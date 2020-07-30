@@ -1,12 +1,5 @@
-<h1>St. Anthony Chapel Relic Finder</h1>
-
-<div class="cabinet-scene-container">
+<div class="cabinet-scenes-container">
     <app-cabinet-scene [photoInfo]="photoInfo"
-      (clickToAddRelic)="addRelic($event)"
-      (doneDraggingZoomArea)="addZoomArea($event)"
-      (draggingZoomArea)="updateZoomAreaCoords($event)">
-      (mousedownInCabinetStarted)="tentativelyStartZoomArea($event)">
+      [editMode]="editMode">
     </app-cabinet-scene>
-    <div class="relic-dots-container"></div>
-    <div class="zoom-rects-container"></div>
 </div>

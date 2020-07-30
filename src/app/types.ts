@@ -2,7 +2,17 @@ export interface PhotoInfo {
   photoIdName: string;
   photoImgPath?: string;
   relicsInPhoto?: number[];
-  photosInPhoto?: string[];
+  zoomAreasInPhoto?: string[];
+}
+
+export interface ZoomAreaInfo {
+  zoomToPhotoId: string;
+  zoomFromPhotoId: string;
+  // Values below are for the "zoom from" photo.
+  topLeftNaturalCoords: number[];
+  bottomRightNaturalCoords: number[];
+  naturalImgWidth: number;
+  naturalImgHeight: number;
 }
 
 export interface Relic {

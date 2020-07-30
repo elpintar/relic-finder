@@ -1,7 +1,9 @@
-
-<img [src]="photoInfo.photoImgPath"
-     class="cabinet-scene-image"
-     (mousedown)="mousedownInCabinet($event)"
-     (mousemove)="mousemoveInCabinet($event)"
-     (mouseup)="mouseupInCabinet($event)"
-     draggable="false">
+<div class="cabinet-scene-container">
+    <div #zoomAreasContainer></div>
+    <img #cabinetImage
+        [src]="photoInfo.photoImgPath"
+        (load)="adjustCoordinatesToImageHeight()"
+        (click)="clickInCabinet($event)"
+        class="cabinet-scene-image"
+        draggable="false">
+</div>

@@ -13,7 +13,7 @@ export class AppComponent {
     photoIdName: 'CDEF',
     photoImgPath: 'assets/pics/CDEF.jpg',
     relicsInPhoto: [0, 1],
-    photosInPhoto: ['D'],
+    zoomAreasInPhoto: ['D'],
   };
 
   relics: Relic[] = [
@@ -26,7 +26,7 @@ export class AppComponent {
     },
   ];
 
-
+  editMode = true;
 
   addZoomArea(coords: [number, number]): void {
   }
