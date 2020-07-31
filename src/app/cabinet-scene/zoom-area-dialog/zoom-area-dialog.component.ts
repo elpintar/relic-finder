@@ -8,12 +8,13 @@ import { ZoomAreaInfo } from 'src/app/types';
   styleUrls: ['./zoom-area-dialog.component.sass']
 })
 export class ZoomAreaDialogComponent {
+  newZoomToPhotoId = '';
 
   constructor(
     public dialogRef: MatDialogRef<ZoomAreaDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ZoomAreaInfo) {}
 
-  onNoClick(): void {
+  onCancelClick(): void {
     this.dialogRef.close();
   }
 

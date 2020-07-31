@@ -1,5 +1,17 @@
 <div class="cabinet-scenes-container">
-    <app-cabinet-scene [photoInfo]="photoInfo"
-      [editMode]="editMode">
+    <app-cabinet-scene [photoInfo]="currentCabinetScene"
+      [editMode]="editMode"
+      (changeScene)="changeCabinetScene($event)">
     </app-cabinet-scene>
+</div>
+
+<div class="top-left-buttons">
+  <button mat-fab
+          (click)="toggleEditMode()"
+          color="primary"
+          aria-label="Change from view mode to edit mode"
+          [title]="(editMode) ? 'Change to view mode' : 'Change to edit mode'">
+    <mat-icon *ngIf="editMode">visibility</mat-icon>
+    <mat-icon *ngIf="!editMode">create</mat-icon>
+  </button>
 </div>

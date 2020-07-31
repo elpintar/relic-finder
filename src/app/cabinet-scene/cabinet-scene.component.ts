@@ -1,6 +1,9 @@
 import { Component, OnInit, Input, Output, EventEmitter, ElementRef, ViewChild, ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
 import {PhotoInfo, ZoomAreaInfo} from '../types';
 import { ZoomAreaComponent } from './zoom-area/zoom-area.component';
+import { MatDialog } from '@angular/material/dialog';
+import { ZoomAreaDialogComponent } from './zoom-area-dialog/zoom-area-dialog.component';
+import { Subscription, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-cabinet-scene',
@@ -11,10 +14,7 @@ export class CabinetSceneComponent implements OnInit {
   @Input() photoInfo: PhotoInfo;
   @Input() editMode = false;
 
-  // @Output() mousedownInCabinetStarted = new EventEmitter<[number, number]>();
-  // @Output() draggingZoomArea = new EventEmitter<[number, number]>();
-  // @Output() doneDraggingZoomArea = new EventEmitter<[number, number]>();
-  // @Output() clickToAddRelic = new EventEmitter<[number, number]>();
+  @Output() changeScene = new EventEmitter<string>();
 
   @ViewChild('cabinetImage', {read: ViewContainerRef}) cabinetImage?: ViewContainerRef;
   @ViewChild('zoomAreasContainer', {read: ViewContainerRef}) zoomAreasContainer?: ViewContainerRef;
@@ -30,7 +30,8 @@ export class CabinetSceneComponent implements OnInit {
   imgWidth = 0;
   imgHeight = 0;
 
-  constructor(private resolver: ComponentFactoryResolver) {
+  constructor(private resolver: ComponentFactoryResolver,
+              private dialog: MatDialog) {
     this.photoInfo = {photoIdName: ''};
   }
 
@@ -86,9 +87,8 @@ export class CabinetSceneComponent implements OnInit {
       (bottomRight[0] / this.imgWidth) * this.imgNaturalWidth,
       (bottomRight[1] / this.imgHeight) * this.imgNaturalHeight
     ];
-    const inputtedPhotoIdName = 'joe';
     const zoomAreaInfo: ZoomAreaInfo = {
-      zoomToPhotoId: inputtedPhotoIdName,
+      zoomToPhotoId: 'replace me',
       zoomFromPhotoId: this.photoInfo.photoIdName,
       topLeftNaturalCoords,
       bottomRightNaturalCoords,
@@ -97,8 +97,29 @@ export class CabinetSceneComponent implements OnInit {
     };
     const factory = this.resolver.resolveComponentFactory(ZoomAreaComponent);
     const componentRef = this.zoomAreasContainer.createComponent(factory);
-    componentRef.instance.zoomAreaInfo = zoomAreaInfo;
-    componentRef.instance.updateLocationAndDimensions(this.img);
+    this.openDialogForZoomToPhoto(Object.assign({}, zoomAreaInfo)).subscribe((result) => {
+      console.log('result', result);
+      if (result) {
+        // User pressed OK.
+        zoomAreaInfo.zoomToPhotoId = result;
+        componentRef.instance.zoomAreaInfo = zoomAreaInfo;
+        if (!this.img) {
+          throw new Error('No image data loaded in makeNewZoomArea subscription');
+        }
+        componentRef.instance.updateLocationAndDimensions(this.img);
+        componentRef.instance.zoomInSignal.subscribe((photoToZoomTo) => {
+          this.changeScene.emit(photoToZoomTo);
+        });
+      }
+    });
+  }
+
+  openDialogForZoomToPhoto(zoomAreaInfo: ZoomAreaInfo): Observable<string> {
+    const dialogRef = this.dialog.open(ZoomAreaDialogComponent, {
+      data: zoomAreaInfo,
+    });
+
+    return dialogRef.afterClosed();
   }
 
   resetZoomInfo(): void {

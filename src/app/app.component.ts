@@ -8,13 +8,17 @@ import { PhotoInfo, Relic } from './types';
 })
 export class AppComponent {
   title = 'relic-finder';
+  editMode = true;
 
-  photoInfo: PhotoInfo = {
+  currentCabinetScene: PhotoInfo = {
     photoIdName: 'CDEF',
     photoImgPath: 'assets/pics/CDEF.jpg',
     relicsInPhoto: [0, 1],
     zoomAreasInPhoto: ['D'],
   };
+
+  photos = new Map()
+    .set('CDEF', Object.assign({}, this.currentCabinetScene));
 
   relics: Relic[] = [
     {
@@ -26,12 +30,27 @@ export class AppComponent {
     },
   ];
 
-  editMode = true;
+  changeCabinetScene(photoToChangeTo: string): void {
+    if (this.photos.has(photoToChangeTo)) {
+      this.currentCabinetScene = this.photos.get(photoToChangeTo);
+    } else {
+      this.currentCabinetScene = {
+        photoIdName: photoToChangeTo,
+        photoImgPath: 'assets/pics/' + photoToChangeTo + '.jpg',
+        relicsInPhoto: [],
+        zoomAreasInPhoto: [],
+      }
+    }
+  }
 
   addZoomArea(coords: [number, number]): void {
   }
 
   addRelic(coords: [number, number]): void {
     console.log(coords[0], coords[1]);
+  }
+
+  toggleEditMode(): void {
+    this.editMode = !this.editMode;
   }
 }

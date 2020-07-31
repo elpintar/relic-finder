@@ -1,6 +1,7 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, Output, EventEmitter } from '@angular/core';
 import { ZoomAreaInfo } from 'src/app/types';
 import { assertNotNull } from '@angular/compiler/src/output/output_ast';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-zoom-area',
@@ -8,6 +9,8 @@ import { assertNotNull } from '@angular/compiler/src/output/output_ast';
   styleUrls: ['./zoom-area.component.sass']
 })
 export class ZoomAreaComponent implements OnInit {
+  @Output() zoomInSignal = new EventEmitter<string>();
+
   zoomAreaInfo?: ZoomAreaInfo;
   width = 0;
   height = 0;
@@ -15,6 +18,13 @@ export class ZoomAreaComponent implements OnInit {
   offsetY = 0;
 
   constructor() {
+  }
+
+  sendZoomInSignal(): void {
+    if (!this.zoomAreaInfo) {
+      throw new Error('zoomAreaInfo not defined in sendZoomInSignal');
+    }
+    this.zoomInSignal.emit(this.zoomAreaInfo.zoomToPhotoId);
   }
 
   updateLocationAndDimensions(img: HTMLImageElement): void {
