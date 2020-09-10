@@ -14,7 +14,7 @@ export class CabinetSceneComponent implements OnInit {
   @Input() photoInfo: PhotoInfo;
   @Input() editMode = false;
 
-  @Output() changeScene = new EventEmitter<string>();
+  @Output() zoomIn = new EventEmitter<string>();
 
   @ViewChild('cabinetImage', {read: ViewContainerRef}) cabinetImage?: ViewContainerRef;
   @ViewChild('zoomAreasContainer', {read: ViewContainerRef}) zoomAreasContainer?: ViewContainerRef;
@@ -107,8 +107,8 @@ export class CabinetSceneComponent implements OnInit {
           throw new Error('No image data loaded in makeNewZoomArea subscription');
         }
         componentRef.instance.updateLocationAndDimensions(this.img);
-        componentRef.instance.zoomInSignal.subscribe((photoToZoomTo) => {
-          this.changeScene.emit(photoToZoomTo);
+        componentRef.instance.zoomInSignal.subscribe((photoToZoomTo: string) => {
+          this.zoomIn.emit(photoToZoomTo);
         });
       }
     });

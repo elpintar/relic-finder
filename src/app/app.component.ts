@@ -9,6 +9,7 @@ import { PhotoInfo, Relic } from './types';
 export class AppComponent {
   title = 'relic-finder';
   editMode = true;
+  zoomedList: string[] = [];
 
   currentCabinetScene: PhotoInfo = {
     photoIdName: 'CDEF',
@@ -41,6 +42,19 @@ export class AppComponent {
         zoomAreasInPhoto: [],
       }
     }
+  }
+
+  zoomIn(photoToChangeTo: string): void {
+    this.zoomedList.unshift(this.currentCabinetScene.photoIdName);
+    this.changeCabinetScene(photoToChangeTo);
+  }
+
+  zoomOut(): void {
+    const zoomToPic = this.zoomedList.shift();
+    if (!zoomToPic) {
+      throw new Error('No picture to zoom out from!');
+    }
+    this.changeCabinetScene(zoomToPic);
   }
 
   addZoomArea(coords: [number, number]): void {

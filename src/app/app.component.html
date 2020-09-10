@@ -1,7 +1,7 @@
 <div class="cabinet-scenes-container">
     <app-cabinet-scene [photoInfo]="currentCabinetScene"
       [editMode]="editMode"
-      (changeScene)="changeCabinetScene($event)">
+      (zoomIn)="zoomIn($event)">
     </app-cabinet-scene>
 </div>
 
@@ -13,5 +13,14 @@
           [title]="(editMode) ? 'Change to view mode' : 'Change to edit mode'">
     <mat-icon *ngIf="editMode">visibility</mat-icon>
     <mat-icon *ngIf="!editMode">create</mat-icon>
+  </button>
+  <br>
+  <button mat-fab
+          (click)="zoomOut()"
+          *ngIf="zoomedList.length > 0"
+          color="primary"
+          aria-label="Zoom out"
+          title="Zoom out">
+    <mat-icon>zoom_out</mat-icon>
   </button>
 </div>
