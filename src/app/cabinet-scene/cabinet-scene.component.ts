@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, ElementRef, ViewChild, ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ElementRef, ViewChild, ViewContainerRef, ComponentFactoryResolver, ComponentRef } from '@angular/core';
 import {PhotoInfo, ZoomAreaInfo} from '../types';
 import { ZoomAreaComponent } from './zoom-area/zoom-area.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -13,8 +13,10 @@ import { Subscription, Observable } from 'rxjs';
 export class CabinetSceneComponent implements OnInit {
   @Input() photoInfo: PhotoInfo;
   @Input() editMode = false;
+  @Input() addRelicMode = false;
 
   @Output() zoomIn = new EventEmitter<string>();
+  @Output() addZoomArea = new EventEmitter<ZoomAreaInfo>();
 
   @ViewChild('cabinetImage', {read: ViewContainerRef}) cabinetImage?: ViewContainerRef;
   @ViewChild('zoomAreasContainer', {read: ViewContainerRef}) zoomAreasContainer?: ViewContainerRef;
@@ -23,6 +25,8 @@ export class CabinetSceneComponent implements OnInit {
   mousedownStart = 0;
   zoomStart = [-1, -1];
   zoomDragPoint = [-1, -1];
+
+  zoomAreaComponentsToDestroy: ComponentRef<ZoomAreaComponent>[] = [];
 
   img?: HTMLImageElement;
   imgNaturalWidth = 0;
@@ -49,13 +53,23 @@ export class CabinetSceneComponent implements OnInit {
     if (this.editMode) {
       this.updateZoomAreaCoords([event.offsetX, event.offsetY]);
     } else {
-      this.addRelic([event.offsetX, event.offsetY]);      
+      this.addRelic([event.offsetX, event.offsetY]);
     }
     this.mousedownStart = 0;
   }
 
   addRelic(coords: [number, number]): void {
+    //TODO
     console.log(coords);
+  }
+
+  redrawScene(zoomAreasInScene: ZoomAreaInfo[]): void {
+    this.zoomAreaComponentsToDestroy.forEach((zoomAreaComponent) => {
+      zoomAreaComponent.destroy();
+    });
+    zoomAreasInScene.forEach((zoomArea) => {
+      this.putZoomAreaInScene(zoomArea);
+    });
   }
 
   updateZoomAreaCoords(coords: [number, number]): void {
@@ -67,15 +81,12 @@ export class CabinetSceneComponent implements OnInit {
     } else {
       // bottom righthand corner click
       console.log(this.zoomStart, coords);
-      this.makeNewZoomArea(this.zoomStart, coords);
+      this.makeNewZoomAreaFromCoords(this.zoomStart, coords);
       this.resetZoomInfo();
     }
   }
 
-  makeNewZoomArea(topLeft: number[], bottomRight: number[]): void {
-    if (!this.zoomAreasContainer) {
-      throw new Error('No #zoomAreasContainer found in view');
-    }
+  makeNewZoomAreaFromCoords(topLeft: number[], bottomRight: number[]): void {
     if (!this.img) {
       throw new Error('No image data loaded in makeNewZoomArea');
     }
@@ -95,24 +106,33 @@ export class CabinetSceneComponent implements OnInit {
       naturalImgWidth: this.imgNaturalWidth,
       naturalImgHeight: this.imgNaturalHeight,
     };
-    const factory = this.resolver.resolveComponentFactory(ZoomAreaComponent);
-    const componentRef = this.zoomAreasContainer.createComponent(factory);
     this.openDialogForZoomToPhoto(Object.assign({}, zoomAreaInfo)).subscribe((result) => {
       console.log('result', result);
       if (result) {
         // User pressed OK.
         zoomAreaInfo.zoomToPhotoId = result;
-        componentRef.instance.zoomAreaInfo = zoomAreaInfo;
-        if (!this.img) {
-          throw new Error('No image data loaded in makeNewZoomArea subscription');
-        }
-        componentRef.instance.updateLocationAndDimensions(this.img);
-        componentRef.instance.zoomInSignal.subscribe((photoToZoomTo: string) => {
-          this.zoomIn.emit(photoToZoomTo);
-        });
+        this.putZoomAreaInScene(zoomAreaInfo);
       }
     });
   }
+
+  putZoomAreaInScene(zoomAreaInfo: ZoomAreaInfo): void {
+    if (!this.zoomAreasContainer) {
+      throw new Error('No #zoomAreasContainer found in view');
+    }
+    const factory = this.resolver.resolveComponentFactory(ZoomAreaComponent);
+    const componentRef = this.zoomAreasContainer.createComponent(factory);
+    this.zoomAreaComponentsToDestroy.push(componentRef);
+    componentRef.instance.zoomAreaInfo = zoomAreaInfo;
+    if (!this.img) {
+      throw new Error('No image data loaded in makeNewZoomArea subscription');
+    }
+    componentRef.instance.updateLocationAndDimensions(this.img);
+    this.addZoomArea.emit(zoomAreaInfo);
+    componentRef.instance.zoomInSignal.subscribe((photoToZoomTo: string) => {
+      this.zoomIn.emit(photoToZoomTo);
+    });
+  };
 
   openDialogForZoomToPhoto(zoomAreaInfo: ZoomAreaInfo): Observable<string> {
     const dialogRef = this.dialog.open(ZoomAreaDialogComponent, {

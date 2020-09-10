@@ -1,7 +1,9 @@
 <div class="cabinet-scenes-container">
     <app-cabinet-scene [photoInfo]="currentCabinetScene"
       [editMode]="editMode"
-      (zoomIn)="zoomIn($event)">
+      [addRelicMode]="addRelicMode"
+      (zoomIn)="zoomIn($event)"
+      (addZoomArea)="addZoomArea($event)">
     </app-cabinet-scene>
 </div>
 
@@ -11,8 +13,18 @@
           color="primary"
           aria-label="Change from view mode to edit mode"
           [title]="(editMode) ? 'Change to view mode' : 'Change to edit mode'">
-    <mat-icon *ngIf="editMode">visibility</mat-icon>
-    <mat-icon *ngIf="!editMode">create</mat-icon>
+    <mat-icon *ngIf="editMode">create</mat-icon>
+    <mat-icon *ngIf="!editMode">visibility</mat-icon>
+  </button>
+  <br>
+  <button mat-fab
+          *ngIf="editMode"
+          (click)="toggleAddRelicMode()"
+          color="primary"
+          aria-label="Change from add relic mode to add zoom area mode"
+          [title]="(addRelicMode) ? 'Change to zoom area mode' : 'Change to add relic mode'">
+    <mat-icon *ngIf="addRelicMode">control_camera</mat-icon>
+    <mat-icon *ngIf="!addRelicMode">crop_free</mat-icon>
   </button>
   <br>
   <button mat-fab
@@ -22,5 +34,27 @@
           aria-label="Zoom out"
           title="Zoom out">
     <mat-icon>zoom_out</mat-icon>
+  </button>
+</div>
+
+<div class="left-button">
+  <button mat-fab
+          (click)="moveLeftOrRight('left')"
+          *ngIf="zoomedList.length === 0"
+          color="primary"
+          aria-label="Move left"
+          title="Move left">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+</div>
+
+<div class="right-button">
+  <button mat-fab
+          (click)="moveLeftOrRight('right')"
+          *ngIf="zoomedList.length === 0"
+          color="primary"
+          aria-label="Move right"
+          title="Move right">
+    <mat-icon>arrow_forward</mat-icon>
   </button>
 </div>

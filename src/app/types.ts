@@ -18,6 +18,8 @@ export interface ZoomAreaInfo {
 export interface Relic {
   relicId: number;
   saint: Saint;
+  inPhoto: string;
+  photoCoords: number[];
   relicMaterial?: string;
   chapelLocation?: string;
   additionalInfo?: string;
