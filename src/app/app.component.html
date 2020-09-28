@@ -1,7 +1,8 @@
 <div class="cabinet-scenes-container">
-    <app-cabinet-scene [photoInfo]="currentCabinetScene"
+    <app-cabinet-scene [photoInfo]="currentPhotoInfo"
       [editMode]="editMode"
       [addRelicMode]="addRelicMode"
+      (sceneImgChanged)="cabinetSceneImgChanged()"
       (zoomIn)="zoomIn($event)"
       (addRelicDot)="addRelicDot($event)"
       (addZoomArea)="addZoomArea($event)">

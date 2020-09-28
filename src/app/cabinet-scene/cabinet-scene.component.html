@@ -3,7 +3,8 @@
     <div #relicDotsContainer></div>
     <img #cabinetImage
         [src]="photoInfo.photoImgPath"
-        (load)="adjustCoordinatesToImageHeight()"
+        (load)="onImgChange()"
+        (change)="onImgChange()"
         (click)="clickInCabinet($event)"
         class="cabinet-scene-image"
         draggable="false">

@@ -17,7 +17,7 @@ export interface ZoomAreaInfo {
 
 export interface Relic {
   inPhoto: string;
-  photoCoords: number[];
+  photoNaturalCoords: number[];
   relicId: number;
   saint?: Saint;
   relicMaterial?: string;

@@ -20,11 +20,11 @@ export class RelicDotComponent implements OnInit {
     this.relicClickedSignal.emit(this.relic.relicId);
   }
 
-  updateLocationAndDimensions(img: HTMLImageElement, photoInfo: PhotoInfo): void {
+  updateLocation(img: HTMLImageElement, photoInfo: PhotoInfo): void {
     if (!this.relic) {
       throw new Error('relic not defined in RelicDotComponent');
     }
-    const coords = this.relic.photoCoords;
+    const coords = this.relic.photoNaturalCoords;
     const naturalWidth = photoInfo.naturalImgWidth;
     const naturalHeight = photoInfo.naturalImgHeight;
     this.offsetX = (document.body.clientWidth / 2 - img.clientWidth / 2) + coords[0] * (img.clientWidth / naturalWidth);

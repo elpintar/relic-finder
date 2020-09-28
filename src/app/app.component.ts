@@ -20,7 +20,7 @@ export class AppComponent {
     'GHJ', 'CDEF', 'B', 'A', 'ZgZcZh'];
   leftRightIndex = 5;
 
-  currentCabinetScene: PhotoInfo = {
+  currentPhotoInfo: PhotoInfo = {
     photoIdName: 'MNOPQ',
     photoImgPath: 'assets/pics/MNOPQ.jpg',
     relicsInPhoto: [],
@@ -30,7 +30,7 @@ export class AppComponent {
   };
 
   photos = new Map()
-    .set(this.leftRightList[this.leftRightIndex], Object.assign({}, this.currentCabinetScene));
+    .set(this.leftRightList[this.leftRightIndex], Object.assign({}, this.currentPhotoInfo));
 
   zoomAreas = new Map();
 
@@ -52,9 +52,9 @@ export class AppComponent {
 
   changeCabinetScene(photoToChangeTo: string): void {
     if (this.photos.has(photoToChangeTo)) {
-      this.currentCabinetScene = this.photos.get(photoToChangeTo);
+      this.currentPhotoInfo = this.photos.get(photoToChangeTo);
     } else {
-      this.currentCabinetScene = {
+      this.currentPhotoInfo = {
         photoIdName: photoToChangeTo,
         photoImgPath: 'assets/pics/' + photoToChangeTo + '.jpg',
         relicsInPhoto: [],
@@ -63,14 +63,18 @@ export class AppComponent {
         naturalImgHeight: 0, // will be replaced by load call of image
       };
       // Add new photo area to the set of photos.
-      this.photos.set(photoToChangeTo, this.currentCabinetScene);
+      this.photos.set(photoToChangeTo, this.currentPhotoInfo);
     }
-    this.sendRedrawInfo(photoToChangeTo);
+    // Photo img change in cabinet scene will trigger sendRedrawInfo.
 
     console.log('changed cabinet scene to ', photoToChangeTo);
-    console.log('currentCabinetScene', this.currentCabinetScene,
+    console.log('currentCabinetScene', this.currentPhotoInfo,
     'photos', this.photos,
     'relics', this.relics);
+  }
+
+  cabinetSceneImgChanged(): void {
+    this.sendRedrawInfo(this.currentPhotoInfo.photoIdName);
   }
 
   sendRedrawInfo(photoToChangeTo: string): void {
@@ -93,7 +97,7 @@ export class AppComponent {
   }
 
   zoomIn(photoToChangeTo: string): void {
-    this.zoomedList.unshift(this.currentCabinetScene.photoIdName);
+    this.zoomedList.unshift(this.currentPhotoInfo.photoIdName);
     this.changeCabinetScene(photoToChangeTo);
   }
 
@@ -109,7 +113,7 @@ export class AppComponent {
   // Called after adding a new zoom area, before zooming into it.
   addZoomArea(zoomAreaInfo: ZoomAreaInfo): void {
     console.log('new zoom area info', zoomAreaInfo);
-    this.currentCabinetScene.zoomAreasInPhoto?.push(zoomAreaInfo.zoomToPhotoId);
+    this.currentPhotoInfo.zoomAreasInPhoto?.push(zoomAreaInfo.zoomToPhotoId);
     this.zoomAreas.set(zoomAreaInfo.zoomFromPhotoId, zoomAreaInfo);
     console.log('zoomAreas:', this.zoomAreas);
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, ElementRef, ViewChild, ViewContainerRef, ComponentFactoryResolver, ComponentRef } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ElementRef, ViewChild, ViewContainerRef, ComponentFactoryResolver, ComponentRef, HostListener } from '@angular/core';
 import {PhotoInfo, ZoomAreaInfo, Relic} from '../types';
 import { ZoomAreaComponent } from './zoom-area/zoom-area.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -22,6 +22,7 @@ export class CabinetSceneComponent implements OnInit {
   @Output() zoomIn = new EventEmitter<string>();
   @Output() addZoomArea = new EventEmitter<ZoomAreaInfo>();
   @Output() addRelicDot = new EventEmitter<Relic>();
+  @Output() sceneImgChanged = new EventEmitter<void>();
 
   @ViewChild('cabinetImage', {read: ViewContainerRef}) cabinetImage?: ViewContainerRef;
   @ViewChild('relicDotsContainer', {read: ViewContainerRef}) relicDotsContainer?: ViewContainerRef;
@@ -63,9 +64,21 @@ export class CabinetSceneComponent implements OnInit {
 
   }
 
+  @HostListener('window:resize', ['$event'])
+  onResize(): void {
+    this.onImgChange();
+  }
+
+  onImgChange(): void {
+    this.adjustCoordinatesToImageHeight();
+    // This will call redrawScene through the AppComponent controller.
+    this.sceneImgChanged.emit();
+  }
+
   redrawScene(relicsInScene: Relic[], zoomAreasInScene: ZoomAreaInfo[]): void {
     // Signal to destroy subscribers.
     this.sceneRedrawn.next();
+    // Destroy dead components / html elements.
     this.zoomAreaComponentsToDestroy.forEach((zoomAreaComponent) => {
       zoomAreaComponent.destroy();
     });
@@ -114,13 +127,13 @@ export class CabinetSceneComponent implements OnInit {
 
   makeNewRelicFromCoords(coords: [number, number]): void {
     const naturalCoords = [
-      (coords[0] / this.imgClientWidth) * this.photoInfo.naturalImgHeight,
-      (coords[1] / this.imgClientHeight) * this.photoInfo.naturalImgWidth
+      (coords[0] / this.imgClientWidth) * this.photoInfo.naturalImgWidth,
+      (coords[1] / this.imgClientHeight) * this.photoInfo.naturalImgHeight
     ];
     const relic: Relic = {
       relicId: this.nextRelicIdNumber++,
       inPhoto: this.photoInfo.photoIdName,
-      photoCoords: naturalCoords,
+      photoNaturalCoords: naturalCoords,
       saint: {
         name: '',
       }
@@ -139,8 +152,8 @@ export class CabinetSceneComponent implements OnInit {
       throw new Error('No image data loaded in makeNewZoomArea');
     }
     const topLeftNaturalCoords = [
-      (topLeft[0] / this.imgClientWidth) * this.photoInfo.naturalImgHeight,
-      (topLeft[1] / this.imgClientHeight) * this.photoInfo.naturalImgWidth
+      (topLeft[0] / this.imgClientWidth) * this.photoInfo.naturalImgWidth,
+      (topLeft[1] / this.imgClientHeight) * this.photoInfo.naturalImgHeight
     ];
     const bottomRightNaturalCoords = [
       (bottomRight[0] / this.imgClientWidth) * this.photoInfo.naturalImgHeight,
@@ -173,7 +186,7 @@ export class CabinetSceneComponent implements OnInit {
     if (!this.img) {
       throw new Error('No image data loaded in makeNewZoomArea subscription');
     }
-    componentRef.instance.updateLocationAndDimensions(this.img, this.photoInfo);
+    componentRef.instance.updateLocation(this.img, this.photoInfo);
     this.addRelicDot.emit(relic);
     componentRef.instance.relicClickedSignal
       .pipe(takeUntil(this.sceneRedrawn))
@@ -222,15 +235,29 @@ export class CabinetSceneComponent implements OnInit {
     this.zoomStart = [-1, -1];
   }
 
-  adjustCoordinatesToImageHeight(): void {
+  adjustCoordinatesToImageHeight(photoInfo?: PhotoInfo): void {
     if (!this.cabinetImage) {
       throw new Error('No #cabinetImage found in view');
     }
-    const img: HTMLImageElement = this.cabinetImage.element.nativeElement;
-    this.img = img;
-    this.photoInfo.naturalImgWidth = img.naturalWidth;
-    this.photoInfo.naturalImgHeight = img.naturalHeight;
-    this.imgClientWidth = img.clientWidth;
-    this.imgClientHeight = img.clientHeight;
+    if (false && photoInfo) {// && photoInfo.photoImgPath) {
+      // this.img = document.createElement('img');
+      // this.img.src = photoInfo.photoImgPath;
+      // this.img.onload = function(){
+      //   this.img.style.visibility = 'hidden';
+      //   document.body.appendChild(img);
+      //   console.log(img.clientWidth);
+      // }
+      // this.photoInfo.naturalImgWidth = img.naturalWidth;
+      // this.photoInfo.naturalImgHeight = img.naturalHeight;
+      // this.imgClientWidth = img.clientWidth;
+      // this.imgClientHeight = img.clientHeight;
+    } else {
+      const img: HTMLImageElement = this.cabinetImage.element.nativeElement;
+      this.img = img;
+      this.photoInfo.naturalImgWidth = img.naturalWidth;
+      this.photoInfo.naturalImgHeight = img.naturalHeight;
+      this.imgClientWidth = img.clientWidth;
+      this.imgClientHeight = img.clientHeight;
+    }
   }
 }
