@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject, Output, EventEmitter } from '@angular/core';
-import { ZoomAreaInfo } from 'src/app/types';
+import { PhotoInfo, ZoomAreaInfo } from 'src/app/types';
 import { assertNotNull } from '@angular/compiler/src/output/output_ast';
 import { Observable } from 'rxjs';
 
@@ -27,14 +27,14 @@ export class ZoomAreaComponent implements OnInit {
     this.zoomInSignal.emit(this.zoomAreaInfo.zoomToPhotoId);
   }
 
-  updateLocationAndDimensions(img: HTMLImageElement): void {
+  updateLocationAndDimensions(img: HTMLImageElement, photoInfo: PhotoInfo): void {
     if (!this.zoomAreaInfo) {
       throw new Error('zoomAreaInfo not defined in ZoomAreaComponent');
     }
     const topLeft = this.zoomAreaInfo.topLeftNaturalCoords;
     const bottomRight = this.zoomAreaInfo.bottomRightNaturalCoords;
-    const naturalWidth = this.zoomAreaInfo.naturalImgWidth;
-    const naturalHeight = this.zoomAreaInfo.naturalImgHeight;
+    const naturalWidth = photoInfo.naturalImgWidth;
+    const naturalHeight = photoInfo.naturalImgHeight;
     this.width = (bottomRight[0] - topLeft[0]) * (img.clientWidth / naturalWidth);
     this.height = (bottomRight[1] - topLeft[1]) * (img.clientHeight / naturalHeight);
     this.offsetX = (document.body.clientWidth / 2 - img.clientWidth / 2) + topLeft[0] * (img.clientWidth / naturalWidth);

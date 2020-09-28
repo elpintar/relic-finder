@@ -13,6 +13,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CabinetSceneComponent } from './cabinet-scene/cabinet-scene.component';
 import { ZoomAreaComponent } from './cabinet-scene/zoom-area/zoom-area.component';
 import { ZoomAreaDialogComponent } from './cabinet-scene/zoom-area-dialog/zoom-area-dialog.component';
+import { RelicDotComponent } from './cabinet-scene/relic-dot/relic-dot.component';
+import { RelicDialogComponent } from './cabinet-scene/relic-dialog/relic-dialog.component';
 
 @NgModule({
   declarations: [
@@ -20,6 +22,8 @@ import { ZoomAreaDialogComponent } from './cabinet-scene/zoom-area-dialog/zoom-a
     CabinetSceneComponent,
     ZoomAreaComponent,
     ZoomAreaDialogComponent,
+    RelicDotComponent,
+    RelicDialogComponent,
   ],
   imports: [
     BrowserModule,

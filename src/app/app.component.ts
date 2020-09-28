@@ -13,7 +13,7 @@ export class AppComponent {
 
   title = 'relic-finder';
   editMode = true;
-  addRelicMode = false;
+  addRelicMode = true;
   zoomedList: string[] = [];
   leftRightList: string[] = ['ZeZf', 'ZaZb', 'WXYZ', 'TUV',
     'S', 'MNOPQ', 'M', 'K',
@@ -25,6 +25,8 @@ export class AppComponent {
     photoImgPath: 'assets/pics/MNOPQ.jpg',
     relicsInPhoto: [],
     zoomAreasInPhoto: [],
+    naturalImgWidth: 0, // will be replaced by load call of image
+    naturalImgHeight: 0, // will be replaced by load call of image
   };
 
   photos = new Map()
@@ -32,17 +34,7 @@ export class AppComponent {
 
   zoomAreas = new Map();
 
-  relics: Relic[] = [
-    {
-      relicId: 0,
-      saint: {name: 'St. Francis of Assisi',
-      feastDayAndMonth: 'October 4',
-      vocation: 'founder'},
-      inPhoto: 'NOP',
-      photoCoords: [1, 2],
-      chapelLocation: 'D42',
-    },
-  ];
+  relics = new Map();
 
   moveLeftOrRight(direction: string): void {
     if (direction === 'left') {
@@ -67,6 +59,8 @@ export class AppComponent {
         photoImgPath: 'assets/pics/' + photoToChangeTo + '.jpg',
         relicsInPhoto: [],
         zoomAreasInPhoto: [],
+        naturalImgWidth: 0, // will be replaced by load call of image
+        naturalImgHeight: 0, // will be replaced by load call of image
       };
       // Add new photo area to the set of photos.
       this.photos.set(photoToChangeTo, this.currentCabinetScene);
@@ -80,6 +74,12 @@ export class AppComponent {
   }
 
   sendRedrawInfo(photoToChangeTo: string): void {
+    const relicsInScene: Relic[] = [];
+    this.relics.forEach((relic: Relic) => {
+      if (relic.inPhoto === photoToChangeTo) {
+        relicsInScene.push(relic);
+      }
+    });
     const zoomAreasInScene: ZoomAreaInfo[] = [];
     this.zoomAreas.forEach((zoomArea: ZoomAreaInfo) => {
       if (zoomArea.zoomFromPhotoId === photoToChangeTo) {
@@ -89,7 +89,7 @@ export class AppComponent {
     if (!this.cabinetSceneComponent) {
       throw new Error('No cabinet scene component!');
     }
-    this.cabinetSceneComponent.redrawScene(zoomAreasInScene);
+    this.cabinetSceneComponent.redrawScene(relicsInScene, zoomAreasInScene);
   }
 
   zoomIn(photoToChangeTo: string): void {
@@ -105,8 +105,8 @@ export class AppComponent {
     this.changeCabinetScene(zoomToPic);
   }
 
+  // Updates data (but doesn't change view).
   // Called after adding a new zoom area, before zooming into it.
-  // Data update only, doesn't change view.
   addZoomArea(zoomAreaInfo: ZoomAreaInfo): void {
     console.log('new zoom area info', zoomAreaInfo);
     this.currentCabinetScene.zoomAreasInPhoto?.push(zoomAreaInfo.zoomToPhotoId);
@@ -114,9 +114,9 @@ export class AppComponent {
     console.log('zoomAreas:', this.zoomAreas);
   }
 
-  addRelic(coords: [number, number]): void {
-    // TODO
-    console.log(coords[0], coords[1]);
+  addRelicDot(relic: Relic): void {
+    console.log(relic);
+    this.relics.set(relic.relicId, relic);
   }
 
   toggleEditMode(): void {

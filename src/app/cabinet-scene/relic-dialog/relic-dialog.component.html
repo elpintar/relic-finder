@@ -1,0 +1,36 @@
+<div mat-dialog-content>
+
+  <h1>Saint Information</h1>
+  
+  <mat-form-field>
+    <mat-label>Saint Name</mat-label>
+    <input required matInput [(ngModel)]="relic.saint!.name">
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Saint's Vocation(s)</mat-label>
+    <input matInput [(ngModel)]="relic.saint!.vocation">
+  </mat-form-field>
+
+  <h1>Relic Information</h1>
+
+  <mat-form-field>
+    <mat-label>Relic Material</mat-label>
+    <input matInput [(ngModel)]="relic.relicMaterial">
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Chapel Location</mat-label>
+    <input matInput [(ngModel)]="relic.chapelLocation">
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Additional Information</mat-label>
+    <input matInput [(ngModel)]="relic.additionalInfo">
+  </mat-form-field>
+
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onCancelClick()">Cancel</button>
+  <button mat-button [mat-dialog-close]="relic" cdkFocusInitial>OK</button>
+</div>
