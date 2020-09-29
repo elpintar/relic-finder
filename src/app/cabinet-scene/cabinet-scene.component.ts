@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter, ElementRef, ViewChild, ViewContainerRef, ComponentFactoryResolver, ComponentRef, HostListener } from '@angular/core';
-import {PhotoInfo, ZoomAreaInfo, Relic} from '../types';
+import {PhotoInfo, ZoomArea, Relic} from '../types';
 import { ZoomAreaComponent } from './zoom-area/zoom-area.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ZoomAreaDialogComponent } from './zoom-area-dialog/zoom-area-dialog.component';
@@ -20,7 +20,7 @@ export class CabinetSceneComponent implements OnInit {
   @Input() addRelicMode = false;
 
   @Output() zoomIn = new EventEmitter<string>();
-  @Output() addZoomArea = new EventEmitter<ZoomAreaInfo>();
+  @Output() addZoomArea = new EventEmitter<ZoomArea>();
   @Output() addRelicDot = new EventEmitter<Relic>();
   @Output() sceneImgChanged = new EventEmitter<void>();
 
@@ -30,7 +30,6 @@ export class CabinetSceneComponent implements OnInit {
 
   photoDirectory = '/assets/pics/';
 
-  nextRelicIdNumber = 1;
   zoomStart = [-1, -1];
 
   relicDotComponentsToDestroy: ComponentRef<RelicDotComponent>[] = [];
@@ -75,7 +74,7 @@ export class CabinetSceneComponent implements OnInit {
     this.sceneImgChanged.emit();
   }
 
-  redrawScene(relicsInScene: Relic[], zoomAreasInScene: ZoomAreaInfo[]): void {
+  redrawScene(relicsInScene: Relic[], zoomAreasInScene: ZoomArea[]): void {
     // Signal to destroy subscribers.
     this.sceneRedrawn.next();
     // Destroy dead components / html elements.
@@ -131,7 +130,6 @@ export class CabinetSceneComponent implements OnInit {
       (coords[1] / this.imgClientHeight) * this.photoInfo.naturalImgHeight
     ];
     const relic: Relic = {
-      relicId: this.nextRelicIdNumber++,
       inPhoto: this.photoInfo.photoIdName,
       photoNaturalCoords: naturalCoords,
       saint: {
@@ -142,7 +140,7 @@ export class CabinetSceneComponent implements OnInit {
       console.log('result', returnedRelic);
       if (returnedRelic) {
         // User pressed OK.
-        this.putRelicInScene(returnedRelic);
+        this.putRelicInScene(returnedRelic, true);
       }
     });
   }
@@ -156,10 +154,10 @@ export class CabinetSceneComponent implements OnInit {
       (topLeft[1] / this.imgClientHeight) * this.photoInfo.naturalImgHeight
     ];
     const bottomRightNaturalCoords = [
-      (bottomRight[0] / this.imgClientWidth) * this.photoInfo.naturalImgHeight,
-      (bottomRight[1] / this.imgClientHeight) * this.photoInfo.naturalImgWidth
+      (bottomRight[0] / this.imgClientWidth) * this.photoInfo.naturalImgWidth,
+      (bottomRight[1] / this.imgClientHeight) * this.photoInfo.naturalImgHeight
     ];
-    const zoomAreaInfo: ZoomAreaInfo = {
+    const zoomAreaInfo: ZoomArea = {
       zoomToPhotoId: 'replace me',
       zoomFromPhotoId: this.photoInfo.photoIdName,
       topLeftNaturalCoords,
@@ -170,12 +168,12 @@ export class CabinetSceneComponent implements OnInit {
       if (result) {
         // User pressed OK.
         zoomAreaInfo.zoomToPhotoId = result;
-        this.putZoomAreaInScene(zoomAreaInfo);
+        this.putZoomAreaInScene(zoomAreaInfo, true);
       }
     });
   }
 
-  putRelicInScene(relic: Relic): void {
+  putRelicInScene(relic: Relic, isNewRelic = false): void {
     if (!this.relicDotsContainer) {
       throw new Error('No #relicDotsContainer found in view');
     }
@@ -187,15 +185,17 @@ export class CabinetSceneComponent implements OnInit {
       throw new Error('No image data loaded in makeNewZoomArea subscription');
     }
     componentRef.instance.updateLocation(this.img, this.photoInfo);
-    this.addRelicDot.emit(relic);
+    if (isNewRelic) {
+      this.addRelicDot.emit(relic);
+    }
     componentRef.instance.relicClickedSignal
       .pipe(takeUntil(this.sceneRedrawn))
-      .subscribe((relicId: number) => {
-        console.log('relic with id clicked:', relicId);
+      .subscribe((relicClicked: Relic) => {
+        console.log('relic clicked:', relicClicked);
       });
   }
 
-  putZoomAreaInScene(zoomAreaInfo: ZoomAreaInfo): void {
+  putZoomAreaInScene(zoomAreaInfo: ZoomArea, isNewZoomArea = false): void {
     if (!this.zoomAreasContainer) {
       throw new Error('No #zoomAreasContainer found in view');
     }
@@ -207,11 +207,16 @@ export class CabinetSceneComponent implements OnInit {
       throw new Error('No image data loaded in makeNewZoomArea subscription');
     }
     componentRef.instance.updateLocationAndDimensions(this.img, this.photoInfo);
-    this.addZoomArea.emit(zoomAreaInfo);
+    if (isNewZoomArea) {
+      this.addZoomArea.emit(zoomAreaInfo);
+    }
     componentRef.instance.zoomInSignal
       .pipe(takeUntil(this.sceneRedrawn))
       .subscribe((photoToZoomTo: string) => {
-        this.zoomIn.emit(photoToZoomTo);
+        // Only zoom in if in view mode.
+        if (!this.editMode) {
+          this.zoomIn.emit(photoToZoomTo);
+        }
       });
   }
 
@@ -223,7 +228,7 @@ export class CabinetSceneComponent implements OnInit {
     return dialogRef.afterClosed();
   }
 
-  openDialogForZoomToPhoto(zoomAreaInfo: ZoomAreaInfo): Observable<string> {
+  openDialogForZoomToPhoto(zoomAreaInfo: ZoomArea): Observable<string> {
     const dialogRef = this.dialog.open(ZoomAreaDialogComponent, {
       data: zoomAreaInfo,
     });

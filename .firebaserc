@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "relic-finder"
+  },
+  "targets": {
+    "relic-finder": {
+      "hosting": {
+        "relic-finder": [
+          "relic-finder"
+        ]
+      }
+    }
+  }
+}

@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
-import { ZoomAreaInfo } from 'src/app/types';
+import { ZoomArea } from 'src/app/types';
 
 @Component({
   selector: 'app-zoom-area-dialog',
@@ -12,7 +12,7 @@ export class ZoomAreaDialogComponent {
 
   constructor(
     public dialogRef: MatDialogRef<ZoomAreaDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ZoomAreaInfo) {}
+    @Inject(MAT_DIALOG_DATA) public data: ZoomArea) {}
 
   onCancelClick(): void {
     this.dialogRef.close();

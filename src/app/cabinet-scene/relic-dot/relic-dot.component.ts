@@ -7,17 +7,17 @@ import { PhotoInfo, Relic } from 'src/app/types';
   styleUrls: ['./relic-dot.component.sass']
 })
 export class RelicDotComponent implements OnInit {
-  @Output() relicClickedSignal = new EventEmitter<number>();
+  @Output() relicClickedSignal = new EventEmitter<Relic>();
 
   relic?: Relic;
   offsetX = -1;
   offsetY = -1;
 
   sendRelicClickedSignal(): void {
-    if (!this.relic || !this.relic.relicId) {
+    if (!this.relic) {
       throw new Error('relic not defined in sendRelicClickedSignal');
     }
-    this.relicClickedSignal.emit(this.relic.relicId);
+    this.relicClickedSignal.emit(this.relic);
   }
 
   updateLocation(img: HTMLImageElement, photoInfo: PhotoInfo): void {

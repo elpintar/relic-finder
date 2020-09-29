@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject, Output, EventEmitter } from '@angular/core';
-import { PhotoInfo, ZoomAreaInfo } from 'src/app/types';
+import { PhotoInfo, ZoomArea } from 'src/app/types';
 import { assertNotNull } from '@angular/compiler/src/output/output_ast';
 import { Observable } from 'rxjs';
 
@@ -11,7 +11,7 @@ import { Observable } from 'rxjs';
 export class ZoomAreaComponent implements OnInit {
   @Output() zoomInSignal = new EventEmitter<string>();
 
-  zoomAreaInfo?: ZoomAreaInfo;
+  zoomAreaInfo?: ZoomArea;
   width = 0;
   height = 0;
   offsetX = 0;

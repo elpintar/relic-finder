@@ -4,10 +4,9 @@ export interface PhotoInfo {
   naturalImgHeight: number;
   photoImgPath?: string;
   relicsInPhoto?: number[];
-  zoomAreasInPhoto?: string[];
 }
 
-export interface ZoomAreaInfo {
+export interface ZoomArea {
   zoomToPhotoId: string;
   zoomFromPhotoId: string;
   // Values below are for the "zoom from" photo.
@@ -18,7 +17,6 @@ export interface ZoomAreaInfo {
 export interface Relic {
   inPhoto: string;
   photoNaturalCoords: number[];
-  relicId: number;
   saint?: Saint;
   relicMaterial?: string;
   chapelLocation?: string;
