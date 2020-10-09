@@ -19,6 +19,7 @@ export class AppComponent {
   title = 'relic-finder';
   editMode = false;
   addRelicMode = true;
+  hideLabels = false;
 
   user: firebase.User|null = null;
   users: User[]|null = null;
@@ -237,5 +238,9 @@ export class AppComponent {
 
   toggleAddRelicMode(): void {
     this.addRelicMode = !this.addRelicMode;
+  }
+
+  toggleHideLabels(): void {
+    this.hideLabels = !this.hideLabels;
   }
 }

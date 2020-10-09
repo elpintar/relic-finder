@@ -1,6 +1,4 @@
 <div class="cabinet-scene-container">
-    <div #zoomAreasContainer></div>
-    <div #relicDotsContainer></div>
     <img #cabinetImage
         [src]="photoInfo.photoImgPath"
         (load)="onImgChange()"
@@ -8,4 +6,11 @@
         (click)="clickInCabinet($event)"
         class="cabinet-scene-image"
         draggable="false">
+
+    <div [ngClass]="{'hide-labels': hideLabels}">
+        <ng-container #zoomAreasContainer></ng-container>
+    </div>
+    <div [ngClass]="{'hide-labels': hideLabels}">
+        <ng-container #relicDotsContainer></ng-container>
+    </div>
 </div>

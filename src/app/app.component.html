@@ -2,6 +2,7 @@
     <app-cabinet-scene [photoInfo]="currentPhotoInfo"
       [editMode]="editMode"
       [addRelicMode]="addRelicMode"
+      [hideLabels]="hideLabels"
       (sceneImgChanged)="cabinetSceneImgChanged()"
       (zoomIn)="zoomIn($event)"
       (addOrUpdateRelicDot)="addOrUpdateRelicDot($event)"
@@ -76,5 +77,16 @@
           aria-label="Move right"
           title="Move right">
     <mat-icon>arrow_forward</mat-icon>
+  </button>
+</div>
+
+<div class="bottom-right-buttons">
+  <button mat-fab
+          (click)="toggleHideLabels()"
+          color="primary"
+          aria-label="Show or hide the labels"
+          [title]="(hideLabels) ? 'Show labels' : 'Hide labels'">
+    <mat-icon *ngIf="hideLabels">explore</mat-icon>
+    <mat-icon *ngIf="!hideLabels">explore_off</mat-icon>
   </button>
 </div>

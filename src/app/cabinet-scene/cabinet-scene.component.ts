@@ -18,6 +18,7 @@ export class CabinetSceneComponent implements OnInit {
   @Input() photoInfo: PhotoInfo;
   @Input() editMode = false;
   @Input() addRelicMode = false;
+  @Input() hideLabels = false;
 
   @Output() zoomIn = new EventEmitter<string>();
   @Output() addZoomArea = new EventEmitter<ZoomArea>();
