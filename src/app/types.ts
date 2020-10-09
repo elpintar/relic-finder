@@ -28,3 +28,8 @@ export interface Saint {
   feastDayAndMonth?: string;
   vocation?: string;
 }
+
+export interface User {
+  uid: string;
+  name: string;
+}

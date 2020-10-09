@@ -3,4 +3,9 @@
                  'height.px': 16,
                  'left.px': (offsetX - 12),
                  'top.px': (offsetY - 13)}"
-     (click)="sendRelicClickedSignal()"></div>
+     (click)="sendRelicClickedSignal()">
+     <mat-card *ngIf="relic && relic!.saint"
+               class="relic-hover-card">
+          <mat-card-title>{{relic!.saint!.name}}</mat-card-title>
+     </mat-card>
+</div>

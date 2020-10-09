@@ -1,9 +1,11 @@
 import { Component, ViewChild } from '@angular/core';
-import { PhotoInfo, Relic, ZoomArea } from './types';
+import { PhotoInfo, Relic, ZoomArea, User } from './types';
 import { CabinetSceneComponent } from './cabinet-scene/cabinet-scene.component';
-import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
+import { AngularFirestore, AngularFirestoreCollection, DocumentData, DocumentReference, QuerySnapshot } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { AngularFireAuth } from '@angular/fire/auth';
+import { auth } from 'firebase/app';
 
 @Component({
   selector: 'app-root',
@@ -15,8 +17,13 @@ export class AppComponent {
   private cabinetSceneComponent?: CabinetSceneComponent;
 
   title = 'relic-finder';
-  editMode = true;
+  editMode = false;
   addRelicMode = true;
+
+  user: firebase.User|null = null;
+  users: User[]|null = null;
+  userIsEditor = false;
+
   zoomedList: string[] = [];
   leftRightList: string[] = ['ZeZf', 'ZaZb', 'WXYZ', 'TUV',
     'S', 'MNOPQ', 'M', 'K',
@@ -40,10 +47,56 @@ export class AppComponent {
   relicCollection: AngularFirestoreCollection<Relic>;
   relicsObservable: Observable<Relic[]>;
 
-  constructor(private firestore: AngularFirestore) {
+  constructor(private firestore: AngularFirestore,
+              public angularFireAuth: AngularFireAuth) {
     // Initialize Cloud Firestore through Firebase
     this.relicCollection = firestore.collection<Relic>('relics');
     this.relicsObservable = this.relicCollection.valueChanges();
+    this.getInitialUserData();
+    angularFireAuth.authState.subscribe((user: firebase.User|null) => {
+      // Update user data whenever the auth state changes.
+      this.user = user;
+      this.checkIfUserIsEditor();
+    });
+  }
+
+  getInitialUserData(): void {
+    // Get user data if user is logged in.
+    this.angularFireAuth.user.pipe(take(1)).subscribe(userResult => {
+      console.log('user:', userResult);
+      this.user = userResult;
+      // Get set of authentic user ids who can write.
+      this.firestore.collection<User>('users')
+          .valueChanges().pipe(take(1)).subscribe((users) => {
+        console.log('users:', users);
+        this.users = users;
+        this.checkIfUserIsEditor();
+      });
+    });
+  }
+
+  checkIfUserIsEditor(): void {
+    const editorUsers = this.users;
+    const loggedInUser = this.user;
+    if (loggedInUser && editorUsers) {
+      this.userIsEditor = editorUsers.findIndex(user => user.uid === loggedInUser.uid) >= 0;
+      console.log('User is editor:', this.userIsEditor);
+    }
+  }
+
+  login(): void {
+    this.angularFireAuth.signInWithPopup(new auth.GoogleAuthProvider())
+    .then((result) => {
+      console.log('Logged in with user data:', JSON.stringify(result));
+    }).catch((error: Error) => {
+      alert('Login error: ' + error.message);
+    });
+  }
+
+  logout(): void {
+    if (confirm('Are you sure you want to logout?')) {
+      this.angularFireAuth.signOut();
+    }
   }
 
   moveLeftOrRight(direction: string): void {
@@ -116,7 +169,7 @@ export class AppComponent {
     this.changeCabinetScene(zoomToPic);
   }
 
-  // Updates data (but doesn't change view).
+  // WRITE new zoom area (but doesn't change view).
   // Called after adding a new zoom area, before zooming into it.
   addZoomArea(zoomArea: ZoomArea): void {
     console.log('new zoom area info', zoomArea);
@@ -128,17 +181,57 @@ export class AppComponent {
     });
   }
 
-  addRelicDot(relic: Relic): void {
+  // WRITE new relic.
+  addOrUpdateRelicDot(relic: Relic): void {
     console.log(relic);
     const relicCollection = this.firestore.collection<Relic>('relics');
-    relicCollection.add(relic).catch((reason: string) => {
-      throw Error(reason);
-    }).finally(() => {
-      console.log('successfully added relic: ', relic);
+    if (relic && relic.saint && relic.saint.name) {
+      this.firestore.collection('relics',
+          ref => ref.where('saint.name', '==', relic.saint ? relic.saint.name : ''))
+          .get().pipe(take(1)).subscribe((relics: QuerySnapshot<DocumentData>) => {
+        if (relics.size > 1) {
+          alert('Error: two relics found with same data: ' + JSON.stringify(relic));
+        } else if (relics.size === 1) {
+          this.updateRelic(relics, relic);
+        } else {
+          this.addRelic(relic);
+        }
+      });
+    }
+  }
+
+  updateRelic(querySnapshot: QuerySnapshot<DocumentData>, relic: Relic): void {
+    querySnapshot.forEach(doc => {
+      // There will only be one doc.
+      this.firestore.collection<Relic>('relics').doc(doc.id).update(relic)
+      .then(() => {
+        console.log('Relic updated:', doc.id, relic);
+      })
+      .catch((error) => {
+        console.error('Error updating document: ', error);
+      });
     });
   }
 
+  addRelic(relic: Relic): void {
+    this.firestore.collection<Relic>('relics').add(relic)
+      .then((documentReference: DocumentReference) => {
+        console.log('document reference:', documentReference);
+      })
+      .catch((reason: string) => {
+        console.error(reason);
+        alert('Reminder: your data is not being saved.');
+      }).finally(() => {
+        console.log('successfully added relic: ', relic);
+      });
+  }
+
   toggleEditMode(): void {
+    if (!this.editMode && !this.userIsEditor) {
+      alert('Your editing changes will not be saved, since your user account ' +
+            'is not registered with our database. Reach out to ' +
+            'elpintar@gmail.com for edit access.');
+    }
     this.editMode = !this.editMode;
   }
 

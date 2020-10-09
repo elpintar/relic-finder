@@ -21,7 +21,7 @@ export class CabinetSceneComponent implements OnInit {
 
   @Output() zoomIn = new EventEmitter<string>();
   @Output() addZoomArea = new EventEmitter<ZoomArea>();
-  @Output() addRelicDot = new EventEmitter<Relic>();
+  @Output() addOrUpdateRelicDot = new EventEmitter<Relic>();
   @Output() sceneImgChanged = new EventEmitter<void>();
 
   @ViewChild('cabinetImage', {read: ViewContainerRef}) cabinetImage?: ViewContainerRef;
@@ -186,12 +186,21 @@ export class CabinetSceneComponent implements OnInit {
     }
     componentRef.instance.updateLocation(this.img, this.photoInfo);
     if (isNewRelic) {
-      this.addRelicDot.emit(relic);
+      this.addOrUpdateRelicDot.emit(relic);
     }
     componentRef.instance.relicClickedSignal
       .pipe(takeUntil(this.sceneRedrawn))
       .subscribe((relicClicked: Relic) => {
         console.log('relic clicked:', relicClicked);
+        if (this.editMode) {
+          this.openDialogForNewRelicInfo(relicClicked)
+          .subscribe((returnedRelic: Relic) => {
+            if (returnedRelic) {
+              // User pressed OK.
+              this.addOrUpdateRelicDot.emit(relic);
+            }
+        });
+        }
       });
   }
 

@@ -9,6 +9,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import { AngularFireModule } from '@angular/fire';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
+import {MatCardModule} from '@angular/material/card';
 
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
@@ -37,6 +38,7 @@ import { RelicDialogComponent } from './cabinet-scene/relic-dialog/relic-dialog.
     FormsModule,
     MatButtonModule,
     MatIconModule,
+    MatCardModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFirestoreModule,
   ],

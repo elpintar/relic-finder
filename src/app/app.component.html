@@ -4,19 +4,20 @@
       [addRelicMode]="addRelicMode"
       (sceneImgChanged)="cabinetSceneImgChanged()"
       (zoomIn)="zoomIn($event)"
-      (addRelicDot)="addRelicDot($event)"
+      (addOrUpdateRelicDot)="addOrUpdateRelicDot($event)"
       (addZoomArea)="addZoomArea($event)">
     </app-cabinet-scene>
 </div>
 
-<div class="top-left-buttons">
+<div *ngIf="user && user!.uid"
+     class="top-left-buttons">
   <button mat-fab
           (click)="toggleEditMode()"
           color="primary"
           aria-label="Change from view mode to edit mode"
           [title]="(editMode) ? 'Change to view mode' : 'Change to edit mode'">
-    <mat-icon *ngIf="editMode">create</mat-icon>
-    <mat-icon *ngIf="!editMode">visibility</mat-icon>
+    <mat-icon *ngIf="editMode">visibility</mat-icon>
+    <mat-icon *ngIf="!editMode">create</mat-icon>
   </button>
   <br>
   <button mat-fab
@@ -25,8 +26,8 @@
           color="primary"
           aria-label="Change from add relic mode to add zoom area mode"
           [title]="(addRelicMode) ? 'Change to zoom area mode' : 'Change to add relic mode'">
-    <mat-icon *ngIf="addRelicMode">control_camera</mat-icon>
-    <mat-icon *ngIf="!addRelicMode">crop_free</mat-icon>
+    <mat-icon *ngIf="addRelicMode">crop_free</mat-icon>
+    <mat-icon *ngIf="!addRelicMode">control_camera</mat-icon>
   </button>
   <br>
   <button mat-fab
@@ -37,6 +38,23 @@
           title="Zoom out">
     <mat-icon>zoom_out</mat-icon>
   </button>
+</div>
+
+<div class="top-right-buttons">
+  <div *ngIf="angularFireAuth.user | async as user; else showLogin">
+    <button class="user-btn"
+            (click)="logout()">
+      <img class="user-photo"
+           [src]="user!.photoURL">
+    </button>
+  </div>
+  <ng-template #showLogin>
+    <button class="user-btn"
+            (click)="login()">
+      <mat-icon class="user-photo"
+                style="padding: 13px 0px">create</mat-icon>
+    </button>
+  </ng-template>
 </div>
 
 <div class="left-button">
