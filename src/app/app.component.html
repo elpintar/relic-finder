@@ -9,9 +9,17 @@
     </app-cabinet-scene>
 </div>
 
-<div *ngIf="user && user!.uid"
-     class="top-left-buttons">
+<div class="top-left-buttons">
   <button mat-fab
+          (click)="zoomOut()"
+          *ngIf="zoomedList.length > 0"
+          color="primary"
+          aria-label="Zoom out"
+          title="Zoom out">
+    <mat-icon>zoom_out</mat-icon>
+  </button>
+  <button *ngIf="user && user!.uid"
+          mat-fab
           (click)="toggleEditMode()"
           color="primary"
           aria-label="Change from view mode to edit mode"
@@ -21,7 +29,7 @@
   </button>
   <br>
   <button mat-fab
-          *ngIf="editMode"
+          *ngIf="editMode && user && user!.uid"
           (click)="toggleAddRelicMode()"
           color="primary"
           aria-label="Change from add relic mode to add zoom area mode"
@@ -30,14 +38,6 @@
     <mat-icon *ngIf="!addRelicMode">control_camera</mat-icon>
   </button>
   <br>
-  <button mat-fab
-          (click)="zoomOut()"
-          *ngIf="zoomedList.length > 0"
-          color="primary"
-          aria-label="Zoom out"
-          title="Zoom out">
-    <mat-icon>zoom_out</mat-icon>
-  </button>
 </div>
 
 <div class="top-right-buttons">
