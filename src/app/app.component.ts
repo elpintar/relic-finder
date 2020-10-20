@@ -42,18 +42,14 @@ export class AppComponent {
   photos = new Map()
     .set(this.leftRightList[this.leftRightIndex], Object.assign({}, this.currentPhotoInfo));
 
-  zoomAreas = new Map();
-
-  relics = new Map();
-  relicCollection: AngularFirestoreCollection<Relic>;
-  relicsObservable: Observable<Relic[]>;
+  relics: Relic[] = [];
+  zoomAreas: ZoomArea[] = [];
 
   constructor(private firestore: AngularFirestore,
               public angularFireAuth: AngularFireAuth) {
     // Initialize Cloud Firestore through Firebase
-    this.relicCollection = firestore.collection<Relic>('relics');
-    this.relicsObservable = this.relicCollection.valueChanges();
     this.getInitialUserData();
+    this.getInitialServerData();
     angularFireAuth.authState.subscribe((user: firebase.User|null) => {
       // Update user data whenever the auth state changes.
       this.user = user;
@@ -72,6 +68,20 @@ export class AppComponent {
         console.log('users:', users);
         this.users = users;
         this.checkIfUserIsEditor();
+      });
+    });
+  }
+
+  getInitialServerData(): void {
+    this.firestore.collection('relics')
+        .valueChanges({idField: 'firebaseDocId'}).pipe(take(1)).subscribe((relicsList) => {
+      this.relics = relicsList as Relic[];
+      console.log('relics', this.relics);
+      this.firestore.collection('zoomAreas')
+          .valueChanges({idField: 'firebaseDocId'}).pipe(take(1)).subscribe((zoomAreasList) => {
+        this.zoomAreas = zoomAreasList as ZoomArea[];
+        console.log('zoomAreas', this.zoomAreas);
+        this.redrawCurrentScene();
       });
     });
   }
@@ -136,25 +146,17 @@ export class AppComponent {
     'relics', this.relics);
   }
 
-  cabinetSceneImgChanged(): void {
+  redrawCurrentScene(): void {
     this.sendRedrawInfo(this.currentPhotoInfo.photoIdName);
   }
 
   sendRedrawInfo(photoToChangeTo: string): void {
-    const relicsInScene: Relic[] = [];
-    this.firestore.collection('relics',
-      ref => ref.where('inPhoto', '==', photoToChangeTo))
-    .valueChanges().pipe(take(1)).subscribe((relics) => {
-      this.firestore.collection('zoomAreas',
-        ref => ref.where('zoomFromPhotoId', '==', photoToChangeTo))
-      .valueChanges().pipe(take(1)).subscribe((zoomAreas) => {
-        if (!this.cabinetSceneComponent) {
-          throw new Error('No cabinet scene component!');
-        }
-        this.cabinetSceneComponent.redrawScene(
-          relics as Relic[], zoomAreas as ZoomArea[]);
-      });
-    });
+    if (!this.cabinetSceneComponent) {
+      throw new Error('No cabinet scene component!');
+    }
+    const relicsInPhoto = this.relics.filter(r => r.inPhoto === photoToChangeTo);
+    const zasInPhoto = this.zoomAreas.filter(za => za.zoomFromPhotoId === photoToChangeTo);
+    this.cabinetSceneComponent.redrawScene(relicsInPhoto, zasInPhoto);
   }
 
   zoomIn(photoToChangeTo: string): void {
@@ -184,11 +186,10 @@ export class AppComponent {
 
   // WRITE new relic.
   addOrUpdateRelicDot(relic: Relic): void {
-    console.log(relic);
-    const relicCollection = this.firestore.collection<Relic>('relics');
-    if (relic && relic.saint && relic.saint.name) {
+    console.log('add or update:', relic);
+    if (relic && relic.saints && relic.saints[0] && relic.saints[0].name) {
       this.firestore.collection('relics',
-          ref => ref.where('saint.name', '==', relic.saint ? relic.saint.name : ''))
+          ref => ref.where('saint.name', '==', relic.saints[0] ? relic.saints[0].name : ''))
           .get().pipe(take(1)).subscribe((relics: QuerySnapshot<DocumentData>) => {
         if (relics.size > 1) {
           alert('Error: two relics found with same data: ' + JSON.stringify(relic));
@@ -231,7 +232,8 @@ export class AppComponent {
     if (!this.editMode && !this.userIsEditor) {
       alert('Your editing changes will not be saved, since your user account ' +
             'is not registered with our database. Reach out to ' +
-            'elpintar@gmail.com for edit access.');
+            'elpintar@gmail.com for edit access. Send him this code: ' +
+            (this.user ? this.user.uid : 'no id found'));
     }
     this.editMode = !this.editMode;
   }

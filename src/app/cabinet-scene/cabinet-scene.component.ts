@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter, ElementRef, ViewChild, ViewContainerRef, ComponentFactoryResolver, ComponentRef, HostListener } from '@angular/core';
-import {PhotoInfo, ZoomArea, Relic} from '../types';
+import {PhotoInfo, ZoomArea, Relic, CanonizationStatus} from '../types';
 import { ZoomAreaComponent } from './zoom-area/zoom-area.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ZoomAreaDialogComponent } from './zoom-area-dialog/zoom-area-dialog.component';
@@ -133,9 +133,10 @@ export class CabinetSceneComponent implements OnInit {
     const relic: Relic = {
       inPhoto: this.photoInfo.photoIdName,
       photoNaturalCoords: naturalCoords,
-      saint: {
+      saints: [{
         name: '',
-      }
+        canonizationStatus: CanonizationStatus.Saint,
+      }]
     };
     this.openDialogForNewRelicInfo(relic).subscribe((returnedRelic: Relic) => {
       console.log('result', returnedRelic);

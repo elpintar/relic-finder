@@ -3,7 +3,7 @@
       [editMode]="editMode"
       [addRelicMode]="addRelicMode"
       [hideLabels]="hideLabels"
-      (sceneImgChanged)="cabinetSceneImgChanged()"
+      (sceneImgChanged)="redrawCurrentScene()"
       (zoomIn)="zoomIn($event)"
       (addOrUpdateRelicDot)="addOrUpdateRelicDot($event)"
       (addZoomArea)="addZoomArea($event)">

@@ -10,6 +10,7 @@ import {MatIconModule} from '@angular/material/icon';
 import { AngularFireModule } from '@angular/fire';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
 import {MatCardModule} from '@angular/material/card';
+import {MatSelectModule} from '@angular/material/select';
 
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
@@ -39,6 +40,7 @@ import { RelicDialogComponent } from './cabinet-scene/relic-dialog/relic-dialog.
     MatButtonModule,
     MatIconModule,
     MatCardModule,
+    MatSelectModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFirestoreModule,
   ],

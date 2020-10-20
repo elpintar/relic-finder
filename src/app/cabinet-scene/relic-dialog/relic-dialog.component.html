@@ -1,23 +1,103 @@
 <div mat-dialog-content>
 
-  <h1>Saint Information</h1>
+  <h2>Saint Information</h2>
   
-  <mat-form-field>
-    <mat-label>Saint Name</mat-label>
-    <input required matInput [(ngModel)]="relic.saint!.name">
-  </mat-form-field>
+  <div *ngFor="let saint of relic.saints; index as i">
+    <div *ngIf="i > 0">
+      <br>
+      <hr>
+      <br>
+      <h2>Saint {{i+1}}</h2>
+    </div>
 
-  <mat-form-field>
-    <mat-label>Saint's Vocation(s)</mat-label>
-    <input matInput [(ngModel)]="relic.saint!.vocation">
-  </mat-form-field>
+    <mat-form-field appearance="fill">
+      <mat-select [(ngModel)]="saint.canonizationStatus">
+        <mat-option *ngFor="let status of canonizationStatuses"
+                    [value]="status">{{status}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    
+    <mat-form-field>
+      <mat-label>Saint Name</mat-label>
+      <input required matInput [(ngModel)]="saint.name">
+    </mat-form-field>
+    
+    of
 
-  <h1>Relic Information</h1>
+    <mat-form-field>
+      <mat-label>City</mat-label>
+      <input matInput [(ngModel)]="saint.city">
+    </mat-form-field>
 
-  <mat-form-field>
-    <mat-label>Relic Material</mat-label>
-    <input matInput [(ngModel)]="relic.relicMaterial">
-  </mat-form-field>
+    <mat-form-field>
+      <mat-label>Subtitle</mat-label>
+      <input matInput [(ngModel)]="saint.subtitle">
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Religious Order</mat-label>
+      <input matInput [(ngModel)]="saint.religiousOrder">
+    </mat-form-field>
+
+    <br>
+    Vocations:
+    <div *ngFor="let vocation of saint.vocations; index as i">
+      <mat-form-field>
+        <input matInput [(ngModel)]="saint.vocations![i]">
+      </mat-form-field>
+    </div>
+    <button mat-raised-button
+            (click)="addVocation(saint)">+ vocation</button>
+    <button mat-raised-button
+            *ngIf="saint.vocations && saint.vocations!.length > 1"
+            (click)="removeVocation(saint)">- vocation</button>
+
+    <mat-form-field>
+      <mat-label>Birth date</mat-label>
+      <input matInput [(ngModel)]="saint.birthDate">
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Death date</mat-label>
+      <input matInput [(ngModel)]="saint.deathDate">
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Feast day (actual)</mat-label>
+      <input matInput [(ngModel)]="saint.feastDayAndMonth">
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Feast day (pre-1970)</mat-label>
+      <input matInput [(ngModel)]="saint.feastDayAndMonthOld">
+    </mat-form-field>
+
+    <div *ngIf="relic.saints.length > 1">
+      <button mat-raised-button
+              (click)="removeSaint(saint)">remove saint</button>
+    </div>
+  </div>
+
+  <button mat-raised-button
+            (click)="addSaint()">+ saint</button>
+
+  <br>
+  <hr>
+  <br>
+
+  <h2>Relic Information</h2>
+
+  Relic Materials:
+  <div *ngFor="let material of relic.relicMaterials; index as i">
+    <mat-form-field>
+      <input matInput [(ngModel)]="relic.relicMaterials![i]">
+    </mat-form-field>
+  </div>
+  <button mat-raised-button
+          (click)="addRelicMaterial()">+ material</button>
+  <button mat-raised-button
+          *ngIf="relic.relicMaterials && relic.relicMaterials!.length > 1"
+          (click)="removeRelicMaterial()">- relicMaterial</button>
 
   <mat-form-field>
     <mat-label>Chapel Location</mat-label>
@@ -25,8 +105,45 @@
   </mat-form-field>
 
   <mat-form-field>
-    <mat-label>Additional Information</mat-label>
-    <input matInput [(ngModel)]="relic.additionalInfo">
+    <mat-label>Other Information</mat-label>
+    <textarea matInput [(ngModel)]="relic.otherInfo"></textarea>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Doc Number</mat-label>
+    <input matInput [(ngModel)]="relic.docNumber">
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Number of Names in Doc (number only - no parentheses)</mat-label>
+    <input matInput [(ngModel)]="relic.numNamesInDoc">
+  </mat-form-field>
+
+  <br>
+  <hr>
+  <br>
+
+  <h2>Auto-Generated Data</h2>
+
+  <mat-form-field>
+    <mat-label>Photo URL</mat-label>
+    <input matInput [(ngModel)]="relic.inPhoto">
+  </mat-form-field>
+
+  Natural Coordinates:
+  <mat-form-field>
+    <mat-label>X</mat-label>
+    <input matInput [(ngModel)]="relic.photoNaturalCoords[0]">
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Y</mat-label>
+    <input matInput [(ngModel)]="relic.photoNaturalCoords[1]">
+  </mat-form-field>
+
+
+  <mat-form-field>
+    <mat-label>Doc Id (within Firebase)</mat-label>
+    <input matInput [(ngModel)]="relic.firebaseDocId">
   </mat-form-field>
 
 </div>
