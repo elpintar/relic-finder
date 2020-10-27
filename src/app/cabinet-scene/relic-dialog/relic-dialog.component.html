@@ -2,7 +2,7 @@
 
   <h2>Saint Information</h2>
   
-  <div *ngFor="let saint of relic.saints; index as i">
+  <div *ngFor="let saint of saints; index as i">
     <div *ngIf="i > 0">
       <br>
       <hr>
@@ -30,7 +30,7 @@
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Subtitle</mat-label>
+      <mat-label>Subtitle (like "the Baptist" / "of the Cross")</mat-label>
       <input matInput [(ngModel)]="saint.subtitle">
     </mat-form-field>
 
@@ -72,15 +72,24 @@
       <input matInput [(ngModel)]="saint.feastDayAndMonthOld">
     </mat-form-field>
 
-    <div *ngIf="relic.saints.length > 1">
+    <div>
+      Saint Firebase Id (blank if new):<br>{{saint.firebaseDocId}}
+    </div>
+
+    <br>
+    <br>
+
+    <div *ngIf="saints.length > 1">
       <button mat-raised-button
               (click)="removeSaint(saint)">remove saint</button>
     </div>
+    <br>
   </div>
 
   <button mat-raised-button
             (click)="addSaint()">+ saint</button>
 
+  <br>
   <br>
   <hr>
   <br>
@@ -88,7 +97,7 @@
   <h2>Relic Information</h2>
 
   Relic Materials:
-  <div *ngFor="let material of relic.relicMaterials; index as i">
+  <div *ngFor="let material of relic.relicMaterials; index as i; trackBy: trackByFn">
     <mat-form-field>
       <input matInput [(ngModel)]="relic.relicMaterials![i]">
     </mat-form-field>
@@ -141,13 +150,14 @@
   </mat-form-field>
 
 
-  <mat-form-field>
-    <mat-label>Doc Id (within Firebase)</mat-label>
-    <input matInput [(ngModel)]="relic.firebaseDocId">
-  </mat-form-field>
+  <div>
+    Firebase Doc id (blank if new):<br>{{relic.firebaseDocId}}
+  </div>
+  
+  <br>
 
 </div>
 <div mat-dialog-actions>
   <button mat-button (click)="onCancelClick()">Cancel</button>
-  <button mat-button [mat-dialog-close]="relic" cdkFocusInitial>OK</button>
+  <button mat-button [mat-dialog-close]="[relic, saints]" cdkFocusInitial>OK</button>
 </div>

@@ -1,15 +1,16 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { PhotoInfo, Relic } from 'src/app/types';
+import { PhotoInfo, Relic, RelicAndSaints, Saint } from 'src/app/types';
 
 @Component({
   selector: 'app-relic-dot',
   templateUrl: './relic-dot.component.html',
   styleUrls: ['./relic-dot.component.sass']
 })
-export class RelicDotComponent implements OnInit {
-  @Output() relicClickedSignal = new EventEmitter<Relic>();
+export class RelicDotComponent {
+  @Output() relicClickedSignal = new EventEmitter<RelicAndSaints>();
 
   relic?: Relic;
+  saints?: Saint[];
   offsetX = -1;
   offsetY = -1;
 
@@ -17,7 +18,7 @@ export class RelicDotComponent implements OnInit {
     if (!this.relic) {
       throw new Error('relic not defined in sendRelicClickedSignal');
     }
-    this.relicClickedSignal.emit(this.relic);
+    this.relicClickedSignal.emit([this.relic, this.saints || []]);
   }
 
   updateLocation(img: HTMLImageElement, photoInfo: PhotoInfo): void {
@@ -31,7 +32,12 @@ export class RelicDotComponent implements OnInit {
     this.offsetY = (document.body.clientHeight / 2 - img.clientHeight / 2) + coords[1] * (img.clientHeight / naturalHeight);
   }
 
-  ngOnInit(): void {
+  getHoverText(): string {
+    const saints = this.saints;
+    if (saints && saints.length >= 1 && saints[0]) {
+      return saints[0].name;
+    } else {
+      return '?';
+    }
   }
-
 }

@@ -1,11 +1,11 @@
 <div mat-dialog-content>
-  <p>Photo (name only, no ".jpg") to zoom to:</p>
+  <p>Photo filename (like "MNOPQ.jpeg") to zoom to:</p>
   <mat-form-field>
-    <mat-label>Photo name</mat-label>
-    <input matInput [(ngModel)]="newZoomToPhotoId">
+    <mat-label>Photo filename</mat-label>
+    <input matInput [(ngModel)]="newZoomToPhotoFilename">
   </mat-form-field>
 </div>
 <div mat-dialog-actions>
   <button mat-button (click)="onCancelClick()">Cancel</button>
-  <button mat-button [mat-dialog-close]="newZoomToPhotoId" cdkFocusInitial>OK</button>
+  <button mat-button [mat-dialog-close]="newZoomToPhotoFilename" cdkFocusInitial>OK</button>
 </div>

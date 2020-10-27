@@ -2,8 +2,8 @@
      [ngStyle]="{'left.px': (offsetX - 12),
                  'top.px': (offsetY - 13)}"
      (click)="sendRelicClickedSignal()">
-     <mat-card *ngIf="relic && relic!.saints[0]"
+     <mat-card *ngIf="relic && relic!.saintFirebaseDocIds[0]"
                class="relic-hover-card">
-          <mat-card-title>{{relic!.saints![0].name}}</mat-card-title>
+          <mat-card-title>{{getHoverText()}}</mat-card-title>
      </mat-card>
 </div>

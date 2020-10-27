@@ -8,7 +8,7 @@ import { ZoomArea } from 'src/app/types';
   styleUrls: ['./zoom-area-dialog.component.sass']
 })
 export class ZoomAreaDialogComponent {
-  newZoomToPhotoId = '';
+  newZoomToPhotoFilename = '';
 
   constructor(
     public dialogRef: MatDialogRef<ZoomAreaDialogComponent>,

@@ -1,11 +1,13 @@
 import { Component, ViewChild } from '@angular/core';
-import { PhotoInfo, Relic, ZoomArea, User } from './types';
+import { PhotoInfo, Relic, ZoomArea, User, RelicAndSaints } from './types';
 import { CabinetSceneComponent } from './cabinet-scene/cabinet-scene.component';
 import { AngularFirestore, AngularFirestoreCollection, DocumentData, DocumentReference, QuerySnapshot } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { AngularFireAuth } from '@angular/fire/auth';
 import { auth } from 'firebase/app';
+import {FirebaseDataService} from './firebase-data.service';
+import {FirebaseAuthService} from './firebase-auth.service';
 
 @Component({
   selector: 'app-root',
@@ -21,19 +23,15 @@ export class AppComponent {
   addRelicMode = true;
   hideLabels = false;
 
-  user: firebase.User|null = null;
-  users: User[]|null = null;
-  userIsEditor = false;
-
   zoomedList: string[] = [];
-  leftRightList: string[] = ['ZeZf', 'ZaZb', 'WXYZ', 'TUV',
-    'S', 'MNOPQ', 'M', 'K',
-    'GHJ', 'CDEF', 'B', 'A', 'ZgZcZh'];
-  leftRightIndex = 5;
+  leftRightList: string[] = ['MNOPQ.jpeg', 'GHJKL.jpeg', 'ABCDEF.jpeg',
+                             'WXYZZaZb.jpeg', 'RSTUV.jpeg'];
+  leftRightIndex = 0;
 
   currentPhotoInfo: PhotoInfo = {
-    photoIdName: 'MNOPQ',
-    photoImgPath: 'assets/pics/MNOPQ.jpg',
+    photoFilename: 'MNOPQ.jpeg',
+    photoImgPath: 'https://firebasestorage.googleapis.com/v0/b/relic-finder.' +
+                  'appspot.com/o/zas%2FMNOPQ_1600x1600.jpeg?alt=media',
     relicsInPhoto: [],
     naturalImgWidth: 0, // will be replaced by load call of image
     naturalImgHeight: 0, // will be replaced by load call of image
@@ -42,72 +40,22 @@ export class AppComponent {
   photos = new Map()
     .set(this.leftRightList[this.leftRightIndex], Object.assign({}, this.currentPhotoInfo));
 
-  relics: Relic[] = [];
-  zoomAreas: ZoomArea[] = [];
-
-  constructor(private firestore: AngularFirestore,
-              public angularFireAuth: AngularFireAuth) {
+  constructor(private firebaseDataService: FirebaseDataService,
+              public firebaseAuthService: FirebaseAuthService,
+              private angularFireAuth: AngularFireAuth) {
     // Initialize Cloud Firestore through Firebase
-    this.getInitialUserData();
-    this.getInitialServerData();
-    angularFireAuth.authState.subscribe((user: firebase.User|null) => {
-      // Update user data whenever the auth state changes.
-      this.user = user;
-      this.checkIfUserIsEditor();
+    firebaseAuthService.getInitialUserData();
+    firebaseDataService.getInitialServerData(() => {
+      this.redrawCurrentScene();
     });
-  }
-
-  getInitialUserData(): void {
-    // Get user data if user is logged in.
-    this.angularFireAuth.user.pipe(take(1)).subscribe(userResult => {
-      console.log('user:', userResult);
-      this.user = userResult;
-      // Get set of authentic user ids who can write.
-      this.firestore.collection<User>('users')
-          .valueChanges().pipe(take(1)).subscribe((users) => {
-        console.log('users:', users);
-        this.users = users;
-        this.checkIfUserIsEditor();
-      });
-    });
-  }
-
-  getInitialServerData(): void {
-    this.firestore.collection('relics')
-        .valueChanges({idField: 'firebaseDocId'}).pipe(take(1)).subscribe((relicsList) => {
-      this.relics = relicsList as Relic[];
-      console.log('relics', this.relics);
-      this.firestore.collection('zoomAreas')
-          .valueChanges({idField: 'firebaseDocId'}).pipe(take(1)).subscribe((zoomAreasList) => {
-        this.zoomAreas = zoomAreasList as ZoomArea[];
-        console.log('zoomAreas', this.zoomAreas);
-        this.redrawCurrentScene();
-      });
-    });
-  }
-
-  checkIfUserIsEditor(): void {
-    const editorUsers = this.users;
-    const loggedInUser = this.user;
-    if (loggedInUser && editorUsers) {
-      this.userIsEditor = editorUsers.findIndex(user => user.uid === loggedInUser.uid) >= 0;
-      console.log('User is editor:', this.userIsEditor);
-    }
   }
 
   login(): void {
-    this.angularFireAuth.signInWithPopup(new auth.GoogleAuthProvider())
-    .then((result) => {
-      console.log('Logged in with user data:', JSON.stringify(result));
-    }).catch((error: Error) => {
-      alert('Login error: ' + error.message);
-    });
+    this.firebaseAuthService.login();
   }
 
   logout(): void {
-    if (confirm('Are you sure you want to logout?')) {
-      this.angularFireAuth.signOut();
-    }
+    this.firebaseAuthService.logout();
   }
 
   moveLeftOrRight(direction: string): void {
@@ -129,8 +77,8 @@ export class AppComponent {
       this.currentPhotoInfo = this.photos.get(photoToChangeTo);
     } else {
       this.currentPhotoInfo = {
-        photoIdName: photoToChangeTo,
-        photoImgPath: 'assets/pics/' + photoToChangeTo + '.jpg',
+        photoFilename: photoToChangeTo,
+        photoImgPath: this.firebaseDataService.getPhotoForFilename(photoToChangeTo),
         relicsInPhoto: [],
         naturalImgWidth: 0, // will be replaced by load call of image
         naturalImgHeight: 0, // will be replaced by load call of image
@@ -143,24 +91,24 @@ export class AppComponent {
     console.log('changed cabinet scene to ', photoToChangeTo);
     console.log('currentCabinetScene', this.currentPhotoInfo,
     'photos', this.photos,
-    'relics', this.relics);
+    'relics', this.firebaseDataService.allRelicsLocal);
   }
 
   redrawCurrentScene(): void {
-    this.sendRedrawInfo(this.currentPhotoInfo.photoIdName);
+    this.sendRedrawInfo(this.currentPhotoInfo.photoFilename);
   }
 
   sendRedrawInfo(photoToChangeTo: string): void {
     if (!this.cabinetSceneComponent) {
       throw new Error('No cabinet scene component!');
     }
-    const relicsInPhoto = this.relics.filter(r => r.inPhoto === photoToChangeTo);
-    const zasInPhoto = this.zoomAreas.filter(za => za.zoomFromPhotoId === photoToChangeTo);
+    const relicsInPhoto = this.firebaseDataService.allRelicsLocal.filter(r => r.inPhoto === photoToChangeTo);
+    const zasInPhoto = this.firebaseDataService.allZoomAreasLocal.filter(za => za.zoomFromPhotoFilename === photoToChangeTo);
     this.cabinetSceneComponent.redrawScene(relicsInPhoto, zasInPhoto);
   }
 
   zoomIn(photoToChangeTo: string): void {
-    this.zoomedList.unshift(this.currentPhotoInfo.photoIdName);
+    this.zoomedList.unshift(this.currentPhotoInfo.photoFilename);
     this.changeCabinetScene(photoToChangeTo);
   }
 
@@ -175,65 +123,21 @@ export class AppComponent {
   // WRITE new zoom area (but doesn't change view).
   // Called after adding a new zoom area, before zooming into it.
   addZoomArea(zoomArea: ZoomArea): void {
-    console.log('new zoom area info', zoomArea);
-    const zoomAreaCollection = this.firestore.collection<ZoomArea>('zoomAreas');
-    zoomAreaCollection.add(zoomArea).catch((reason: string) => {
-      throw Error(reason);
-    }).finally(() => {
-      console.log('successfully added zoomArea: ', zoomArea);
-    });
+    this.firebaseDataService.createZoomArea(zoomArea);
   }
 
   // WRITE new relic.
-  addOrUpdateRelicDot(relic: Relic): void {
-    console.log('add or update:', relic);
-    if (relic && relic.saints && relic.saints[0] && relic.saints[0].name) {
-      this.firestore.collection('relics',
-          ref => ref.where('saint.name', '==', relic.saints[0] ? relic.saints[0].name : ''))
-          .get().pipe(take(1)).subscribe((relics: QuerySnapshot<DocumentData>) => {
-        if (relics.size > 1) {
-          alert('Error: two relics found with same data: ' + JSON.stringify(relic));
-        } else if (relics.size === 1) {
-          this.updateRelic(relics, relic);
-        } else {
-          this.addRelic(relic);
-        }
-      });
-    }
-  }
-
-  updateRelic(querySnapshot: QuerySnapshot<DocumentData>, relic: Relic): void {
-    querySnapshot.forEach(doc => {
-      // There will only be one doc.
-      this.firestore.collection<Relic>('relics').doc(doc.id).update(relic)
-      .then(() => {
-        console.log('Relic updated:', doc.id, relic);
-      })
-      .catch((error) => {
-        console.error('Error updating document: ', error);
-      });
-    });
-  }
-
-  addRelic(relic: Relic): void {
-    this.firestore.collection<Relic>('relics').add(relic)
-      .then((documentReference: DocumentReference) => {
-        console.log('document reference:', documentReference);
-      })
-      .catch((reason: string) => {
-        console.error(reason);
-        alert('Reminder: your data is not being saved.');
-      }).finally(() => {
-        console.log('successfully added relic: ', relic);
-      });
+  addOrUpdateRelicDot(relicAndSaints: RelicAndSaints): void {
+    this.firebaseDataService.addOrUpdateRelicAndSaints(relicAndSaints);
   }
 
   toggleEditMode(): void {
-    if (!this.editMode && !this.userIsEditor) {
+    if (!this.editMode && !this.firebaseAuthService.userIsEditor) {
       alert('Your editing changes will not be saved, since your user account ' +
             'is not registered with our database. Reach out to ' +
             'elpintar@gmail.com for edit access. Send him this code: ' +
-            (this.user ? this.user.uid : 'no id found'));
+            (this.firebaseAuthService.user ?
+              this.firebaseAuthService.user.uid : 'no id found'));
     }
     this.editMode = !this.editMode;
   }

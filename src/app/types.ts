@@ -7,7 +7,7 @@ export enum CanonizationStatus {
 }
 
 export interface PhotoInfo {
-  photoIdName: string;
+  photoFilename: string;
   naturalImgWidth: number;
   naturalImgHeight: number;
   photoImgPath?: string;
@@ -15,18 +15,18 @@ export interface PhotoInfo {
 }
 
 export interface ZoomArea {
-  zoomToPhotoId: string;
-  zoomFromPhotoId: string;
+  zoomToPhotoFilename: string;
+  zoomFromPhotoFilename: string;
   // Values below are for the "zoom from" photo.
   topLeftNaturalCoords: number[];
   bottomRightNaturalCoords: number[];
-  firebaseDocId?: string;
+  firebaseDocId?: string; // doc in Firebase
 }
 
 export interface Relic {
   inPhoto: string;
   photoNaturalCoords: number[];
-  saints: Saint[];
+  saintFirebaseDocIds: string[];
   firebaseDocId?: string; // doc in Firebase
   relicMaterials?: string[];
   chapelLocation?: string;
@@ -46,9 +46,12 @@ export interface Saint {
   deathDate?: string;
   vocations?: string[];
   religiousOrder?: string;
+  firebaseDocId?: string; // doc in Firebase
 }
 
 export interface User {
   uid: string;
   name: string;
 }
+
+export type RelicAndSaints = [Relic, Saint[]];

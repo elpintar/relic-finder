@@ -19,7 +19,7 @@
           title="Zoom out">
     <mat-icon>zoom_out</mat-icon>
   </button>
-  <button *ngIf="user && user!.uid"
+  <button *ngIf="firebaseAuthService.user && firebaseAuthService.user!.uid"
           mat-fab
           (click)="toggleEditMode()"
           color="primary"
@@ -30,7 +30,7 @@
   </button>
   <br>
   <button mat-fab
-          *ngIf="editMode && user && user!.uid"
+          *ngIf="editMode && firebaseAuthService.user && firebaseAuthService.user!.uid"
           (click)="toggleAddRelicMode()"
           color="primary"
           aria-label="Change from add relic mode to add zoom area mode"
@@ -42,7 +42,7 @@
 </div>
 
 <div class="top-right-buttons">
-  <div *ngIf="angularFireAuth.user | async as user; else showLogin">
+  <div *ngIf="firebaseAuthService.angularFireAuth.user | async as user; else showLogin">
     <button class="user-btn"
             (click)="logout()">
       <img class="user-photo"

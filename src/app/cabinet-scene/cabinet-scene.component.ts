@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter, ElementRef, ViewChild, ViewContainerRef, ComponentFactoryResolver, ComponentRef, HostListener } from '@angular/core';
-import {PhotoInfo, ZoomArea, Relic, CanonizationStatus} from '../types';
+import {PhotoInfo, ZoomArea, Relic, CanonizationStatus, Saint, RelicAndSaints} from '../types';
 import { ZoomAreaComponent } from './zoom-area/zoom-area.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ZoomAreaDialogComponent } from './zoom-area-dialog/zoom-area-dialog.component';
@@ -8,6 +8,7 @@ import { RelicDotComponent } from './relic-dot/relic-dot.component';
 import { assertNotNull } from '@angular/compiler/src/output/output_ast';
 import { RelicDialogComponent } from './relic-dialog/relic-dialog.component';
 import { takeUntil } from 'rxjs/operators';
+import { FirebaseDataService } from '../firebase-data.service';
 
 @Component({
   selector: 'app-cabinet-scene',
@@ -22,7 +23,7 @@ export class CabinetSceneComponent implements OnInit {
 
   @Output() zoomIn = new EventEmitter<string>();
   @Output() addZoomArea = new EventEmitter<ZoomArea>();
-  @Output() addOrUpdateRelicDot = new EventEmitter<Relic>();
+  @Output() addOrUpdateRelicDot = new EventEmitter<RelicAndSaints>();
   @Output() sceneImgChanged = new EventEmitter<void>();
 
   @ViewChild('cabinetImage', {read: ViewContainerRef}) cabinetImage?: ViewContainerRef;
@@ -45,16 +46,17 @@ export class CabinetSceneComponent implements OnInit {
   private sceneRedrawn = new Subject();
 
   constructor(private resolver: ComponentFactoryResolver,
-              private dialog: MatDialog) {
+              private dialog: MatDialog,
+              private firebaseDataService: FirebaseDataService) {
     this.photoInfo = {
-      photoIdName: '',
+      photoFilename: '',
       naturalImgWidth: -1,
       naturalImgHeight: -1
     };
   }
 
   ngOnInit(): void {
-    const photoId = this.photoInfo.photoIdName;
+    const photoId = this.photoInfo.photoFilename;
     if (!photoId) {
       throw new Error('No photo id assigned to cabinetSceneComponent!');
     }
@@ -87,7 +89,8 @@ export class CabinetSceneComponent implements OnInit {
     });
     // Redraw relics and zoom areas for this scene.
     relicsInScene.forEach((relic) => {
-      this.putRelicInScene(relic);
+      const saints = this.firebaseDataService.getSaintsForRelic(relic);
+      this.putRelicInScene([relic, saints]);
     });
     zoomAreasInScene.forEach((zoomArea) => {
       this.putZoomAreaInScene(zoomArea);
@@ -131,18 +134,20 @@ export class CabinetSceneComponent implements OnInit {
       (coords[1] / this.imgClientHeight) * this.photoInfo.naturalImgHeight
     ];
     const relic: Relic = {
-      inPhoto: this.photoInfo.photoIdName,
+      inPhoto: this.photoInfo.photoFilename,
       photoNaturalCoords: naturalCoords,
-      saints: [{
-        name: '',
-        canonizationStatus: CanonizationStatus.Saint,
-      }]
+      saintFirebaseDocIds: [''],
     };
-    this.openDialogForNewRelicInfo(relic).subscribe((returnedRelic: Relic) => {
-      console.log('result', returnedRelic);
-      if (returnedRelic) {
+    const saints: Saint[] = [{
+      name: '',
+      canonizationStatus: CanonizationStatus.Saint,
+      firebaseDocId: '',
+    }];
+    this.openDialogForNewRelicInfo([relic, saints]).subscribe((returnedRelicAndSaints: [Relic, Saint[]]) => {
+      console.log('result', returnedRelicAndSaints);
+      if (returnedRelicAndSaints) {
         // User pressed OK.
-        this.putRelicInScene(returnedRelic, true);
+        this.putRelicInScene(returnedRelicAndSaints, true);
       }
     });
   }
@@ -160,8 +165,8 @@ export class CabinetSceneComponent implements OnInit {
       (bottomRight[1] / this.imgClientHeight) * this.photoInfo.naturalImgHeight
     ];
     const zoomAreaInfo: ZoomArea = {
-      zoomToPhotoId: 'replace me',
-      zoomFromPhotoId: this.photoInfo.photoIdName,
+      zoomToPhotoFilename: 'replace me',
+      zoomFromPhotoFilename: this.photoInfo.photoFilename,
       topLeftNaturalCoords,
       bottomRightNaturalCoords,
     };
@@ -169,37 +174,38 @@ export class CabinetSceneComponent implements OnInit {
       console.log('result', result);
       if (result) {
         // User pressed OK.
-        zoomAreaInfo.zoomToPhotoId = result;
+        zoomAreaInfo.zoomToPhotoFilename = result;
         this.putZoomAreaInScene(zoomAreaInfo, true);
       }
     });
   }
 
-  putRelicInScene(relic: Relic, isNewRelic = false): void {
+  putRelicInScene(relicAndSaints: RelicAndSaints, isNewRelic = false): void {
     if (!this.relicDotsContainer) {
       throw new Error('No #relicDotsContainer found in view');
     }
     const factory = this.resolver.resolveComponentFactory(RelicDotComponent);
     const componentRef = this.relicDotsContainer.createComponent(factory);
     this.relicDotComponentsToDestroy.push(componentRef);
-    componentRef.instance.relic = relic;
+    componentRef.instance.relic = relicAndSaints[0];
+    componentRef.instance.saints = relicAndSaints[1];
     if (!this.img) {
       throw new Error('No image data loaded in makeNewZoomArea subscription');
     }
     componentRef.instance.updateLocation(this.img, this.photoInfo);
     if (isNewRelic) {
-      this.addOrUpdateRelicDot.emit(relic);
+      this.addOrUpdateRelicDot.emit(relicAndSaints);
     }
     componentRef.instance.relicClickedSignal
       .pipe(takeUntil(this.sceneRedrawn))
-      .subscribe((relicClicked: Relic) => {
-        console.log('relic clicked:', relicClicked);
+      .subscribe((relicAndSaintsClicked: RelicAndSaints) => {
+        console.log('relic clicked:', relicAndSaintsClicked);
         if (this.editMode) {
-          this.openDialogForNewRelicInfo(relicClicked)
-          .subscribe((returnedRelic: Relic) => {
-            if (returnedRelic) {
+          this.openDialogForNewRelicInfo(relicAndSaintsClicked)
+          .subscribe((returnedRelicAndSaints: RelicAndSaints) => {
+            if (returnedRelicAndSaints) {
               // User pressed OK.
-              this.addOrUpdateRelicDot.emit(relic);
+              this.addOrUpdateRelicDot.emit(returnedRelicAndSaints);
             }
         });
         }
@@ -224,16 +230,14 @@ export class CabinetSceneComponent implements OnInit {
     componentRef.instance.zoomInSignal
       .pipe(takeUntil(this.sceneRedrawn))
       .subscribe((photoToZoomTo: string) => {
-        // Only zoom in if in view mode.
-        if (!this.editMode) {
-          this.zoomIn.emit(photoToZoomTo);
-        }
+        // Zoom in to this photo (in edit or view mode).
+        this.zoomIn.emit(photoToZoomTo);
       });
   }
 
-  openDialogForNewRelicInfo(relic: Relic): Observable<Relic> {
+  openDialogForNewRelicInfo(relicAndSaints: RelicAndSaints): Observable<[Relic, Saint[]]> {
     const dialogRef = this.dialog.open(RelicDialogComponent, {
-      data: relic,
+      data: relicAndSaints,
     });
 
     return dialogRef.afterClosed();

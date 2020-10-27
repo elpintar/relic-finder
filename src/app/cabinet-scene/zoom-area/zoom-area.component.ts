@@ -24,7 +24,7 @@ export class ZoomAreaComponent implements OnInit {
     if (!this.zoomAreaInfo) {
       throw new Error('zoomAreaInfo not defined in sendZoomInSignal');
     }
-    this.zoomInSignal.emit(this.zoomAreaInfo.zoomToPhotoId);
+    this.zoomInSignal.emit(this.zoomAreaInfo.zoomToPhotoFilename);
   }
 
   updateLocationAndDimensions(img: HTMLImageElement, photoInfo: PhotoInfo): void {
