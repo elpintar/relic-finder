@@ -151,6 +151,25 @@ export class FirebaseDataService {
     });
   }
 
+  getLatestRelicAndSaints(relicAndSaints: RelicAndSaints): RelicAndSaints {
+    let updatedRelic = relicAndSaints[0];
+    const saints = relicAndSaints[1];
+    const updatedSaints: Saint[] = [];
+    if (updatedRelic.firebaseDocId) {
+      const relicIndex = this.getLocalRelicIndexWithId(updatedRelic.firebaseDocId);
+      updatedRelic = this.allRelicsLocal[relicIndex];
+    }
+    saints.forEach(s => {
+      let saintToAdd = s;
+      if (s.firebaseDocId) {
+        const sIndex = this.getLocalSaintIndexWithId(s.firebaseDocId);
+        saintToAdd = this.allSaintsLocal[sIndex];
+      }
+      updatedSaints.push(saintToAdd);
+    });
+    return [updatedRelic, updatedSaints];
+  }
+
   getSaintsForRelic(relic: Relic): Saint[] {
     const saints: Saint[] = [];
     relic.saintFirebaseDocIds.forEach(saintFirebaseId => {

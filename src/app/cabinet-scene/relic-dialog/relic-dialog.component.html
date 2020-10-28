@@ -8,7 +8,25 @@
       <hr>
       <br>
       <h2>Saint {{i+1}}</h2>
+      <br>
     </div>
+
+    <div>Pick existing saint from list:</div>
+
+    <mat-form-field>
+      <input matInput
+             placeholder="Look up existing saint"
+             aria-label="Look up existing saint"
+             [matAutocomplete]="auto"
+             [formControl]="autocompleteSaintsCtrl">
+      <mat-autocomplete #auto="matAutocomplete">
+        <mat-option *ngFor="let s of filteredSaints | async"
+                    (onSelectionChange)="autocompleteOptionSelectedForSaint(s, i)"
+                    [value]="getHumanReadableSaintName(s)">
+          <span>{{getHumanReadableSaintName(s)}}</span>
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
 
     <mat-form-field appearance="fill">
       <mat-select [(ngModel)]="saint.canonizationStatus">
@@ -41,7 +59,7 @@
 
     <br>
     Vocations:
-    <div *ngFor="let vocation of saint.vocations; index as i">
+    <div *ngFor="let vocation of saint.vocations; index as i; trackBy: trackByFn">
       <mat-form-field>
         <input matInput [(ngModel)]="saint.vocations![i]">
       </mat-form-field>
@@ -76,7 +94,6 @@
       Saint Firebase Id (blank if new):<br>{{saint.firebaseDocId}}
     </div>
 
-    <br>
     <br>
 
     <div *ngIf="saints.length > 1">
@@ -151,7 +168,7 @@
 
 
   <div>
-    Firebase Doc id (blank if new):<br>{{relic.firebaseDocId}}
+    Firebase Relic Doc Id (blank if new):<br>{{relic.firebaseDocId}}
   </div>
   
   <br>

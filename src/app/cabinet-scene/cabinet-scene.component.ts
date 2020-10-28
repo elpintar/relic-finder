@@ -198,18 +198,22 @@ export class CabinetSceneComponent implements OnInit {
     }
     componentRef.instance.relicClickedSignal
       .pipe(takeUntil(this.sceneRedrawn))
-      .subscribe((relicAndSaintsClicked: RelicAndSaints) => {
-        console.log('relic clicked:', relicAndSaintsClicked);
-        if (this.editMode) {
-          this.openDialogForNewRelicInfo(relicAndSaintsClicked)
-          .subscribe((returnedRelicAndSaints: RelicAndSaints) => {
-            if (returnedRelicAndSaints) {
-              // User pressed OK.
-              this.addOrUpdateRelicDot.emit(returnedRelicAndSaints);
-            }
-        });
+      .subscribe(this.relicClicked.bind(this));
+  }
+
+  relicClicked(relicAndSaintsClicked: RelicAndSaints): void {
+    console.log('relic clicked:', relicAndSaintsClicked);
+    if (this.editMode) {
+      const relicAndSaintsLatest = this.firebaseDataService
+        .getLatestRelicAndSaints(relicAndSaintsClicked);
+      this.openDialogForNewRelicInfo(relicAndSaintsLatest)
+      .subscribe((returnedRelicAndSaints: RelicAndSaints) => {
+        if (returnedRelicAndSaints) {
+          // User pressed OK.
+          this.addOrUpdateRelicDot.emit(returnedRelicAndSaints);
         }
-      });
+    });
+    }
   }
 
   putZoomAreaInScene(zoomAreaInfo: ZoomArea, isNewZoomArea = false): void {
