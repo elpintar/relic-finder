@@ -41,12 +41,18 @@ export class FirebaseDataService {
 
   createZoomArea(zoomArea: ZoomArea): void {
     console.log('new zoom area info', zoomArea);
-    const zoomAreaCollection = this.firestore.collection<ZoomArea>('zoomAreas');
-    zoomAreaCollection.add(zoomArea).catch((reason: string) => {
-      throw Error(reason);
-    }).finally(() => {
-      console.log('successfully added zoomArea: ', zoomArea);
-    });
+    const newZAId = this.makeIdForZoomArea(zoomArea);
+    zoomArea.firebaseDocId = newZAId;
+    this.firestore.collection<ZoomArea>('zoomAreas').doc(newZAId)
+      .set(zoomArea)
+      .then(() => {
+        console.log('za created: ', zoomArea);
+        // Update local zoom area data.
+        this.allZoomAreasLocal.push(zoomArea);
+      })
+      .catch((reason: string) => {
+        console.error('Error creating zoom area: ', reason, zoomArea);
+      });
   }
 
   addOrUpdateRelicAndSaints(relicAndSaints: RelicAndSaints): void {
@@ -204,6 +210,16 @@ export class FirebaseDataService {
     return this.allRelicsLocal.findIndex((relic) => {
       return relic.firebaseDocId === relicFirebaseId;
     });
+  }
+
+  makeIdForZoomArea(za: ZoomArea): string {
+    let newZAId = za.zoomFromPhotoFilename.split('.')[0];
+    newZAId = newZAId + '_to_' + za.zoomToPhotoFilename.split('.')[0];
+    newZAId = newZAId + '_' +
+      Math.floor(za.topLeftNaturalCoords[0]).toString();
+    newZAId = newZAId + '_' +
+      Math.floor(za.topLeftNaturalCoords[1]).toString();
+    return newZAId;
   }
 
   makeIdForSaint(saint: Saint): string {

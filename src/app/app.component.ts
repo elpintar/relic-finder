@@ -102,8 +102,10 @@ export class AppComponent {
     if (!this.cabinetSceneComponent) {
       throw new Error('No cabinet scene component!');
     }
-    const relicsInPhoto = this.firebaseDataService.allRelicsLocal.filter(r => r.inPhoto === photoToChangeTo);
-    const zasInPhoto = this.firebaseDataService.allZoomAreasLocal.filter(za => za.zoomFromPhotoFilename === photoToChangeTo);
+    const relicsInPhoto = this.firebaseDataService.allRelicsLocal.filter(
+      r => r.inPhoto === photoToChangeTo);
+    const zasInPhoto = this.firebaseDataService.allZoomAreasLocal.filter(
+      za => za.zoomFromPhotoFilename === photoToChangeTo);
     this.cabinetSceneComponent.redrawScene(relicsInPhoto, zasInPhoto);
   }
 
