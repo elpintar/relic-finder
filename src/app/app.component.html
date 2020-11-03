@@ -44,14 +44,16 @@
 <div class="top-right-buttons">
   <div *ngIf="firebaseAuthService.angularFireAuth.user | async as user; else showLogin">
     <button class="user-btn"
-            (click)="logout()">
+            (click)="logout()"
+            title="Log out">
       <img class="user-photo"
            [src]="user!.photoURL">
     </button>
   </div>
   <ng-template #showLogin>
     <button class="user-btn"
-            (click)="login()">
+            (click)="login()"
+            title="Log in to edit">
       <mat-icon class="user-photo"
                 style="padding: 13px 0px">create</mat-icon>
     </button>

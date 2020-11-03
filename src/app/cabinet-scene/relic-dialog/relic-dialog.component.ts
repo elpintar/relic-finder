@@ -22,6 +22,7 @@ export class RelicDialogComponent {
       public dialogRef: MatDialogRef<RelicDialogComponent>,
       @Inject(MAT_DIALOG_DATA) public relicAndSaintsInput: RelicAndSaints,
       private firebaseDataService: FirebaseDataService) {
+    dialogRef.disableClose = true;
     this.relic = relicAndSaintsInput[0];
     this.saints = relicAndSaintsInput[1];
     this.canonizationStatuses = Object.values(CanonizationStatus);

@@ -5,7 +5,9 @@
   <div *ngFor="let saint of saints; index as i">
     <div *ngIf="i > 0">
       <br>
+
       <hr>
+      
       <br>
       <h2>Saint {{i+1}}</h2>
       <br>
@@ -34,14 +36,14 @@
     </mat-form-field>
     
     <mat-form-field>
-      <mat-label>Saint Name</mat-label>
+      <mat-label>Saint Name (name only, subtitle goes below)</mat-label>
       <input required matInput [(ngModel)]="saint.name">
     </mat-form-field>
     
-    of
+    of &nbsp;
 
-    <mat-form-field>
-      <mat-label>City</mat-label>
+    <mat-form-field style="display: inline-block;">
+      <mat-label>City (optional)</mat-label>
       <input matInput [(ngModel)]="saint.city">
     </mat-form-field>
 
@@ -51,12 +53,12 @@
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Religious Order</mat-label>
+      <mat-label>Religious Order (like "OFM", "OP", "SJ")</mat-label>
       <input matInput [(ngModel)]="saint.religiousOrder">
     </mat-form-field>
 
     <br>
-    Vocations:
+    Vocations (like "Martyr", "Grandfather of Jesus"):
     <div *ngFor="let vocation of saint.vocations; index as i; trackBy: trackByFn">
       <mat-form-field>
         <input matInput [(ngModel)]="saint.vocations![i]">
@@ -69,22 +71,22 @@
             (click)="removeVocation(saint)">- vocation</button>
 
     <mat-form-field>
-      <mat-label>Birth date</mat-label>
+      <mat-label>Birth date (MM-DD-YYYY, YYYY if date unknown)</mat-label>
       <input matInput [(ngModel)]="saint.birthDate">
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Death date</mat-label>
+      <mat-label>Death date (MM-DD-YYYY, YYYY if date unknown)</mat-label>
       <input matInput [(ngModel)]="saint.deathDate">
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Feast day (actual)</mat-label>
+      <mat-label>Feast day (actual) (MM-DD, like 01-02)</mat-label>
       <input matInput [(ngModel)]="saint.feastDayAndMonth">
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Feast day (pre-1970)</mat-label>
+      <mat-label>Feast day (pre-1970) (MM-DD, like 01-02)</mat-label>
       <input matInput [(ngModel)]="saint.feastDayAndMonthOld">
     </mat-form-field>
 
@@ -111,7 +113,7 @@
 
   <h2>Relic Information</h2>
 
-  Relic Materials:
+  Relic Materials (what relic is made out of):
   <div *ngFor="let material of relic.relicMaterials; index as i; trackBy: trackByFn">
     <mat-form-field>
       <input matInput [(ngModel)]="relic.relicMaterials![i]">
@@ -124,17 +126,17 @@
           (click)="removeRelicMaterial()">- relicMaterial</button>
 
   <mat-form-field>
-    <mat-label>Chapel Location</mat-label>
+    <mat-label>Chapel Location (like "V 31", "P 6 A 5 H")</mat-label>
     <input matInput [(ngModel)]="relic.chapelLocation">
   </mat-form-field>
 
   <mat-form-field>
-    <mat-label>Other Information</mat-label>
+    <mat-label>Other Information (about this relic from book)</mat-label>
     <textarea matInput [(ngModel)]="relic.otherInfo"></textarea>
   </mat-form-field>
 
   <mat-form-field>
-    <mat-label>Doc Number</mat-label>
+    <mat-label>Doc Number (from chart book)</mat-label>
     <input matInput [(ngModel)]="relic.docNumber">
   </mat-form-field>
 

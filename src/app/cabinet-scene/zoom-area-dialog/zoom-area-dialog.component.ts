@@ -12,7 +12,9 @@ export class ZoomAreaDialogComponent {
 
   constructor(
     public dialogRef: MatDialogRef<ZoomAreaDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: ZoomArea) {}
+    @Inject(MAT_DIALOG_DATA) public data: ZoomArea) {
+      dialogRef.disableClose = true;
+    }
 
   onCancelClick(): void {
     this.dialogRef.close();
