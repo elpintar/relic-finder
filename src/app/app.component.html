@@ -3,10 +3,12 @@
       [editMode]="editMode"
       [addRelicMode]="addRelicMode"
       [hideLabels]="hideLabels"
+      [movingRelicOrZA]="movingRelicOrZA"
       (sceneImgChanged)="redrawCurrentScene()"
       (zoomIn)="zoomIn($event)"
       (addOrUpdateRelicDot)="addOrUpdateRelicDot($event)"
-      (addZoomArea)="addZoomArea($event)">
+      (addZoomArea)="addZoomArea($event)"
+      (setHelperText)="setHelperTextFromCabinetScene($event)">
     </app-cabinet-scene>
 </div>
 
@@ -39,6 +41,15 @@
     <mat-icon *ngIf="!addRelicMode">control_camera</mat-icon>
   </button>
   <br>
+  <button mat-fab
+          *ngIf="editMode && firebaseAuthService.user && firebaseAuthService.user!.uid"
+          (click)="moveRelicOrZA()"
+          color="primary"
+          aria-label="Move a relic or Zoom Area"
+          [title]="(movingRelicOrZA) ? 'Cancel move' : 'Move relic or zoom area'">
+    <mat-icon *ngIf="movingRelicOrZA">cancel</mat-icon>
+    <mat-icon *ngIf="!movingRelicOrZA || movingRelicOrZA === ''">edit_location</mat-icon>
+  </button>
 </div>
 
 <div class="top-right-buttons">
@@ -80,6 +91,11 @@
           title="Move right">
     <mat-icon>arrow_forward</mat-icon>
   </button>
+</div>
+
+<div *ngIf="helperText"
+     class="bottom-text-area">
+  <span class="bottom-text">{{helperText}}</span>
 </div>
 
 <div class="bottom-right-buttons">

@@ -20,11 +20,13 @@ export class CabinetSceneComponent implements OnInit {
   @Input() editMode = false;
   @Input() addRelicMode = false;
   @Input() hideLabels = false;
+  @Input() movingRelicOrZA = '';
 
   @Output() zoomIn = new EventEmitter<string>();
   @Output() addZoomArea = new EventEmitter<ZoomArea>();
   @Output() addOrUpdateRelicDot = new EventEmitter<RelicAndSaints>();
   @Output() sceneImgChanged = new EventEmitter<void>();
+  @Output() setHelperText = new EventEmitter<string>();
 
   @ViewChild('cabinetImage', {read: ViewContainerRef}) cabinetImage?: ViewContainerRef;
   @ViewChild('relicDotsContainer', {read: ViewContainerRef}) relicDotsContainer?: ViewContainerRef;
@@ -36,6 +38,9 @@ export class CabinetSceneComponent implements OnInit {
 
   relicDotComponentsToDestroy: ComponentRef<RelicDotComponent>[] = [];
   zoomAreaComponentsToDestroy: ComponentRef<ZoomAreaComponent>[] = [];
+
+  relicAndSaintsToMove?: RelicAndSaints;
+  zaToMove?: ZoomArea;
 
   img?: HTMLImageElement;
   imgNaturalWidth = 0;
@@ -63,7 +68,6 @@ export class CabinetSceneComponent implements OnInit {
     if (!this.photoInfo.photoImgPath) {
       this.photoInfo.photoImgPath = this.photoDirectory + photoId + '.jpg';
     }
-
   }
 
   @HostListener('window:resize', ['$event'])
@@ -99,7 +103,12 @@ export class CabinetSceneComponent implements OnInit {
 
   clickInCabinet(event: MouseEvent): void {
     if (this.editMode) {
-      if (this.addRelicMode) {
+      if (this.movingRelicOrZA === 'whereRelic') {
+        this.moveRelic(this.relicAndSaintsToMove, [event.offsetX, event.offsetY]);
+        this.movingRelicOrZA = '';
+        this.setHelperText.emit('');
+      }
+      else if (this.addRelicMode) {
         this.addRelic([event.offsetX, event.offsetY]);
       } else {
         this.updateZoomAreaCoords([event.offsetX, event.offsetY]);
@@ -112,6 +121,32 @@ export class CabinetSceneComponent implements OnInit {
   addRelic(coords: [number, number]): void {
     console.log('adding relic at', coords);
     this.makeNewRelicFromCoords(coords);
+  }
+
+  moveRelic(relicAndSaintsToMove: RelicAndSaints|undefined,
+            coords: [number, number]): void {
+    if (!relicAndSaintsToMove) {
+      return;
+    }
+    // Update local data.
+    const relic = relicAndSaintsToMove[0];
+    const naturalCoords = [
+      (coords[0] / this.imgClientWidth) * this.photoInfo.naturalImgWidth,
+      (coords[1] / this.imgClientHeight) * this.photoInfo.naturalImgHeight
+    ];
+    relic.photoNaturalCoords = naturalCoords;
+    // Update position on screen.
+    const relicComponent = this.relicDotComponentsToDestroy.find(relicDotComponent => {
+      if (!relicDotComponent.instance.relic) {
+        return false;
+      }
+      return relicDotComponent.instance.relic.firebaseDocId === relic.firebaseDocId;
+    });
+    if (relicComponent && this.img) {
+      relicComponent.instance.updateLocation(this.img, this.photoInfo);
+    }
+    // Update DATABASE in Firebase.
+    this.addOrUpdateRelicDot.emit(this.relicAndSaintsToMove);
   }
 
   updateZoomAreaCoords(coords: [number, number]): void {
@@ -204,15 +239,21 @@ export class CabinetSceneComponent implements OnInit {
   relicClicked(relicAndSaintsClicked: RelicAndSaints): void {
     console.log('relic clicked:', relicAndSaintsClicked);
     if (this.editMode) {
-      const relicAndSaintsLatest = this.firebaseDataService
-        .getLatestRelicAndSaints(relicAndSaintsClicked);
-      this.openDialogForNewRelicInfo(relicAndSaintsLatest)
-      .subscribe((returnedRelicAndSaints: RelicAndSaints) => {
-        if (returnedRelicAndSaints) {
-          // User pressed OK.
-          this.addOrUpdateRelicDot.emit(returnedRelicAndSaints);
-        }
-    });
+      if (this.movingRelicOrZA === 'whichRelicOrZA') {
+        this.relicAndSaintsToMove = relicAndSaintsClicked;
+        this.movingRelicOrZA = 'whereRelic';
+        this.setHelperText.emit('Click the new relic location.');
+      } else {
+        const relicAndSaintsLatest = this.firebaseDataService
+          .getLatestRelicAndSaints(relicAndSaintsClicked);
+        this.openDialogForNewRelicInfo(relicAndSaintsLatest)
+        .subscribe((returnedRelicAndSaints: RelicAndSaints) => {
+          if (returnedRelicAndSaints) {
+            // User pressed OK.
+            this.addOrUpdateRelicDot.emit(returnedRelicAndSaints);
+          }
+        });
+      }
     }
   }
 

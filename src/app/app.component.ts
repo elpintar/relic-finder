@@ -22,6 +22,8 @@ export class AppComponent {
   editMode = false;
   addRelicMode = true;
   hideLabels = false;
+  movingRelicOrZA = '';
+  helperText = '';
 
   zoomedList: string[] = [];
   leftRightList: string[] = ['MNOPQ.jpeg', 'GHJKL.jpeg', 'ABCDEF.jpeg',
@@ -150,5 +152,27 @@ export class AppComponent {
 
   toggleHideLabels(): void {
     this.hideLabels = !this.hideLabels;
+  }
+
+  setHelperText(newText?: string): void {
+    if (newText) {
+      this.helperText = newText;
+    } else {
+      this.helperText = '';
+    }
+  }
+
+  setHelperTextFromCabinetScene(newText: string): void {
+    this.setHelperText(newText);
+  }
+
+  moveRelicOrZA(): void {
+    if (this.movingRelicOrZA) {
+      this.movingRelicOrZA = '';
+      this.helperText = '';
+    } else {
+      this.movingRelicOrZA = 'whichRelicOrZA';
+      this.helperText = 'Click relic or zoom area to move';
+    }
   }
 }
