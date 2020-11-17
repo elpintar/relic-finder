@@ -46,6 +46,9 @@ export interface Saint {
   deathDate?: string;
   vocations?: string[];
   religiousOrder?: string;
+  shortBio?: string;
+  linkTexts?: string[];
+  linkUrls?: string[];
   firebaseDocId?: string; // doc in Firebase
 }
 

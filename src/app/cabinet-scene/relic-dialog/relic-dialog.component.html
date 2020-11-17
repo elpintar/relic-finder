@@ -58,7 +58,7 @@
     </mat-form-field>
 
     <br>
-    Vocations (like "Martyr", "Grandfather of Jesus"):
+    Vocations (like "Martyr", "Grandfather of Jesus"):<br>
     <div *ngFor="let vocation of saint.vocations; index as i; trackBy: trackByFn">
       <mat-form-field>
         <input matInput [(ngModel)]="saint.vocations![i]">
@@ -67,7 +67,7 @@
     <button mat-raised-button
             (click)="addVocation(saint)">+ vocation</button>
     <button mat-raised-button
-            *ngIf="saint.vocations && saint.vocations!.length > 1"
+            *ngIf="saint.vocations && saint.vocations!.length >= 1"
             (click)="removeVocation(saint)">- vocation</button>
 
     <mat-form-field>
@@ -90,6 +90,29 @@
       <input matInput [(ngModel)]="saint.feastDayAndMonthOld">
     </mat-form-field>
 
+    <mat-form-field>
+      <mat-label>Short Biography (1-2 sentences, no repeat of above info)</mat-label>
+      <textarea matInput [(ngModel)]="saint.shortBio"></textarea>
+    </mat-form-field>
+
+    <br>
+    Links to learn more about this saint:<br>
+    <div *ngFor="let link of saint.linkUrls; index as i; trackBy: trackByFn">
+      <mat-form-field>
+        <mat-label>link text / description</mat-label>
+        <input matInput [(ngModel)]="saint.linkTexts![i]">
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>URL (with http://)</mat-label>
+        <input matInput required [(ngModel)]="saint.linkUrls![i]">
+      </mat-form-field>
+    </div>
+    <button mat-raised-button
+            (click)="addLink(saint)">+ link</button>
+    <button mat-raised-button
+            *ngIf="saint.linkUrls && saint.linkUrls!.length >= 1"
+            (click)="removeLink(saint)">- link</button>
+
     <div>
       Saint Firebase Id (blank if new):<br>{{saint.firebaseDocId}}
     </div>
@@ -98,7 +121,7 @@
 
     <div *ngIf="saints.length > 1">
       <button mat-raised-button
-              (click)="removeSaint(saint)">remove saint</button>
+              (click)="removeSaint(saint)">- saint</button>
     </div>
     <br>
   </div>
@@ -113,7 +136,7 @@
 
   <h2>Relic Information</h2>
 
-  Relic Materials (what relic is made out of):
+  Relic Materials (what relic is made out of):<br>
   <div *ngFor="let material of relic.relicMaterials; index as i; trackBy: trackByFn">
     <mat-form-field>
       <input matInput [(ngModel)]="relic.relicMaterials![i]">
@@ -122,8 +145,8 @@
   <button mat-raised-button
           (click)="addRelicMaterial()">+ material</button>
   <button mat-raised-button
-          *ngIf="relic.relicMaterials && relic.relicMaterials!.length > 1"
-          (click)="removeRelicMaterial()">- relicMaterial</button>
+          *ngIf="relic.relicMaterials && relic.relicMaterials!.length >= 1"
+          (click)="removeRelicMaterial()">- material</button>
 
   <mat-form-field>
     <mat-label>Chapel Location (like "V 31", "P 6 A 5 H")</mat-label>

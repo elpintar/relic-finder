@@ -266,13 +266,14 @@ export class FirebaseDataService {
         newSaintId = newSaintId + 'SoG_';
         break;
       default:
-        newSaintId = newSaintId + 'St?_';
+        newSaintId = newSaintId + '';
     }
-    newSaintId = newSaintId + saint.name.replace(' ', '_');
+    // Replace all spaces with underscores.
+    newSaintId = newSaintId + saint.name.replace(/ /g, '_');
     if (saint.subtitle) {
-      newSaintId = newSaintId + '_' + saint.subtitle.replace(' ', '_');
+      newSaintId = newSaintId + '_' + saint.subtitle.replace(/ /g, '_');
     } else if (saint.city) {
-      newSaintId = newSaintId + '_of_' + saint.city.replace(' ', '_');
+      newSaintId = newSaintId + '_of_' + saint.city.replace(/ /g, '_');
     }
     let matchingSaintIndex = this.getLocalSaintIndexWithId(newSaintId);
     let i = 1;
@@ -299,7 +300,11 @@ export class FirebaseDataService {
     });
     let materials = '';
     if (relic.relicMaterials && relic.relicMaterials.length > 0) {
-      materials = '_' + relic.relicMaterials.join('_&_') + '_';
+      const underscoreStrings = relic.relicMaterials.map(
+        m => m.replace(/ /g, '_'));
+      materials = '_' + underscoreStrings.join('_&_') + '_';
+    } else {
+      materials = '_';
     }
     newRelicId = relic.inPhoto.split('.')[0] + '_' +
                  newRelicId +

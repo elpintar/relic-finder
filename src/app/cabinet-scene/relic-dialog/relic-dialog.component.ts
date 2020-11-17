@@ -67,8 +67,27 @@ export class RelicDialogComponent {
   }
 
   removeVocation(saint: Saint): void {
-    if (saint.vocations && saint.vocations.length > 1) {
+    if (saint.vocations && saint.vocations.length >= 1) {
       saint.vocations.pop();
+    }
+  }
+
+  addLink(saint: Saint): void {
+    if (saint.linkUrls && saint.linkTexts) {
+      saint.linkUrls.push('');
+      saint.linkTexts?.push('');
+    } else {
+      saint.linkUrls = [''];
+      saint.linkTexts = [''];
+    }
+  }
+
+  removeLink(saint: Saint): void {
+    if (saint.linkUrls && saint.linkUrls.length >= 1) {
+      saint.linkUrls.pop();
+    }
+    if (saint.linkTexts && saint.linkTexts.length >= 1) {
+      saint.linkTexts.pop();
     }
   }
 
@@ -81,16 +100,8 @@ export class RelicDialogComponent {
   }
 
   removeRelicMaterial(): void {
-    if (this.relic.relicMaterials && this.relic.relicMaterials.length > 1) {
+    if (this.relic.relicMaterials && this.relic.relicMaterials.length >= 1) {
       this.relic.relicMaterials.pop();
-    }
-  }
-
-  onRelicMaterialUpdate(newValue: string, i: number): void {
-    console.log(newValue, i);
-    if (this.relic.relicMaterials &&
-        this.relic.relicMaterials.length >= (i + 1)) {
-      this.relic.relicMaterials[i] = newValue;
     }
   }
 
