@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
   styleUrls: ['./zoom-area.component.sass']
 })
 export class ZoomAreaComponent implements OnInit {
-  @Output() zoomInSignal = new EventEmitter<string>();
+  @Output() zoomAreaClicked = new EventEmitter<string>();
 
   zoomAreaInfo?: ZoomArea;
   width = 0;
@@ -24,7 +24,7 @@ export class ZoomAreaComponent implements OnInit {
     if (!this.zoomAreaInfo) {
       throw new Error('zoomAreaInfo not defined in sendZoomInSignal');
     }
-    this.zoomInSignal.emit(this.zoomAreaInfo.zoomToPhotoFilename);
+    this.zoomAreaClicked.emit(this.zoomAreaInfo.zoomToPhotoFilename);
   }
 
   updateLocationAndDimensions(img: HTMLImageElement, photoInfo: PhotoInfo): void {

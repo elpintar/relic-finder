@@ -40,7 +40,7 @@ export class CabinetSceneComponent implements OnInit {
   zoomAreaComponentsToDestroy: ComponentRef<ZoomAreaComponent>[] = [];
 
   relicAndSaintsToMove?: RelicAndSaints;
-  zaToMove?: ZoomArea;
+  zoomAreaToMove?: ZoomArea;
 
   img?: HTMLImageElement;
   imgNaturalWidth = 0;
@@ -108,6 +108,16 @@ export class CabinetSceneComponent implements OnInit {
         this.movingRelicOrZA = '';
         this.setHelperText.emit('');
       }
+      else if (this.movingRelicOrZA === 'whereZATopLeft') {
+        this.zoomStart = [event.offsetX, event.offsetY];
+        this.movingRelicOrZA = 'whereZABottomRight';
+        this.setHelperText.emit('Click bottom right of zoom area.');
+      }
+      else if (this.movingRelicOrZA === 'whereZABottomRight') {
+        this.moveZoomArea([event.offsetX, event.offsetY]);
+        this.movingRelicOrZA = '';
+        this.setHelperText.emit('');
+      }
       else if (this.addRelicMode) {
         this.addRelic([event.offsetX, event.offsetY]);
       } else {
@@ -161,6 +171,44 @@ export class CabinetSceneComponent implements OnInit {
       this.makeNewZoomAreaFromCoords(this.zoomStart, coords);
       this.resetZoomInfo();
     }
+  }
+
+  moveZoomArea(coords: [number, number]): void {
+    const zaToMove = this.zoomAreaToMove;
+    if (this.zoomStart[0] === -1 &&
+      this.zoomStart[1] === -1) {
+      console.error('Tried to move zoom area without a starting point.');
+    }
+    else if (!zaToMove) {
+      console.error('Tried to move zoom area but no zoom area selected.');
+    }
+    else {
+      const topLeft = this.zoomStart;
+      const bottomRight = coords;
+      const topLeftNaturalCoords = [
+        (topLeft[0] / this.imgClientWidth) * this.photoInfo.naturalImgWidth,
+        (topLeft[1] / this.imgClientHeight) * this.photoInfo.naturalImgHeight
+      ];
+      const bottomRightNaturalCoords = [
+        (bottomRight[0] / this.imgClientWidth) * this.photoInfo.naturalImgWidth,
+        (bottomRight[1] / this.imgClientHeight) * this.photoInfo.naturalImgHeight
+      ];
+      zaToMove.topLeftNaturalCoords = topLeftNaturalCoords;
+      zaToMove.bottomRightNaturalCoords = bottomRightNaturalCoords;
+      // Update position on screen.
+      const zoomAreaComponent = this.zoomAreaComponentsToDestroy.find(zaComp => {
+        if (!zaComp.instance.zoomAreaInfo) {
+          return false;
+        }
+        return zaComp.instance.zoomAreaInfo.firebaseDocId === zaToMove.firebaseDocId;
+      });
+      if (zoomAreaComponent && this.img) {
+        zoomAreaComponent.instance.updateLocationAndDimensions(this.img, this.photoInfo);
+      }
+      // Update DATABASE in Firebase.
+      this.firebaseDataService.updateZoomArea(zaToMove);
+    }
+    this.resetZoomInfo();
   }
 
   makeNewRelicFromCoords(coords: [number, number]): void {
@@ -272,11 +320,17 @@ export class CabinetSceneComponent implements OnInit {
     if (isNewZoomArea) {
       this.addZoomArea.emit(zoomAreaInfo);
     }
-    componentRef.instance.zoomInSignal
+    componentRef.instance.zoomAreaClicked
       .pipe(takeUntil(this.sceneRedrawn))
       .subscribe((photoToZoomTo: string) => {
-        // Zoom in to this photo (in edit or view mode).
-        this.zoomIn.emit(photoToZoomTo);
+        if (this.movingRelicOrZA === 'whichRelicOrZA') {
+          this.zoomAreaToMove = zoomAreaInfo;
+          this.movingRelicOrZA = 'whereZATopLeft';
+          this.setHelperText.emit('Click the top left of the zoom area.');
+        } else {
+          // Zoom in to this photo (in edit or view mode).
+          this.zoomIn.emit(photoToZoomTo);
+        }
       });
   }
 

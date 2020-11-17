@@ -21,6 +21,7 @@
           title="Zoom out">
     <mat-icon>zoom_out</mat-icon>
   </button>
+  <br>
   <button *ngIf="firebaseAuthService.user && firebaseAuthService.user!.uid"
           mat-fab
           (click)="toggleEditMode()"

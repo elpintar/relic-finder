@@ -55,6 +55,28 @@ export class FirebaseDataService {
       });
   }
 
+  updateZoomArea(zoomArea: ZoomArea): void {
+    if (!zoomArea.firebaseDocId) {
+      return;
+    }
+    this.firestore.collection<ZoomArea>('zoomAreas')
+      .doc(zoomArea.firebaseDocId)
+      .update(zoomArea)
+      .then(() => {
+        console.log('Zoom area updated', zoomArea);
+      })
+      .catch(error => {
+        console.error('Error updating zoom area:', error);
+      });
+    // Update local data.
+    const indexMatch = this.getLocalZoomAreaIndexWithId(zoomArea.firebaseDocId);
+    if (indexMatch >= 0) {
+      this.allZoomAreasLocal[indexMatch] = zoomArea;
+    } else {
+      alert('No matching zoom area found to update locally!');
+    }
+  }
+
   addOrUpdateRelicAndSaints(relicAndSaints: RelicAndSaints): void {
     console.log('add or update:', relicAndSaints);
     const relic = relicAndSaints[0];
@@ -209,6 +231,12 @@ export class FirebaseDataService {
   getLocalRelicIndexWithId(relicFirebaseId: string): number {
     return this.allRelicsLocal.findIndex((relic) => {
       return relic.firebaseDocId === relicFirebaseId;
+    });
+  }
+
+  getLocalZoomAreaIndexWithId(relicFirebaseId: string): number {
+    return this.allZoomAreasLocal.findIndex(za => {
+      return za.firebaseDocId === relicFirebaseId;
     });
   }
 
