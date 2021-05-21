@@ -37,6 +37,7 @@ export interface Relic {
 
 export interface Saint {
   name: string;
+  commonName?: string; // "commonly known as" name, for relic dot label
   canonizationStatus: CanonizationStatus;
   city?: string;
   subtitle?: string; // like "of the Cross"

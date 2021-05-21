@@ -35,7 +35,11 @@ export class RelicDotComponent {
   getHoverText(): string {
     const saints = this.saints;
     if (saints && saints.length >= 1 && saints[0]) {
-      return saints[0].name;
+      if (saints[0].commonName) {
+        return saints[0].commonName;
+      } else {
+        return saints[0].name;
+      }
     } else {
       return '?';
     }

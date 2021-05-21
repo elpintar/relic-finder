@@ -57,6 +57,11 @@
       <input matInput [(ngModel)]="saint.religiousOrder">
     </mat-form-field>
 
+    <mat-form-field>
+      <mat-label>Saint's "commonly known as" name (for popup label):</mat-label>
+      <input matInput [(ngModel)]="saint.commonName">
+    </mat-form-field>
+
     <br>
     Vocations (like "Martyr", "Grandfather of Jesus"):<br>
     <div *ngFor="let vocation of saint.vocations; index as i; trackBy: trackByFn">
