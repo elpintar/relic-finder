@@ -20,13 +20,18 @@ export class RelicDialogComponent {
   filteredSaints: Observable<Saint[]>;
   otherCommonName = '';
 
+  // Comes from injected data; determines which template to use.
+  editMode = false;
+
   constructor(
       public dialogRef: MatDialogRef<RelicDialogComponent>,
-      @Inject(MAT_DIALOG_DATA) public relicAndSaintsInput: RelicAndSaints,
+      @Inject(MAT_DIALOG_DATA) public dataInput: [RelicAndSaints, boolean],
       private firebaseDataService: FirebaseDataService) {
     dialogRef.disableClose = true;
-    this.relic = relicAndSaintsInput[0];
-    this.saints = relicAndSaintsInput[1];
+    const relicAndSaintsInput = this.dataInput;
+    this.relic = relicAndSaintsInput[0][0];
+    this.saints = relicAndSaintsInput[0][1];
+    this.editMode = this.dataInput[1];
     this.saints.map(this.initOtherCommonName);
     this.canonizationStatuses = Object.values(CanonizationStatus);
     this.filteredSaints = this.autocompleteSaintsCtrl.valueChanges
@@ -154,6 +159,17 @@ export class RelicDialogComponent {
   }
 
   getHumanReadableSaintName(saint: Saint): string {
+    if (saint.commonName) {
+      if (saint.commonName === 'CITY') {
+        return saint.canonizationStatus + ' ' +
+          saint.name + ' of ' + saint.city;
+      } else if (saint.commonName === 'SUBTITLE') {
+        return saint.canonizationStatus + ' ' +
+          saint.name + ' ' + saint.subtitle;
+      } else {
+        return saint.commonName;
+      }
+    }
     let saintName = saint.name;
     saintName = saint.canonizationStatus + ' ' + saint.name;
     if (saint.subtitle) {

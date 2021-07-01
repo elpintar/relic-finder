@@ -1,4 +1,24 @@
-<div mat-dialog-content>
+<!-- VIEW MODE -->
+
+<div *ngIf="!editMode" mat-dialog-content>
+
+  <div *ngFor="let saint of saints; index as i">
+    <h2>
+      {{getHumanReadableSaintName(saint)}}<span 
+        *ngIf="saint.religiousOrder">, {{saint.religiousOrder}}</span>
+    </h2>
+  </div>
+
+</div>
+<div *ngIf="!editMode" mat-dialog-actions>
+  <button mat-button [mat-dialog-close]="[relic, saints]" cdkFocusInitial>OK</button>
+</div>
+
+
+<!-- EDIT MODE -->
+
+
+<div *ngIf="editMode" mat-dialog-content>
 
   <h2>Saint Information</h2>
   
@@ -66,10 +86,12 @@
                           [value]="'CITY'">
           {{saint.canonizationStatus}} {{saint.name}} of {{saint.city}}
         </mat-radio-button>
+        &nbsp;
         <mat-radio-button *ngIf="saint.subtitle"
                           [value]="'SUBTITLE'">
           {{saint.canonizationStatus}} {{saint.name}} {{saint.subtitle}}
         </mat-radio-button>
+        &nbsp;
         <mat-radio-button [value]="saint.otherCommonName"
                           [id]="saint.name + i.toString() + 'radio-btn'">
           Other:
@@ -159,7 +181,9 @@
 
   <h2>Relic Information</h2>
 
-  Relic Materials (what relic is made out of):<br>
+  Relic Materials (what relic is made out of, <br>
+  one line for each saint above;<br>
+  comma-separate if multiple materials per line):<br>
   <div *ngFor="let material of relic.relicMaterials; index as i; trackBy: trackByFn">
     <mat-form-field>
       <input matInput [(ngModel)]="relic.relicMaterials![i]">
@@ -220,7 +244,7 @@
   <br>
 
 </div>
-<div mat-dialog-actions>
+<div *ngIf="editMode" mat-dialog-actions>
   <button mat-button (click)="onCancelClick()">Cancel</button>
   <button mat-button [mat-dialog-close]="[relic, saints]" cdkFocusInitial>OK</button>
 </div>

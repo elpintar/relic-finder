@@ -226,7 +226,7 @@ export class CabinetSceneComponent implements OnInit {
       canonizationStatus: CanonizationStatus.Saint,
       firebaseDocId: '',
     }];
-    this.openDialogForNewRelicInfo([relic, saints]).subscribe((returnedRelicAndSaints: [Relic, Saint[]]) => {
+    this.openDialogForRelic([relic, saints]).subscribe((returnedRelicAndSaints: [Relic, Saint[]]) => {
       console.log('result', returnedRelicAndSaints);
       if (returnedRelicAndSaints) {
         // User pressed OK.
@@ -288,13 +288,15 @@ export class CabinetSceneComponent implements OnInit {
     console.log('relic clicked:', relicAndSaintsClicked);
     if (this.editMode) {
       if (this.movingRelicOrZA === 'whichRelicOrZA') {
+        // Move this relic.
         this.relicAndSaintsToMove = relicAndSaintsClicked;
         this.movingRelicOrZA = 'whereRelic';
         this.setHelperText.emit('Click the new relic location.');
       } else {
+        // Edit this relic.
         const relicAndSaintsLatest = this.firebaseDataService
           .getLatestRelicAndSaints(relicAndSaintsClicked);
-        this.openDialogForNewRelicInfo(relicAndSaintsLatest)
+        this.openDialogForRelic(relicAndSaintsLatest)
         .subscribe((returnedRelicAndSaints: RelicAndSaints) => {
           if (returnedRelicAndSaints) {
             // User pressed OK.
@@ -302,6 +304,17 @@ export class CabinetSceneComponent implements OnInit {
           }
         });
       }
+    } else {
+      // View this relic's information.
+      const relicAndSaintsLatest = this.firebaseDataService
+          .getLatestRelicAndSaints(relicAndSaintsClicked);
+      this.openDialogForRelic(relicAndSaintsLatest)
+      .subscribe((returnedRelicAndSaints: RelicAndSaints) => {
+        if (returnedRelicAndSaints) {
+          // User closed dialog.
+          console.log('User closed relic:', returnedRelicAndSaints);
+        }
+      });
     }
   }
 
@@ -334,9 +347,9 @@ export class CabinetSceneComponent implements OnInit {
       });
   }
 
-  openDialogForNewRelicInfo(relicAndSaints: RelicAndSaints): Observable<[Relic, Saint[]]> {
+  openDialogForRelic(relicAndSaints: RelicAndSaints): Observable<[Relic, Saint[]]> {
     const dialogRef = this.dialog.open(RelicDialogComponent, {
-      data: relicAndSaints,
+      data: [relicAndSaints, this.editMode],
     });
 
     return dialogRef.afterClosed();
