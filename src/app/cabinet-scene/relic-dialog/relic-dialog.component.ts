@@ -1,6 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import { MatRadioChange, _MatRadioButtonBase } from '@angular/material/radio';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { FirebaseDataService } from 'src/app/firebase-data.service';
@@ -17,6 +18,7 @@ export class RelicDialogComponent {
   canonizationStatuses: string[];
   autocompleteSaintsCtrl = new FormControl();
   filteredSaints: Observable<Saint[]>;
+  otherCommonName = '';
 
   constructor(
       public dialogRef: MatDialogRef<RelicDialogComponent>,
@@ -25,6 +27,7 @@ export class RelicDialogComponent {
     dialogRef.disableClose = true;
     this.relic = relicAndSaintsInput[0];
     this.saints = relicAndSaintsInput[1];
+    this.saints.map(this.initOtherCommonName);
     this.canonizationStatuses = Object.values(CanonizationStatus);
     this.filteredSaints = this.autocompleteSaintsCtrl.valueChanges
       .pipe(
@@ -52,6 +55,32 @@ export class RelicDialogComponent {
     // Copy the selectedSaint information to populate the form data for the
     // saint at the saintIndex.
     this.saints[saintIndex] = Object.assign({}, selectedSaint);
+  }
+
+  initOtherCommonName(saint: Saint): void {
+    if (saint.commonName) {
+      if (saint.commonName === 'CITY' || saint.commonName === 'SUBTITLE') {
+        saint.otherCommonName = '';
+      } else {
+        saint.otherCommonName = saint.commonName;
+      }
+    } else {
+      saint.otherCommonName = '';
+    }
+  }
+
+  saintCommonNameChanged(event: MatRadioChange, saint: Saint): void {
+    saint.commonName = event.value as string;
+  }
+
+  clickRadioBtn(saint: Saint, i: number): void {
+    const id = saint.name + i.toString() + 'radio-btn-input';
+    const elem = document.getElementById(id);
+    if (elem) {
+      elem.click();
+    } else {
+      console.error('No radio btn elem found for id:', id);
+    }
   }
 
   onCancelClick(): void {

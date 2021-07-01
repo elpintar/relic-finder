@@ -38,6 +38,10 @@ export interface Relic {
 export interface Saint {
   name: string;
   commonName?: string; // "commonly known as" name, for relic dot label
+                       // 'CITY' or 'SUBTITLE' values indicate to use the
+                       // given information to compile a string
+  otherCommonName?: string; // used only internally for form field,
+                            // the value won't matter or need saved.
   canonizationStatus: CanonizationStatus;
   city?: string;
   subtitle?: string; // like "of the Cross"

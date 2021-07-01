@@ -58,8 +58,26 @@
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Saint's "commonly known as" name (for popup label):</mat-label>
-      <input matInput [(ngModel)]="saint.commonName">
+      Saint commonly goes by this name:
+      <br><br>
+      <mat-radio-group [value]="saint.commonName"
+                       (change)="saintCommonNameChanged($event, saint)">
+        <mat-radio-button *ngIf="saint.city"
+                          [value]="'CITY'">
+          {{saint.canonizationStatus}} {{saint.name}} of {{saint.city}}
+        </mat-radio-button>
+        <mat-radio-button *ngIf="saint.subtitle"
+                          [value]="'SUBTITLE'">
+          {{saint.canonizationStatus}} {{saint.name}} {{saint.subtitle}}
+        </mat-radio-button>
+        <mat-radio-button [value]="saint.otherCommonName"
+                          [id]="saint.name + i.toString() + 'radio-btn'">
+          Other:
+          <input matInput [(ngModel)]="saint.otherCommonName"
+                          (click)="clickRadioBtn(saint, i)"
+                          (focusout)="clickRadioBtn(saint, i)">
+        </mat-radio-button>
+      </mat-radio-group>
     </mat-form-field>
 
     <br>

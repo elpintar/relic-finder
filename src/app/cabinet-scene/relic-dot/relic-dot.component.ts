@@ -21,6 +21,10 @@ export class RelicDotComponent {
     this.relicClickedSignal.emit([this.relic, this.saints || []]);
   }
 
+  showRelicInfo(): void {
+    console.log(this.relic);
+  }
+
   updateLocation(img: HTMLImageElement, photoInfo: PhotoInfo): void {
     if (!this.relic) {
       throw new Error('relic not defined in RelicDotComponent');
@@ -36,12 +40,28 @@ export class RelicDotComponent {
     const saints = this.saints;
     if (saints && saints.length >= 1 && saints[0]) {
       if (saints[0].commonName) {
-        return saints[0].commonName;
+        return this.getCommonName(saints[0]);
       } else {
         return saints[0].name;
       }
     } else {
       return '?';
+    }
+  }
+
+  getCommonName(saint: Saint): string {
+    if (saint.commonName) {
+      if (saint.commonName === 'CITY') {
+        return saint.canonizationStatus + ' ' + saint.name + ' of ' +
+          saint.city;
+      } else if (saint.commonName === 'SUBTITLE') {
+        return saint.canonizationStatus + ' ' + saint.name + ' ' +
+          saint.subtitle;
+      } else {
+        return saint.commonName;
+      }
+    } else {
+      return saint.canonizationStatus + saint.name;
     }
   }
 }
