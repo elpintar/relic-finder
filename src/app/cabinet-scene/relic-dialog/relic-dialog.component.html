@@ -1,12 +1,80 @@
+
 <!-- VIEW MODE -->
 
-<div *ngIf="!editMode" mat-dialog-content>
+<div *ngIf="!editMode" 
+     mat-dialog-content
+     class="view-mode-relic-info">
 
   <div *ngFor="let saint of saints; index as i">
+
+    <div *ngIf="i > 0">
+      <br><br>
+    </div>
+
+    <!-- RELIC MATERIAL -->
+    <h3 *ngIf="relic.relicMaterials && relic.relicMaterials[i]">
+      {{relic.relicMaterials[i]}} of
+    </h3>
+
+    <!-- COMMON NAME -->
     <h2>
-      {{getHumanReadableSaintName(saint)}}<span 
-        *ngIf="saint.religiousOrder">, {{saint.religiousOrder}}</span>
+      {{getHumanReadableSaintName(saint)}}
     </h2>
+
+    <!-- VOCATIONS, RELIGIOUS ORDER -->
+    <div>
+      <h3>
+        <span *ngFor="let vocation of saint.vocations; index as i"><span *ngIf="i > 0">,
+        </span><span>{{vocation}}</span></span><span class="religious-order"
+        *ngIf="saint.religiousOrder">, {{saint.religiousOrder}}</span>
+      </h3>
+    </div>
+
+    <!-- BIRTH - DEATH -->
+    <div *ngIf="saint.birthDate || saint.deathDate">
+      <h3>{{saint.birthDate}} - {{saint.deathDate}}</h3>
+    </div>
+
+    <!-- FEAST DAY -->
+    <div *ngIf="saint.feastDayAndMonth">
+      feast day: {{saint.feastDayAndMonth}}
+    </div>
+
+    <div *ngIf="saint.shortBio">
+      <br>
+    </div>
+
+    <mat-accordion *ngIf="saint.shortBio">
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            More info
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <!-- SHORT BIO -->
+        <div *ngIf="saint.shortBio">
+          {{saint.shortBio}}
+        </div>
+
+        <!-- LINK(S) FOR MORE INFO -->
+        <div *ngIf="saint.linkUrls && saint.linkUrls.length > 0">
+          <br>
+          Links to learn more:
+          <div>
+            <button *ngFor="let url of saint.linkUrls; index as i"
+                    mat-button>
+              <a [href]="url" target="_blank" rel="noopener noreferrer">
+                <span *ngIf="saint.linkTexts && saint.linkTexts[i]; else defaultContent">
+                  {{saint.linkTexts[i]}}
+                </span>
+                <ng-template #defaultContent>{{'Link ' + i}}</ng-template>
+              </a>
+            </button>
+          </div>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+
   </div>
 
 </div>

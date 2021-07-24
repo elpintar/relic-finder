@@ -14,6 +14,7 @@ import {MatSelectModule} from '@angular/material/select';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import { ReactiveFormsModule } from '@angular/forms';
 import {MatRadioModule} from '@angular/material/radio';
+import {MatExpansionModule} from '@angular/material/expansion';
 
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
@@ -46,6 +47,7 @@ import { RelicDialogComponent } from './cabinet-scene/relic-dialog/relic-dialog.
     MatSelectModule,
     MatRadioModule,
     MatAutocompleteModule,
+    MatExpansionModule,
     ReactiveFormsModule,
     AngularFireModule.initializeApp(environment.firebase),
     AngularFirestoreModule,
