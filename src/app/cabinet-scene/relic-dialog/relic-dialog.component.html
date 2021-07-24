@@ -289,6 +289,18 @@
 
   <h2>Auto-Generated Data</h2>
 
+  <div>
+    Creator of this relic's information:<br>
+    {{relic.creator}}
+  </div>
+  <br>
+
+  <div *ngIf="relic.editors.length > 0">
+    Other contributors to this relic:<br>
+    {{relic.editors ? relic.editors.join(", "): ""}}
+  </div>
+  <br>
+
   <mat-form-field>
     <mat-label>Photo URL</mat-label>
     <input matInput [(ngModel)]="relic.inPhoto">
@@ -308,7 +320,7 @@
   <div>
     Firebase Relic Doc Id (blank if new):<br>{{relic.firebaseDocId}}
   </div>
-  
+
   <br>
 
 </div>

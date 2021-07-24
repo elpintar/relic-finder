@@ -33,6 +33,8 @@ export interface Relic {
   otherInfo?: string;
   docNumber?: number; // from "Doc. No." column
   numNamesInDoc?: number; // from column next to "Doc. No."
+  creator?: string; // name of user who created relic
+  editors: string[]; // name of users who edited
 }
 
 export interface Saint {

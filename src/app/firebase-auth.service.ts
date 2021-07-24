@@ -51,6 +51,16 @@ export class FirebaseAuthService {
     }
   }
 
+  getUserName(): string|undefined {
+    const loggedInUser = this.user;
+    if (loggedInUser && this.users) {
+      const foundUser = this.users.find(user => user.uid === loggedInUser.uid);
+      return foundUser ? foundUser.name : undefined;
+    } else {
+      return undefined;
+    }
+  }
+
   login(): void {
     this.angularFireAuth.signInWithPopup(new auth.GoogleAuthProvider())
     .then((result) => {

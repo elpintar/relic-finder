@@ -9,6 +9,9 @@ import { assertNotNull } from '@angular/compiler/src/output/output_ast';
 import { RelicDialogComponent } from './relic-dialog/relic-dialog.component';
 import { takeUntil } from 'rxjs/operators';
 import { FirebaseDataService } from '../firebase-data.service';
+import {FirebaseAuthService} from '../firebase-auth.service';
+import { AngularFireAuth } from '@angular/fire/auth';
+import {relicAndSaintsEqual} from '../helperFuncs';
 
 @Component({
   selector: 'app-cabinet-scene',
@@ -52,7 +55,8 @@ export class CabinetSceneComponent implements OnInit {
 
   constructor(private resolver: ComponentFactoryResolver,
               private dialog: MatDialog,
-              private firebaseDataService: FirebaseDataService) {
+              private firebaseDataService: FirebaseDataService,
+              private firebaseAuthService: FirebaseAuthService) {
     this.photoInfo = {
       photoFilename: '',
       naturalImgWidth: -1,
@@ -216,10 +220,15 @@ export class CabinetSceneComponent implements OnInit {
       (coords[0] / this.imgClientWidth) * this.photoInfo.naturalImgWidth,
       (coords[1] / this.imgClientHeight) * this.photoInfo.naturalImgHeight
     ];
+    if (!this.firebaseAuthService.user) {
+      console.error('No user information when creating a relic!');
+    }
     const relic: Relic = {
       inPhoto: this.photoInfo.photoFilename,
       photoNaturalCoords: naturalCoords,
       saintFirebaseDocIds: [''],
+      creator: this.firebaseAuthService.getUserName(),
+      editors: [],
     };
     const saints: Saint[] = [{
       name: '',
@@ -286,6 +295,7 @@ export class CabinetSceneComponent implements OnInit {
 
   relicClicked(relicAndSaintsClicked: RelicAndSaints): void {
     console.log('relic clicked:', relicAndSaintsClicked);
+    const relicAndSaintsOriginal = JSON.parse(JSON.stringify(relicAndSaintsClicked)) as RelicAndSaints;
     if (this.editMode) {
       if (this.movingRelicOrZA === 'whichRelicOrZA') {
         // Move this relic.
@@ -300,7 +310,25 @@ export class CabinetSceneComponent implements OnInit {
         .subscribe((returnedRelicAndSaints: RelicAndSaints) => {
           if (returnedRelicAndSaints) {
             // User pressed OK.
-            this.addOrUpdateRelicDot.emit(returnedRelicAndSaints);
+            console.log("COMPARING", relicAndSaintsOriginal, returnedRelicAndSaints,
+              relicAndSaintsEqual(relicAndSaintsOriginal, returnedRelicAndSaints));
+            if (relicAndSaintsEqual(relicAndSaintsOriginal, returnedRelicAndSaints)) {
+              return; // no need to update if equal.
+            }
+            else {
+              // If relic is different, add user as an editor.
+              const userName = this.firebaseAuthService.getUserName();
+              if (userName) {
+                const relic = returnedRelicAndSaints[0];
+                const nameInEditors = relic.editors.indexOf(userName) >= 0;
+                if (!nameInEditors) {
+                  relic.editors.push(userName);
+                  returnedRelicAndSaints[0] = relic;
+                }
+              }
+              // Commit the change.
+              this.addOrUpdateRelicDot.emit(returnedRelicAndSaints);
+            }
           }
         });
       }

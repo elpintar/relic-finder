@@ -33,6 +33,19 @@ export class FirebaseDataService {
           this.allRelicsLocal = relicsList as Relic[];
           this.allZoomAreasLocal = zoomAreasList as ZoomArea[];
           this.allSaintsLocal = saintsList as Saint[];
+          // REMOVE - update all creators to be Ben Plazek
+          // this.allRelicsLocal.forEach((r: Relic) => {
+          //   r.creator = "Ben Plazek";
+          //   r.editors = [];
+          //   this.firestore.collection<Relic>('relics').doc(r.firebaseDocId)
+          //     .update(r)
+          //     .then(() => {
+          //       console.log('relic updated:', r.firebaseDocId, r);
+          //     })
+          //     .catch((error) => {
+          //       console.error('Error updating document: ', error);
+          //     });
+          // })
           callback();
         });
       });
