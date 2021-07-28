@@ -31,6 +31,7 @@ export class FirebaseAuthService {
         this.user = userResult;
         this.users = users;
         this.userIsEditor = this.checkIfUserIsEditor();
+        console.log('User is editor:', this.userIsEditor);
       });
     });
     // Get updates to user data and keep it updated.
@@ -38,7 +39,7 @@ export class FirebaseAuthService {
       // Update user data whenever the auth state changes.
       this.user = user;
       this.userIsEditor = this.checkIfUserIsEditor();
-      console.log('User is editor:', this.userIsEditor);
+      console.log('After user change, user is editor:', this.userIsEditor);
     });
   }
 

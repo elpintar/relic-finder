@@ -310,8 +310,6 @@ export class CabinetSceneComponent implements OnInit {
         .subscribe((returnedRelicAndSaints: RelicAndSaints) => {
           if (returnedRelicAndSaints) {
             // User pressed OK.
-            console.log("COMPARING", relicAndSaintsOriginal, returnedRelicAndSaints,
-              relicAndSaintsEqual(relicAndSaintsOriginal, returnedRelicAndSaints));
             if (relicAndSaintsEqual(relicAndSaintsOriginal, returnedRelicAndSaints)) {
               return; // no need to update if equal.
             }
