@@ -60,7 +60,8 @@ export class CabinetSceneComponent implements OnInit {
     this.photoInfo = {
       photoFilename: '',
       naturalImgWidth: -1,
-      naturalImgHeight: -1
+      naturalImgHeight: -1,
+      arrows: {photoFilename: ''}
     };
   }
 

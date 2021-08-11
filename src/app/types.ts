@@ -12,22 +12,32 @@ export interface PhotoInfo {
   naturalImgHeight: number;
   photoImgPath?: string;
   relicsInPhoto?: number[];
+  arrows: PhotoArrows;
 }
 
 export interface ZoomArea {
+  firebaseDocId?: string; // doc in Firebase
   zoomToPhotoFilename: string;
   zoomFromPhotoFilename: string;
   // Values below are for the "zoom from" photo.
   topLeftNaturalCoords: number[];
   bottomRightNaturalCoords: number[];
-  firebaseDocId?: string; // doc in Firebase
+}
+
+export interface PhotoArrows {
+  firebaseDocId?: string; // doc in Firebase, same as photoFilename
+  photoFilename: string; // must match filenames in zoom area data
+  leftToPhoto?: string; // must match filenames in zoom area data
+  rightToPhoto?: string; // must match filenames in zoom area data
+  upToPhoto?: string; // must match filenames in zoom area data
+  downToPhoto?: string; // must match filenames in zoom area data
 }
 
 export interface Relic {
+  firebaseDocId?: string; // doc in Firebase
   inPhoto: string;
   photoNaturalCoords: number[];
   saintFirebaseDocIds: string[];
-  firebaseDocId?: string; // doc in Firebase
   relicMaterials?: string[];
   chapelLocation?: string;
   otherInfo?: string;
@@ -38,6 +48,7 @@ export interface Relic {
 }
 
 export interface Saint {
+  firebaseDocId?: string; // doc in Firebase
   name: string;
   commonName?: string; // "commonly known as" name, for relic dot label
                        // 'CITY' or 'SUBTITLE' values indicate to use the
@@ -56,7 +67,6 @@ export interface Saint {
   shortBio?: string;
   linkTexts?: string[];
   linkUrls?: string[];
-  firebaseDocId?: string; // doc in Firebase
 }
 
 export interface User {

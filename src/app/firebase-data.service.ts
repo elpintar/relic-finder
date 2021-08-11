@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { PhotoInfo, Relic, ZoomArea, User, Saint, RelicAndSaints, CanonizationStatus } from './types';
+import { PhotoInfo, Relic, ZoomArea, User, Saint, RelicAndSaints, CanonizationStatus, PhotoArrows } from './types';
 import { CabinetSceneComponent } from './cabinet-scene/cabinet-scene.component';
 import { AngularFirestore, AngularFirestoreCollection, DocumentData, DocumentReference, QuerySnapshot } from '@angular/fire/firestore';
 import { bindCallback, Observable } from 'rxjs';
@@ -17,6 +17,7 @@ export class FirebaseDataService {
   allRelicsLocal: Relic[] = [];
   allZoomAreasLocal: ZoomArea[] = [];
   allSaintsLocal: Saint[] = [];
+  allArrowsLocal: PhotoArrows[] = [];
 
   constructor(private firestore: AngularFirestore) { }
 
@@ -30,23 +31,14 @@ export class FirebaseDataService {
         this.firestore.collection('saints')
             .valueChanges({idField: 'firebaseDocId'}).pipe(take(1)).subscribe((saintsList) => {
           console.log('saints', saintsList);
-          this.allRelicsLocal = relicsList as Relic[];
-          this.allZoomAreasLocal = zoomAreasList as ZoomArea[];
-          this.allSaintsLocal = saintsList as Saint[];
-          // REMOVE - update all creators to be Ben Plazek
-          // this.allRelicsLocal.forEach((r: Relic) => {
-          //   r.creator = "Ben Plazek";
-          //   r.editors = [];
-          //   this.firestore.collection<Relic>('relics').doc(r.firebaseDocId)
-          //     .update(r)
-          //     .then(() => {
-          //       console.log('relic updated:', r.firebaseDocId, r);
-          //     })
-          //     .catch((error) => {
-          //       console.error('Error updating document: ', error);
-          //     });
-          // })
-          callback();
+          this.firestore.collection('arrows')
+              .valueChanges({idField: 'firebaseDocId'}).pipe(take(1)).subscribe((arrowsList) => {
+            this.allRelicsLocal = relicsList as Relic[];
+            this.allZoomAreasLocal = zoomAreasList as ZoomArea[];
+            this.allSaintsLocal = saintsList as Saint[];
+            this.allArrowsLocal = arrowsList as PhotoArrows[];
+            callback();
+          });
         });
       });
     });
@@ -235,6 +227,48 @@ export class FirebaseDataService {
     return fullPath;
   }
 
+  getPhotoArrows(photoFilename: string): PhotoArrows|undefined {
+    return this.allArrowsLocal.find((arrows) => {
+      return arrows.photoFilename === photoFilename;
+    });
+  }
+
+  addOrUpdatePhotoArrows(newArrows: PhotoArrows): void {
+    const arrowsId = newArrows.firebaseDocId;
+    if (!arrowsId) {
+      // new arrows
+      newArrows.firebaseDocId = newArrows.photoFilename;
+      this.firestore.collection<PhotoArrows>('arrows').doc(arrowsId).set(newArrows)
+      .then(() => {
+        console.log('successful write of new arrows doc - firebase id: ' + newArrows.firebaseDocId);
+      })
+      .catch((reason: string) => {
+        console.error(reason);
+        alert('Reminder: your data is not being saved.');
+      }).finally(() => {
+        console.log('successfully added arrows: ', newArrows);
+      });
+      // Update local data
+      this.allArrowsLocal.push(newArrows);
+    } else {
+      this.firestore.collection<PhotoArrows>('arrows').doc(newArrows.firebaseDocId)
+      .update(newArrows)
+      .then(() => {
+        console.log('Arrows updated:', newArrows.firebaseDocId, newArrows);
+      })
+      .catch((error) => {
+        console.error('Error updating arrows document: ', error);
+      });
+      // Update local data.
+      const indexMatch = this.getLocalArrowsIndexWithId(arrowsId);
+      if (indexMatch >= 0) {
+        this.allArrowsLocal[indexMatch] = newArrows;
+      } else {
+        alert('No matching arrows found to update locally!');
+      }
+    }
+  }
+
   getLocalSaintIndexWithId(saintFirebaseId: string): number {
     return this.allSaintsLocal.findIndex((saint) => {
       return saint.firebaseDocId === saintFirebaseId;
@@ -250,6 +284,12 @@ export class FirebaseDataService {
   getLocalZoomAreaIndexWithId(relicFirebaseId: string): number {
     return this.allZoomAreasLocal.findIndex(za => {
       return za.firebaseDocId === relicFirebaseId;
+    });
+  }
+
+  getLocalArrowsIndexWithId(arrowsId: string): number {
+    return this.allArrowsLocal.findIndex(arrow => {
+      return arrow.firebaseDocId === arrowsId;
     });
   }
 

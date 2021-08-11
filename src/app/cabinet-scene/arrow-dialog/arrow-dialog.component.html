@@ -1,0 +1,11 @@
+<div mat-dialog-component>
+  <p>Photo filename to go to (like "G%2FG-full.jpg"):</p>
+  <mat-form-field>
+    <mat-label>Photo filename</mat-label>
+    <input matInput [(ngModel)]="newArrowToPhotoFilename">
+  </mat-form-field>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onCancelClick()">Cancel</button>
+  <button mat-button [mat-dialog-close]="newArrowToPhotoFilename" cdkFocusInitial>OK</button>
+</div>

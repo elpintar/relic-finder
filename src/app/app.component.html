@@ -74,8 +74,9 @@
 
 <div class="left-button">
   <button mat-fab
-          (click)="moveLeftOrRight('left')"
-          *ngIf="zoomedList.length === 0"
+          (click)="arrowClicked('left')"
+          *ngIf="editMode || currentPhotoInfo.arrows.leftToPhoto"
+          [ngClass]="{'faded-arrow-btn': editMode && !currentPhotoInfo.arrows.leftToPhoto}"
           color="primary"
           aria-label="Move left"
           title="Move left">
@@ -85,12 +86,37 @@
 
 <div class="right-button">
   <button mat-fab
-          (click)="moveLeftOrRight('right')"
-          *ngIf="zoomedList.length === 0"
+          (click)="arrowClicked('right')"
+          *ngIf="editMode || currentPhotoInfo.arrows.rightToPhoto"
+          [ngClass]="{'faded-arrow-btn': editMode && !currentPhotoInfo.arrows.rightToPhoto}"
           color="primary"
           aria-label="Move right"
           title="Move right">
     <mat-icon>arrow_forward</mat-icon>
+  </button>
+</div>
+
+<div class="up-button">
+  <button mat-fab
+          (click)="arrowClicked('up')"
+          *ngIf="editMode || currentPhotoInfo.arrows.upToPhoto"
+          [ngClass]="{'faded-arrow-btn': editMode && !currentPhotoInfo.arrows.upToPhoto}"
+          color="primary"
+          aria-label="Move up"
+          title="Move up">
+    <mat-icon>arrow_upward</mat-icon>
+  </button>
+</div>
+
+<div class="down-button">
+  <button mat-fab
+          (click)="arrowClicked('down')"
+          *ngIf="editMode || currentPhotoInfo.arrows.downToPhoto"
+          [ngClass]="{'faded-arrow-btn': editMode && !currentPhotoInfo.arrows.downToPhoto}"
+          color="primary"
+          aria-label="Move down"
+          title="Move down">
+    <mat-icon>arrow_downward</mat-icon>
   </button>
 </div>
 

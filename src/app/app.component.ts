@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { PhotoInfo, Relic, ZoomArea, User, RelicAndSaints } from './types';
+import { PhotoInfo, Relic, ZoomArea, User, RelicAndSaints, PhotoArrows } from './types';
 import { CabinetSceneComponent } from './cabinet-scene/cabinet-scene.component';
 import { AngularFirestore, AngularFirestoreCollection, DocumentData, DocumentReference, QuerySnapshot } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
@@ -8,6 +8,8 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { auth } from 'firebase/app';
 import {FirebaseDataService} from './firebase-data.service';
 import {FirebaseAuthService} from './firebase-auth.service';
+import { ArrowDialogComponent } from './cabinet-scene/arrow-dialog/arrow-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-root',
@@ -37,17 +39,24 @@ export class AppComponent {
     relicsInPhoto: [],
     naturalImgWidth: 0, // will be replaced by load call of image
     naturalImgHeight: 0, // will be replaced by load call of image
+    arrows: {photoFilename: 'MNOPQ.jpeg'}, // will be replaced
   };
 
-  photos = new Map()
-    .set(this.leftRightList[this.leftRightIndex], Object.assign({}, this.currentPhotoInfo));
+  photos = new Map();
 
   constructor(private firebaseDataService: FirebaseDataService,
               public firebaseAuthService: FirebaseAuthService,
+              private dialog: MatDialog,
               private angularFireAuth: AngularFireAuth) {
     // Initialize Cloud Firestore through Firebase
     firebaseAuthService.getInitialUserData();
     firebaseDataService.getInitialServerData(() => {
+      const startingArrows = this.firebaseDataService.getPhotoArrows(this.currentPhotoInfo.photoFilename);
+      if (!startingArrows) {
+        alert('Arrow data not properly loaded!');
+      } else {
+        this.currentPhotoInfo.arrows = startingArrows;
+      }
       this.redrawCurrentScene();
     });
   }
@@ -60,30 +69,59 @@ export class AppComponent {
     this.firebaseAuthService.logout();
   }
 
-  moveLeftOrRight(direction: string): void {
+  arrowClicked(direction: string): void {
+    let newPhotoFilename: string|undefined;
     if (direction === 'left') {
-      this.leftRightIndex--;
+      newPhotoFilename = this.currentPhotoInfo.arrows.leftToPhoto;
+    } else if (direction === 'right') {
+      newPhotoFilename = this.currentPhotoInfo.arrows.rightToPhoto;
+    } else if (direction === 'up') {
+      newPhotoFilename = this.currentPhotoInfo.arrows.upToPhoto;
+    } else { // down
+      newPhotoFilename = this.currentPhotoInfo.arrows.downToPhoto;
+    }
+    if (!newPhotoFilename) {
+      if (this.editMode) {
+        this.openDialogForEditArrow(Object.assign({}, this.currentPhotoInfo.arrows))
+        .subscribe((result) => {
+          console.log('result', result);
+          if (result) {
+            // User pressed OK.
+            if (direction === 'left') {
+              this.currentPhotoInfo.arrows.leftToPhoto = result;
+            } else if (direction === 'right') {
+              this.currentPhotoInfo.arrows.rightToPhoto = result;
+            } else if (direction === 'up') {
+              this.currentPhotoInfo.arrows.upToPhoto = result;
+            } else { // down
+              this.currentPhotoInfo.arrows.downToPhoto = result;
+            }
+            this.firebaseDataService.addOrUpdatePhotoArrows(this.currentPhotoInfo.arrows);
+          }
+        });
+      } else {
+        alert('Photo does not exist for direction: ' + direction);
+      }
     } else {
-      this.leftRightIndex++;
+      this.changeCabinetScene(newPhotoFilename);
     }
-    if (this.leftRightIndex >= this.leftRightList.length) {
-      this.leftRightIndex = 0;
-    } else if (this.leftRightIndex < 0) {
-      this.leftRightIndex = this.leftRightList.length - 1;
-    }
-    this.changeCabinetScene(this.leftRightList[this.leftRightIndex]);
   }
 
   changeCabinetScene(photoToChangeTo: string): void {
     if (this.photos.has(photoToChangeTo)) {
       this.currentPhotoInfo = this.photos.get(photoToChangeTo);
     } else {
+      const emptyArrows = {
+        photoFilename: photoToChangeTo,
+      };
       this.currentPhotoInfo = {
         photoFilename: photoToChangeTo,
         photoImgPath: this.firebaseDataService.getPhotoForFilename(photoToChangeTo),
         relicsInPhoto: [],
         naturalImgWidth: 0, // will be replaced by load call of image
         naturalImgHeight: 0, // will be replaced by load call of image
+        arrows: this.firebaseDataService.getPhotoArrows(photoToChangeTo) ||
+                emptyArrows,
       };
       // Add new photo area to the set of photos.
       this.photos.set(photoToChangeTo, this.currentPhotoInfo);
@@ -152,6 +190,14 @@ export class AppComponent {
 
   toggleHideLabels(): void {
     this.hideLabels = !this.hideLabels;
+  }
+
+  openDialogForEditArrow(arrows: PhotoArrows): Observable<string> {
+    const dialogRef = this.dialog.open(ArrowDialogComponent, {
+      data: arrows,
+    });
+
+    return dialogRef.afterClosed();
   }
 
   setHelperText(newText?: string): void {
