@@ -71,6 +71,7 @@ export class AppComponent {
 
   arrowClicked(direction: string): void {
     let newPhotoFilename: string|undefined;
+    // Use existing arrow.
     if (direction === 'left') {
       newPhotoFilename = this.currentPhotoInfo.arrows.leftToPhoto;
     } else if (direction === 'right') {
@@ -81,6 +82,7 @@ export class AppComponent {
       newPhotoFilename = this.currentPhotoInfo.arrows.downToPhoto;
     }
     if (!newPhotoFilename) {
+      // Create new arrow.
       if (this.editMode) {
         this.openDialogForEditArrow(Object.assign({}, this.currentPhotoInfo.arrows))
         .subscribe((result) => {
@@ -96,13 +98,22 @@ export class AppComponent {
             } else { // down
               this.currentPhotoInfo.arrows.downToPhoto = result;
             }
-            this.firebaseDataService.addOrUpdatePhotoArrows(this.currentPhotoInfo.arrows);
+            const returnArrows = this.firebaseDataService
+              .updatePhotoArrowsBothDirections(
+                this.currentPhotoInfo.arrows, direction, result);
+            // Update local data for return arrow photoInfo if changed.
+            if (returnArrows && this.photos.has(returnArrows.photoFilename)) {
+              const thatPhotoInfo = this.photos.get(returnArrows.photoFilename);
+              thatPhotoInfo.arrows = returnArrows;
+              this.photos.set(returnArrows.photoFilename, thatPhotoInfo);
+            }
           }
         });
       } else {
         alert('Photo does not exist for direction: ' + direction);
       }
     } else {
+      // Go to new scene using existing arrow.
       this.changeCabinetScene(newPhotoFilename);
     }
   }

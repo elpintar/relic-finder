@@ -25,7 +25,7 @@ export interface ZoomArea {
 }
 
 export interface PhotoArrows {
-  firebaseDocId?: string; // doc in Firebase, same as photoFilename
+  firebaseDocId?: string; // doc in Firebase = photoFilename + '-arrows'
   photoFilename: string; // must match filenames in zoom area data
   leftToPhoto?: string; // must match filenames in zoom area data
   rightToPhoto?: string; // must match filenames in zoom area data

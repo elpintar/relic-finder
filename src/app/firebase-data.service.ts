@@ -233,28 +233,65 @@ export class FirebaseDataService {
     });
   }
 
+  // If updated reverse arrow, send back the reverse arrow data.
+  updatePhotoArrowsBothDirections(newArrows: PhotoArrows, direction: string, newPhoto: string): PhotoArrows|void {
+    // Assumes the newArrows has already been updated for one direction.
+    this.addOrUpdatePhotoArrows(newArrows);
+    // Add arrow in reverse direction.
+    const reverseDirection = this.getReverseDirection(direction);
+    let linkedPhotoArrows = this.getLocalArrowsWithPhotoFilename(newPhoto);
+    if (!linkedPhotoArrows) {
+      linkedPhotoArrows = {
+        photoFilename: newPhoto
+      } as PhotoArrows;
+    }
+    const reverseDirectionHasArrow = this.directionHasArrow(linkedPhotoArrows, reverseDirection);
+    let updateReverseArrow = true;
+    if (reverseDirectionHasArrow) {
+      updateReverseArrow = confirm('Overwrite arrow in reverse direction?');
+    }
+    if (updateReverseArrow) {
+      if (reverseDirection === 'left') {
+        linkedPhotoArrows.leftToPhoto = newArrows.photoFilename;
+      } else if (reverseDirection === 'right') {
+        linkedPhotoArrows.rightToPhoto = newArrows.photoFilename;
+      } else if (reverseDirection === 'up') {
+        linkedPhotoArrows.upToPhoto = newArrows.photoFilename;
+      } else if (reverseDirection === 'down') {
+        linkedPhotoArrows.downToPhoto = newArrows.photoFilename;
+      } else {
+        alert('Direction invalid for reverse arrow: ' + reverseDirection);
+      }
+      this.addOrUpdatePhotoArrows(linkedPhotoArrows);
+      return linkedPhotoArrows;
+    }
+  }
+
   addOrUpdatePhotoArrows(newArrows: PhotoArrows): void {
     const arrowsId = newArrows.firebaseDocId;
     if (!arrowsId) {
       // new arrows
-      newArrows.firebaseDocId = newArrows.photoFilename;
-      this.firestore.collection<PhotoArrows>('arrows').doc(arrowsId).set(newArrows)
+      newArrows.firebaseDocId = newArrows.photoFilename + '-arrows';
+      this.firestore.collection<PhotoArrows>('arrows')
+        .doc(newArrows.firebaseDocId)
+        .set(newArrows)
       .then(() => {
         console.log('successful write of new arrows doc - firebase id: ' + newArrows.firebaseDocId);
       })
       .catch((reason: string) => {
         console.error(reason);
-        alert('Reminder: your data is not being saved.');
+        alert('Error adding new arrow: ' + reason);
       }).finally(() => {
         console.log('successfully added arrows: ', newArrows);
       });
       // Update local data
       this.allArrowsLocal.push(newArrows);
     } else {
-      this.firestore.collection<PhotoArrows>('arrows').doc(newArrows.firebaseDocId)
+      // update existing arrow
+      this.firestore.collection<PhotoArrows>('arrows').doc(arrowsId)
       .update(newArrows)
       .then(() => {
-        console.log('Arrows updated:', newArrows.firebaseDocId, newArrows);
+        console.log('Arrows updated:', arrowsId, newArrows);
       })
       .catch((error) => {
         console.error('Error updating arrows document: ', error);
@@ -266,6 +303,40 @@ export class FirebaseDataService {
       } else {
         alert('No matching arrows found to update locally!');
       }
+    }
+  }
+
+  getReverseDirection(direction: string): string {
+    let reverseDirection = '';
+    if (direction === 'left') {
+      reverseDirection = 'right';
+    } else if (direction === 'right') {
+      reverseDirection = 'left';
+    } else if (direction === 'up') {
+      reverseDirection = 'down';
+    } else if (direction === 'down') {
+      reverseDirection = 'up';
+    }
+    if (reverseDirection === '') {
+      alert('Input direction invalid for reverseDirection: ' + direction);
+      console.error('Input direction invalid for reverseDirection: ', direction);
+    }
+    return reverseDirection;
+  }
+
+  directionHasArrow(arrows: PhotoArrows, direction: string): boolean {
+    if (direction === 'left') {
+      return !!arrows.leftToPhoto;
+    } else if (direction === 'right') {
+      return !!arrows.rightToPhoto;
+    } else if (direction === 'up') {
+      return !!arrows.upToPhoto;
+    } else if (direction === 'down') {
+      return !!arrows.downToPhoto;
+    } else {
+      alert('Invalid direction given to directionHasArrow: ' + direction);
+      console.error('Invalid direction given to directionHasArrow: ', direction);
+      return false;
     }
   }
 
@@ -290,6 +361,12 @@ export class FirebaseDataService {
   getLocalArrowsIndexWithId(arrowsId: string): number {
     return this.allArrowsLocal.findIndex(arrow => {
       return arrow.firebaseDocId === arrowsId;
+    });
+  }
+
+  getLocalArrowsWithPhotoFilename(filename: string): PhotoArrows|undefined {
+    return this.allArrowsLocal.find(arrow => {
+      return arrow.photoFilename === filename;
     });
   }
 
