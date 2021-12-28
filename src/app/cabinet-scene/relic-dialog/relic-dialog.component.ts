@@ -4,6 +4,7 @@ import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { MatRadioChange, _MatRadioButtonBase } from '@angular/material/radio';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
+import { FirebaseAuthService } from 'src/app/firebase-auth.service';
 import { FirebaseDataService } from 'src/app/firebase-data.service';
 import { Relic, ZoomArea, CanonizationStatus, Saint, RelicAndSaints } from 'src/app/types';
 
@@ -26,7 +27,8 @@ export class RelicDialogComponent {
   constructor(
       public dialogRef: MatDialogRef<RelicDialogComponent>,
       @Inject(MAT_DIALOG_DATA) public dataInput: [RelicAndSaints, boolean],
-      private firebaseDataService: FirebaseDataService) {
+      private firebaseDataService: FirebaseDataService,
+      private firebaseAuthService: FirebaseAuthService) {
     dialogRef.disableClose = true;
     const relicAndSaintsInput = this.dataInput;
     this.relic = relicAndSaintsInput[0][0];
@@ -145,7 +147,14 @@ export class RelicDialogComponent {
   }
 
   addSaint(): void {
-    const emptySaint = {name: '', canonizationStatus: CanonizationStatus.Unknown};
+    const currentUser = this.firebaseAuthService.getUserName() || 'Anonymous';
+    const msSince1970 = new Date().getTime();
+    const emptySaint = {
+      name: '', 
+      canonizationStatus: CanonizationStatus.Unknown,
+      editors: [currentUser],
+      timesUpdated: [msSince1970],
+    };
     if (this.saints) {
       this.saints.push(emptySaint);
     } else {

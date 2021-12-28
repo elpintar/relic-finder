@@ -230,6 +230,18 @@
       Saint Firebase Id (blank if new):<br>{{saint.firebaseDocId}}
     </div>
 
+    <div>
+      Creator of this saint's information:<br>
+      {{saint.editors[0]}}
+    </div>
+    <br>
+  
+    <div *ngIf="saint.editors.length > 1">
+      Other contributors:<br>
+      {{saint.editors.slice(1).join(", ")}}
+    </div>
+    <br>
+
     <br>
 
     <div *ngIf="saints.length > 1">
@@ -291,13 +303,13 @@
 
   <div>
     Creator of this relic's information:<br>
-    {{relic.creator}}
+    {{relic.editors[0]}}
   </div>
   <br>
 
-  <div *ngIf="relic.editors.length > 0">
+  <div *ngIf="relic.editors.length > 1">
     Other contributors to this relic:<br>
-    {{relic.editors ? relic.editors.join(", "): ""}}
+    {{relic.editors.slice(1).join(", ")}}
   </div>
   <br>
 

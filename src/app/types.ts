@@ -43,8 +43,10 @@ export interface Relic {
   otherInfo?: string;
   docNumber?: number; // from "Doc. No." column
   numNamesInDoc?: number; // from column next to "Doc. No."
-  creator?: string; // name of user who created relic
-  editors: string[]; // name of users who edited
+  creator?: string; // DEPRECATED - name of first user who created relic
+  editors: string[]; // name of users who created/edited in order
+  timesUpdated: number[]; // Date.getTime() values; maps 1-to-1 with editors
+                          // 0 means we don't know when updated
 }
 
 export interface Saint {
@@ -67,6 +69,9 @@ export interface Saint {
   shortBio?: string;
   linkTexts?: string[];
   linkUrls?: string[];
+  editors: string[]; // name of users who edited
+  timesUpdated: number[]; // Date.getTime() values; maps 1-to-1 with editors
+                          // 0 means we don't know when updated
 }
 
 export interface User {

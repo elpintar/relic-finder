@@ -11,7 +11,7 @@ import { takeUntil } from 'rxjs/operators';
 import { FirebaseDataService } from '../firebase-data.service';
 import {FirebaseAuthService} from '../firebase-auth.service';
 import { AngularFireAuth } from '@angular/fire/auth';
-import {relicAndSaintsEqual} from '../helperFuncs';
+import {relicAndSaintsEqual, relicsEqual, saintsEqual} from '../helperFuncs';
 
 @Component({
   selector: 'app-cabinet-scene',
@@ -224,17 +224,21 @@ export class CabinetSceneComponent implements OnInit {
     if (!this.firebaseAuthService.user) {
       console.error('No user information when creating a relic!');
     }
+    const currentUser = this.firebaseAuthService.getUserName() || 'Anonymous';
+    const msSince1970 = new Date().getTime();
     const relic: Relic = {
       inPhoto: this.photoInfo.photoFilename,
       photoNaturalCoords: naturalCoords,
       saintFirebaseDocIds: [''],
-      creator: this.firebaseAuthService.getUserName(),
-      editors: [],
+      editors: [currentUser],
+      timesUpdated: [msSince1970],
     };
     const saints: Saint[] = [{
       name: '',
       canonizationStatus: CanonizationStatus.Saint,
       firebaseDocId: '',
+      editors: [currentUser],
+      timesUpdated: [msSince1970],
     }];
     this.openDialogForRelic([relic, saints]).subscribe((returnedRelicAndSaints: [Relic, Saint[]]) => {
       console.log('result', returnedRelicAndSaints);
@@ -315,16 +319,28 @@ export class CabinetSceneComponent implements OnInit {
               return; // no need to update if equal.
             }
             else {
-              // If relic is different, add user as an editor.
-              const userName = this.firebaseAuthService.getUserName();
-              if (userName) {
+              const userName = this.firebaseAuthService.getUserName() || 'Anonymous';
+              const msSince1970 = new Date().getTime();
+              // If relic is different, add user as an editor & time updated.
+              if (!relicsEqual(relicAndSaintsOriginal[0], returnedRelicAndSaints[0])) {
                 const relic = returnedRelicAndSaints[0];
-                const nameInEditors = relic.editors.indexOf(userName) >= 0;
-                if (!nameInEditors) {
-                  relic.editors.push(userName);
-                  returnedRelicAndSaints[0] = relic;
-                }
+                relic.editors.push(userName);
+                relic.timesUpdated.push(msSince1970);
+                returnedRelicAndSaints[0] = relic;
+                console.info('Relic updated by user', relic, userName);
               }
+              const oldSaints = relicAndSaintsOriginal[1];
+              const newSaints = returnedRelicAndSaints[1];
+              newSaints.forEach((newS, i) => {
+                // For each saint changed, mark down username and time updated.
+                if (!saintsEqual(oldSaints[i], newS)) {
+                  const s = newS;
+                  s.editors.push(userName);
+                  s.timesUpdated.push(msSince1970);
+                  returnedRelicAndSaints[1][i] = s;
+                  console.info('Saint updated by user', s, userName);
+                }
+              });
               // Commit the change.
               this.addOrUpdateRelicDot.emit(returnedRelicAndSaints);
             }

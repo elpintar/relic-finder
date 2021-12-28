@@ -1,4 +1,4 @@
-import {RelicAndSaints} from './types';
+import {Relic, RelicAndSaints, Saint} from './types';
 
 function deepEquals(x: any, y: any) {
   if (x === y) {
@@ -34,6 +34,14 @@ function deepEquals(x: any, y: any) {
     }
     return true;
   }
+}
+
+export function relicsEqual(r1: Relic, r2: Relic) {
+  return deepEquals(r1, r2);
+}
+
+export function saintsEqual(s1: Saint, s2: Saint) {
+  return deepEquals(s1, s2);
 }
 
 export function relicAndSaintsEqual(rs1: RelicAndSaints, rs2: RelicAndSaints) {
