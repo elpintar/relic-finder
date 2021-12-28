@@ -225,20 +225,25 @@
     <button mat-raised-button
             *ngIf="saint.linkUrls && saint.linkUrls!.length >= 1"
             (click)="removeLink(saint)">- link</button>
+    <br>
 
     <div>
       Saint Firebase Id (blank if new):<br>{{saint.firebaseDocId}}
     </div>
+    <br>
 
     <div>
       Creator of this saint's information:<br>
-      {{saint.editors[0]}}
+      {{saint.editors[0]}} ({{msToDate(saint.timesUpdated[0])}})
     </div>
     <br>
   
     <div *ngIf="saint.editors.length > 1">
       Other contributors:<br>
-      {{saint.editors.slice(1).join(", ")}}
+      <span *ngFor="let e of saint.editors.slice(1); index as i; trackBy: trackByFn">
+        {{e}} ({{msToDate(saint.timesUpdated[i+1])}})
+        <br>
+      </span>
     </div>
     <br>
 
@@ -274,6 +279,7 @@
   <button mat-raised-button
           *ngIf="relic.relicMaterials && relic.relicMaterials!.length >= 1"
           (click)="removeRelicMaterial()">- material</button>
+  <br>
 
   <mat-form-field>
     <mat-label>Chapel Location (like "V 31", "P 6 A 5 H")</mat-label>
@@ -303,15 +309,17 @@
 
   <div>
     Creator of this relic's information:<br>
-    {{relic.editors[0]}}
+    {{relic.editors[0]}} ({{msToDate(relic.timesUpdated[0])}})
   </div>
   <br>
 
   <div *ngIf="relic.editors.length > 1">
-    Other contributors to this relic:<br>
-    {{relic.editors.slice(1).join(", ")}}
+    Other contributors:<br>
+    <span *ngFor="let e of relic.editors.slice(1); index as i; trackBy: trackByFn">
+      {{e}} ({{msToDate(relic.timesUpdated[i+1])}})
+      <br>
+    </span>
   </div>
-  <br>
 
   <mat-form-field>
     <mat-label>Photo URL</mat-label>

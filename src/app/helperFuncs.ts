@@ -55,3 +55,14 @@ export function relicAndSaintsEqual(rs1: RelicAndSaints, rs2: RelicAndSaints) {
   });
   return deepEquals(r1, r2) && allSaintsEqual;
 }
+
+/** Turn milliseconds since 1970 to a human-readable datetime string. */
+export function msToDate(ms: number): string {
+  if (ms === 0) {
+    return "sometime in 2021";
+  }
+  const d = new Date(ms);
+  let datetimeString = d.toLocaleDateString();
+  datetimeString = datetimeString + ' ' + d.toLocaleTimeString();
+  return datetimeString;
+}

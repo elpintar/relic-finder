@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { FirebaseAuthService } from 'src/app/firebase-auth.service';
 import { FirebaseDataService } from 'src/app/firebase-data.service';
+import { msToDate } from 'src/app/helperFuncs';
 import { Relic, ZoomArea, CanonizationStatus, Saint, RelicAndSaints } from 'src/app/types';
 
 @Component({
@@ -41,6 +42,10 @@ export class RelicDialogComponent {
         startWith(''),
         map(this.filterSaintsMatchingSearch, this)
       );
+  }
+
+  msToDate(ms: number): string {
+    return msToDate(ms);
   }
 
   filterSaintsMatchingSearch(searchValue: string): Saint[] {
