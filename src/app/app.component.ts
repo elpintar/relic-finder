@@ -240,7 +240,9 @@ export class AppComponent {
   }
 
   private openInfoDialog(): Observable<void> {
-    const dialogRef = this.dialog.open(InfoDialogComponent, {});
+    const dialogRef = this.dialog.open(InfoDialogComponent, {
+      panelClass: 'info-dialog-panel'
+    });
     return dialogRef.afterClosed();
   }
 }

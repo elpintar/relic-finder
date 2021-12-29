@@ -21,12 +21,16 @@ type ScoreboardInfoKey = 'relicsCreated'|'relicsUpdated'|
 export class InfoDialogComponent {
 
   displayList: [string, UserScoreboardInfo][] = [];
+  relicsLabeled = 0;
+  saintsAdded = 0;
 
   constructor(
     public dialogRef: MatDialogRef<InfoDialogComponent>,
     private firebaseDataService: FirebaseDataService,
   ) {
     this.calculateScoreboard();
+    this.relicsLabeled = this.firebaseDataService.allRelicsLocal.length;
+    this.saintsAdded = this.firebaseDataService.allSaintsLocal.length;
   }
 
   calculateScoreboard() {
