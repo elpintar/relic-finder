@@ -125,7 +125,7 @@
   <span class="bottom-text">{{helperText}}</span>
 </div>
 
-<div class="bottom-right-buttons">
+<div class="bottom-left-buttons">
   <button mat-fab
           (click)="toggleHideLabels()"
           color="primary"
@@ -133,5 +133,15 @@
           [title]="(hideLabels) ? 'Show labels' : 'Hide labels'">
     <mat-icon *ngIf="hideLabels">explore</mat-icon>
     <mat-icon *ngIf="!hideLabels">explore_off</mat-icon>
+  </button>
+</div>
+
+<div class="bottom-right-buttons">
+  <button mat-fab
+          (click)="showInfo()"
+          color="primary"
+          aria-label="Show info screen"
+          title="Show info screen">
+    <mat-icon>info</mat-icon>
   </button>
 </div>

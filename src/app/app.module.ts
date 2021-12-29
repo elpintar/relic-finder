@@ -25,6 +25,7 @@ import { ZoomAreaDialogComponent } from './cabinet-scene/zoom-area-dialog/zoom-a
 import { RelicDotComponent } from './cabinet-scene/relic-dot/relic-dot.component';
 import { RelicDialogComponent } from './cabinet-scene/relic-dialog/relic-dialog.component';
 import { ArrowDialogComponent } from './cabinet-scene/arrow-dialog/arrow-dialog.component';
+import { InfoDialogComponent } from './info-dialog/info-dialog.component';
 
 @NgModule({
   declarations: [
@@ -35,6 +36,7 @@ import { ArrowDialogComponent } from './cabinet-scene/arrow-dialog/arrow-dialog.
     RelicDotComponent,
     RelicDialogComponent,
     ArrowDialogComponent,
+    InfoDialogComponent,
   ],
   imports: [
     BrowserModule,

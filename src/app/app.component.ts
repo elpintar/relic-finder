@@ -10,6 +10,7 @@ import {FirebaseDataService} from './firebase-data.service';
 import {FirebaseAuthService} from './firebase-auth.service';
 import { ArrowDialogComponent } from './cabinet-scene/arrow-dialog/arrow-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { InfoDialogComponent } from './info-dialog/info-dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -141,8 +142,7 @@ export class AppComponent {
 
     console.log('changed cabinet scene to ', photoToChangeTo);
     console.log('currentCabinetScene', this.currentPhotoInfo,
-    'photos', this.photos,
-    'relics', this.firebaseDataService.allRelicsLocal);
+    'photos', this.photos);
   }
 
   redrawCurrentScene(): void {
@@ -231,5 +231,16 @@ export class AppComponent {
       this.movingRelicOrZA = 'whichRelicOrZA';
       this.helperText = 'Click relic or zoom area to move';
     }
+  }
+
+  showInfo() {
+    this.openInfoDialog().subscribe(() => {
+      console.log('closed dialog');
+    });
+  }
+
+  private openInfoDialog(): Observable<void> {
+    const dialogRef = this.dialog.open(InfoDialogComponent, {});
+    return dialogRef.afterClosed();
   }
 }

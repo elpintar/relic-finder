@@ -1,0 +1,31 @@
+<h1>About Relic Finder</h1>
+
+<p>Project Lead: Erik Pintar</p>
+<p>Chapel Chairperson: Carole Brueckner</p>
+<p>Clergy Supporters: Fr. Nick Vaskov, Fr. Jim Orr</p>
+<p>Founder, Designer, and Builder of St. Anthony Chapel: Fr. Suitbert G. Mollinger</p>
+
+<h2>Contributors to Data Entry</h2>
+
+<table>
+  <thead>
+    <th>Name</th>
+    <th>Relics Created</th>
+    <th>Relics Edited</th>
+    <th>Saints Created</th>
+    <th>Saints Edited</th>
+  </thead>
+  <ng-container *ngFor="let row of displayList">
+    <tr>
+      <td>{{row[0]}}</td>
+      <td>{{row[1].relicsCreated}}</td>
+      <td>{{row[1].relicsUpdated}}</td>
+      <td>{{row[1].saintsCreated}}</td>
+      <td>{{row[1].saintsUpdated}}</td>
+    </tr>
+  </ng-container>
+</table>
+
+<div mat-dialog-actions>
+  <button mat-button (click)="onCloseClick()" cdkFocusInitial>OK</button>
+</div>
