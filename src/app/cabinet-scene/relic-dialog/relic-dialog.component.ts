@@ -113,6 +113,20 @@ export class RelicDialogComponent {
     }
   }
 
+  addPatronage(saint: Saint): void {
+    if (saint.patronages) {
+      saint.patronages?.push('');
+    } else {
+      saint.patronages = [''];
+    }
+  }
+
+  removePatronage(saint: Saint): void {
+    if (saint.patronages && saint.patronages.length >= 1) {
+      saint.patronages.pop();
+    }
+  }
+
   addLink(saint: Saint): void {
     if (saint.linkUrls && saint.linkTexts) {
       saint.linkUrls.push('');

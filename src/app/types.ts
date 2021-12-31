@@ -66,6 +66,7 @@ export interface Saint {
   deathDate?: string;
   vocations?: string[];
   religiousOrder?: string;
+  patronages?: string[]; // patron saint of [fishermen, cancer patients, etc.]
   shortBio?: string;
   linkTexts?: string[];
   linkUrls?: string[];
