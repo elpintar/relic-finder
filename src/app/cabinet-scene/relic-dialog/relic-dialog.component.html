@@ -189,7 +189,7 @@
     <button mat-raised-button
             *ngIf="saint.vocations && saint.vocations!.length >= 1"
             (click)="removeVocation(saint)">- vocation</button>
-    <br>
+    <br><br>
 
     <mat-form-field>
       <mat-label>Birth date (MM-DD-YYYY, YYYY if date unknown)</mat-label>
@@ -223,7 +223,7 @@
     <button mat-raised-button
             *ngIf="saint.patronages && saint.patronages!.length >= 1"
             (click)="removePatronage(saint)">- patronage</button>
-    <br>
+    <br><br>
 
     <mat-form-field>
       <mat-label>Short Biography (1-2 sentences, no repeat of above info)</mat-label>
@@ -247,7 +247,7 @@
     <button mat-raised-button
             *ngIf="saint.linkUrls && saint.linkUrls!.length >= 1"
             (click)="removeLink(saint)">- link</button>
-    <br>
+    <br><br>
 
     <div>
       Saint Firebase Id (blank if new):<br>{{saint.firebaseDocId}}

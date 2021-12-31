@@ -42,7 +42,7 @@ export class RelicDotComponent {
       if (saints[0].commonName) {
         return this.getCommonName(saints[0]);
       } else {
-        return saints[0].name;
+        return saints[0].canonizationStatus + ' ' + saints[0].name;
       }
     } else {
       return '?';
