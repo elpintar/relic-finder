@@ -147,6 +147,18 @@ export class AppComponent {
 
   redrawCurrentScene(): void {
     this.sendRedrawInfo(this.currentPhotoInfo.photoFilename);
+
+    if (this.editMode) {
+      // Show chapel location & photo file name.
+      const photoName = this.currentPhotoInfo.photoFilename;
+      const jpgIndex = photoName.indexOf(".jp");
+      let shortPhotoName = photoName.slice(0, jpgIndex);
+      const slashIndex = shortPhotoName.indexOf('%2F');
+      if (slashIndex >= 0) {
+        shortPhotoName = shortPhotoName.substring(slashIndex + 3);
+      }
+      this.setHelperText(shortPhotoName + "  " + photoName);
+    }
   }
 
   sendRedrawInfo(photoToChangeTo: string): void {
@@ -193,6 +205,7 @@ export class AppComponent {
               this.firebaseAuthService.user.uid : 'no id found'));
     }
     this.editMode = !this.editMode;
+    this.setHelperText('');
   }
 
   toggleAddRelicMode(): void {
