@@ -4,5 +4,5 @@
                  'left.px': offsetX,
                  'top.px': offsetY}"
      (click)="sendZoomInSignal()">
-     <span class="relic-count">{{relicCount}}</span>
+     <span *ngIf="relicCount > 0" class="relic-count">{{relicCount}}</span>
 </div>

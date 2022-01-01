@@ -103,7 +103,10 @@ export class CabinetSceneComponent implements OnInit {
       this.putRelicInScene([relic, saints]);
     });
     zoomAreasInScene.forEach((zoomArea) => {
-      const relicCount = zoomAreaRelicCounts.get(zoomArea.zoomToPhotoFilename);
+      let relicCount = 0; // hidden if 0
+      if (this.editMode) {
+        relicCount = zoomAreaRelicCounts.get(zoomArea.zoomToPhotoFilename) || 0;
+      }
       this.putZoomAreaInScene(zoomArea, relicCount);
     });
   }
