@@ -86,7 +86,8 @@ export class CabinetSceneComponent implements OnInit {
     this.sceneImgChanged.emit();
   }
 
-  redrawScene(relicsInScene: Relic[], zoomAreasInScene: ZoomArea[]): void {
+  redrawScene(relicsInScene: Relic[], zoomAreasInScene: ZoomArea[],
+              zoomAreaRelicCounts: Map<string, number>): void {
     // Signal to destroy subscribers.
     this.sceneRedrawn.next();
     // Destroy dead components / html elements.
@@ -102,7 +103,8 @@ export class CabinetSceneComponent implements OnInit {
       this.putRelicInScene([relic, saints]);
     });
     zoomAreasInScene.forEach((zoomArea) => {
-      this.putZoomAreaInScene(zoomArea);
+      const relicCount = zoomAreaRelicCounts.get(zoomArea.zoomToPhotoFilename);
+      this.putZoomAreaInScene(zoomArea, relicCount);
     });
   }
 
@@ -272,7 +274,7 @@ export class CabinetSceneComponent implements OnInit {
       if (result) {
         // User pressed OK.
         zoomAreaInfo.zoomToPhotoFilename = result;
-        this.putZoomAreaInScene(zoomAreaInfo, true);
+        this.putZoomAreaInScene(zoomAreaInfo, 0, true);
       }
     });
   }
@@ -361,7 +363,7 @@ export class CabinetSceneComponent implements OnInit {
     }
   }
 
-  putZoomAreaInScene(zoomAreaInfo: ZoomArea, isNewZoomArea = false): void {
+  putZoomAreaInScene(zoomAreaInfo: ZoomArea, relicCount = 0, isNewZoomArea = false): void {
     if (!this.zoomAreasContainer) {
       throw new Error('No #zoomAreasContainer found in view');
     }
@@ -369,6 +371,7 @@ export class CabinetSceneComponent implements OnInit {
     const componentRef = this.zoomAreasContainer.createComponent(factory);
     this.zoomAreaComponentsToDestroy.push(componentRef);
     componentRef.instance.zoomAreaInfo = zoomAreaInfo;
+    componentRef.instance.relicCount = relicCount;
     if (!this.img) {
       throw new Error('No image data loaded in makeNewZoomArea subscription');
     }

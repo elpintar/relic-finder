@@ -29,9 +29,7 @@ export class AppComponent {
   helperText = '';
 
   zoomedList: string[] = [];
-  leftRightList: string[] = ['MNOPQ.jpeg', 'GHJKL.jpeg', 'ABCDEF.jpeg',
-                             'WXYZZaZb.jpeg', 'RSTUV.jpeg'];
-  leftRightIndex = 0;
+  zoomAreaRelicCounts: Map<string, number>;
 
   currentPhotoInfo: PhotoInfo = {
     photoFilename: 'MNOPQ.jpeg',
@@ -49,6 +47,7 @@ export class AppComponent {
               public firebaseAuthService: FirebaseAuthService,
               private dialog: MatDialog,
               private angularFireAuth: AngularFireAuth) {
+    this.zoomAreaRelicCounts = new Map();
     // Initialize Cloud Firestore through Firebase
     firebaseAuthService.getInitialUserData();
     firebaseDataService.getInitialServerData(() => {
@@ -169,7 +168,8 @@ export class AppComponent {
       r => r.inPhoto === photoToChangeTo);
     const zasInPhoto = this.firebaseDataService.allZoomAreasLocal.filter(
       za => za.zoomFromPhotoFilename === photoToChangeTo);
-    this.cabinetSceneComponent.redrawScene(relicsInPhoto, zasInPhoto);
+    this.getRelicCounts(photoToChangeTo);
+    this.cabinetSceneComponent.redrawScene(relicsInPhoto, zasInPhoto, this.zoomAreaRelicCounts);
   }
 
   zoomIn(photoToChangeTo: string): void {
@@ -257,5 +257,36 @@ export class AppComponent {
       panelClass: 'info-dialog-panel'
     });
     return dialogRef.afterClosed();
+  }
+
+  recursivelyGetRelicCounts(startingPhoto: string): number {
+    const existingCount = this.zoomAreaRelicCounts.get(startingPhoto);
+    if (existingCount) {
+      // This will only update these counts once per page refresh, which is ok.
+      return existingCount;
+    }
+
+    let relicCount = 0;
+
+    // Get count of relics in this view.
+    const relicsInPhoto = this.firebaseDataService.allRelicsLocal.filter(
+      r => r.inPhoto === startingPhoto);
+    relicCount += relicsInPhoto.length;
+
+    // Recursively get counts for each photo you can zoom to from here.
+    const zasInPhoto = this.firebaseDataService.allZoomAreasLocal.filter(
+      za => za.zoomFromPhotoFilename === startingPhoto);
+    zasInPhoto.forEach((za) => {
+      relicCount += this.recursivelyGetRelicCounts(za.zoomToPhotoFilename);
+    });
+
+    // Update data structure.
+    this.zoomAreaRelicCounts.set(startingPhoto, relicCount);
+
+    return relicCount;
+  }
+
+  getRelicCounts(startingPhoto: string): void {
+    this.recursivelyGetRelicCounts(startingPhoto);
   }
 }
