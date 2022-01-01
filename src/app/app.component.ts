@@ -168,7 +168,9 @@ export class AppComponent {
       r => r.inPhoto === photoToChangeTo);
     const zasInPhoto = this.firebaseDataService.allZoomAreasLocal.filter(
       za => za.zoomFromPhotoFilename === photoToChangeTo);
-    this.getRelicCounts(photoToChangeTo);
+    if (this.editMode) {
+      this.getRelicCounts(photoToChangeTo);
+    }
     this.cabinetSceneComponent.redrawScene(relicsInPhoto, zasInPhoto, this.zoomAreaRelicCounts);
   }
 
@@ -205,7 +207,15 @@ export class AppComponent {
               this.firebaseAuthService.user.uid : 'no id found'));
     }
     this.editMode = !this.editMode;
+    // Without this, editMode won't be updated in cabinet scene in time to
+    // draw the relic counts properly.
+    if (this.cabinetSceneComponent) {
+      this.cabinetSceneComponent.editMode = this.editMode;
+    }
     this.setHelperText('');
+    // Redraw current scene to add / get rid of edit mode specific things,
+    // like relic counts.
+    this.redrawCurrentScene();
   }
 
   toggleAddRelicMode(): void {

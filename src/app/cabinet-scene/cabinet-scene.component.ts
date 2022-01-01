@@ -374,7 +374,9 @@ export class CabinetSceneComponent implements OnInit {
     const componentRef = this.zoomAreasContainer.createComponent(factory);
     this.zoomAreaComponentsToDestroy.push(componentRef);
     componentRef.instance.zoomAreaInfo = zoomAreaInfo;
-    componentRef.instance.relicCount = relicCount;
+    if (this.editMode) {
+      componentRef.instance.relicCount = relicCount;
+    }
     if (!this.img) {
       throw new Error('No image data loaded in makeNewZoomArea subscription');
     }

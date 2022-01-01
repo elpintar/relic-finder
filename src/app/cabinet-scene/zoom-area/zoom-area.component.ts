@@ -16,7 +16,7 @@ export class ZoomAreaComponent implements OnInit {
   height = 0;
   offsetX = 0;
   offsetY = 0;
-  relicCount = 0;
+  relicCount: number|undefined;
 
   constructor() {
   }
