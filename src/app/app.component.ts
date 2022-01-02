@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { PhotoInfo, Relic, ZoomArea, User, RelicAndSaints, PhotoArrows } from './types';
+import { PhotoInfo, Relic, ZoomArea, User, RelicAndSaints, PhotoArrows, SpreadsheetRow } from './types';
 import { CabinetSceneComponent } from './cabinet-scene/cabinet-scene.component';
 import { AngularFirestore, AngularFirestoreCollection, DocumentData, DocumentReference, QuerySnapshot } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
@@ -29,6 +29,7 @@ export class AppComponent {
   hideLabels = false;
   movingRelicOrZA = '';
   autofillingRelics = '';
+  autofillRow?: SpreadsheetRow;
   helperText = '';
 
   zoomedList: string[] = [];
@@ -203,6 +204,7 @@ export class AppComponent {
   // WRITE new relic.
   addOrUpdateRelicDot(relicAndSaints: RelicAndSaints): void {
     this.firebaseDataService.addOrUpdateRelicAndSaints(relicAndSaints);
+    this.clearAutofill();
   }
 
   toggleEditMode(): void {
@@ -265,17 +267,25 @@ export class AppComponent {
 
   autofillRelicsToggle(): void {
     if (this.autofillingRelics) {
-      this.autofillingRelics = '';
+      this.clearAutofill();
     } else {
-      this.openAutofillRelicsDialog().subscribe((result: string) => {
-        if (result) {
+      this.openAutofillRelicsDialog().subscribe((rowToPlace: SpreadsheetRow) => {
+        if (rowToPlace) {
           this.autofillingRelics = 'whereRelicForLocation';
-          console.log(result);
+          this.autofillRow = rowToPlace;
+          this.setHelperText('Click where relic should go.');
+          this.addRelicMode = true;
         } else {
-          this.autofillingRelics = '';
+          this.clearAutofill();
         }
       });
     }
+  }
+
+  private clearAutofill(): void {
+    this.autofillingRelics = '';
+    this.autofillRow = undefined;
+    this.setHelperText();
   }
 
   private openAutofillRelicsDialog() {

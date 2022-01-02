@@ -1,4 +1,4 @@
-import {Relic, RelicAndSaints, Saint} from './types';
+import {Relic, RelicAndSaints, Saint, SpreadsheetRow} from './types';
 
 function deepEquals(x: any, y: any) {
   if (x === y) {
@@ -65,4 +65,21 @@ export function msToDate(ms: number): string {
   let datetimeString = d.toLocaleDateString();
   datetimeString = datetimeString + ' ' + d.toLocaleTimeString();
   return datetimeString;
+}
+
+export function locsToString(row: SpreadsheetRow): string {
+  let result = '' + row.loc1;
+  if (row.loc2) {
+    result += ' ' + row.loc2;
+    if (row.loc3) {
+      result += ' ' + row.loc3;
+      if (row.loc4) {
+        result += ' ' + row.loc4;
+        if (row.loc5) {
+          result += ' ' + row.loc5;
+        }
+      }
+    }
+  }
+  return result;
 }

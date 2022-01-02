@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter, ElementRef, ViewChild, ViewContainerRef, ComponentFactoryResolver, ComponentRef, HostListener } from '@angular/core';
-import {PhotoInfo, ZoomArea, Relic, CanonizationStatus, Saint, RelicAndSaints} from '../types';
+import {PhotoInfo, ZoomArea, Relic, CanonizationStatus, Saint, RelicAndSaints, SpreadsheetRow} from '../types';
 import { ZoomAreaComponent } from './zoom-area/zoom-area.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ZoomAreaDialogComponent } from './zoom-area-dialog/zoom-area-dialog.component';
@@ -11,7 +11,8 @@ import { takeUntil } from 'rxjs/operators';
 import { FirebaseDataService } from '../firebase-data.service';
 import {FirebaseAuthService} from '../firebase-auth.service';
 import { AngularFireAuth } from '@angular/fire/auth';
-import {relicAndSaintsEqual, relicsEqual, saintsEqual} from '../helperFuncs';
+import {relicAndSaintsEqual, relicsEqual, saintsEqual, locsToString} from '../helperFuncs';
+import { AutofillRelicsDialogComponent } from '../autofill-relics-dialog/autofill-relics-dialog.component';
 
 @Component({
   selector: 'app-cabinet-scene',
@@ -24,6 +25,7 @@ export class CabinetSceneComponent implements OnInit {
   @Input() addRelicMode = false;
   @Input() hideLabels = false;
   @Input() movingRelicOrZA = '';
+  @Input() autofillRow?:SpreadsheetRow;
 
   @Output() zoomIn = new EventEmitter<string>();
   @Output() addZoomArea = new EventEmitter<ZoomArea>();
@@ -133,8 +135,6 @@ export class CabinetSceneComponent implements OnInit {
       } else {
         this.updateZoomAreaCoords([event.offsetX, event.offsetY]);
       }
-    } else {
-      // TODO - view mode
     }
   }
 
@@ -231,20 +231,27 @@ export class CabinetSceneComponent implements OnInit {
     }
     const currentUser = this.firebaseAuthService.getUserName() || 'Anonymous';
     const msSince1970 = new Date().getTime();
-    const relic: Relic = {
+    let relic: Relic = {
       inPhoto: this.photoInfo.photoFilename,
       photoNaturalCoords: naturalCoords,
       saintFirebaseDocIds: [''],
       editors: [currentUser],
       timesUpdated: [msSince1970],
     };
-    const saints: Saint[] = [{
+    let saints: Saint[] = [{
       name: '',
       canonizationStatus: CanonizationStatus.Saint,
       firebaseDocId: '',
       editors: [currentUser],
       timesUpdated: [msSince1970],
     }];
+    // If we have autofill information, use it!
+    if (this.autofillRow) {
+      const autofilled = this.autofillInfo(relic, saints);
+      relic = autofilled[0];
+      saints = autofilled[1];
+      alert('With autofill: a reminder to search if this saint already exists.');
+    }
     this.openDialogForRelic([relic, saints]).subscribe((returnedRelicAndSaints: [Relic, Saint[]]) => {
       console.log('result', returnedRelicAndSaints);
       if (returnedRelicAndSaints) {
@@ -252,6 +259,38 @@ export class CabinetSceneComponent implements OnInit {
         this.putRelicInScene(returnedRelicAndSaints, true);
       }
     });
+  }
+
+  autofillInfo(r: Relic, saints: Saint[]): RelicAndSaints {
+    if (this.autofillRow) {
+      const s = saints[0];
+      const i = this.autofillRow;
+      if (i.name) {
+        s.name = i.name;
+      }
+      if (i.vocations) {
+        s.vocations = [i.vocations];
+      }
+      if (i.feastDayAndMonth) {
+        s.feastDayAndMonth = i.feastDayAndMonth;
+      }
+      if (i.loc1) {
+        r.chapelLocation = locsToString(i);
+      }
+      if (i.otherInfo) {
+        r.otherInfo = i.otherInfo;
+      }
+      if (i.relicMaterials) {
+        r.relicMaterials = [i.relicMaterials];
+      }
+      if (i.page) {
+        r.bookPage = parseInt(i.page);
+      }
+      if (i.line) {
+        r.bookLine = parseInt(i.line);
+      }
+    }
+    return [r, saints];
   }
 
   makeNewZoomAreaFromCoords(topLeft: number[], bottomRight: number[]): void {

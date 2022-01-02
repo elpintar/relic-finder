@@ -41,6 +41,8 @@ export interface Relic {
   relicMaterials?: string[];
   chapelLocation?: string;
   otherInfo?: string;
+  bookPage?: number; // what page in the Saints & Blesseds book
+  bookLine?: number; // what line on Saints & Blesseds book page
   docNumber?: number; // from "Doc. No." column
   numNamesInDoc?: number; // from column next to "Doc. No."
   creator?: string; // DEPRECATED - name of first user who created relic

@@ -14,8 +14,23 @@
           (click)="lookupRelicLocation(chapelLocation)">Look up</button>
   
   <pre>{{lookupResultStr}}</pre>
+
+  <div *ngIf="lookupResult">
+    When you place this relic:
+    <ol>
+      <li>SEARCH if {{lookupResult.name}} already exists,<br>
+        and if so, use existing saint info<br>
+        (but add info from this one to that one if this has new information)</li>
+      <li>EDIT the fields if they don't look right</li>
+      <li>ADD new fields (through internet searches on the saint),<br>if you have time</li>
+    </ol>
+  </div>
 </div>
 <div mat-dialog-actions>
-  <button mat-button (click)="onCancelClick()">Cancel</button>
-  <button mat-button [mat-dialog-close]="chapelLocation" cdkFocusInitial>OK</button>
+  <button mat-button (click)="onCancelClick()" cdkFocusInitial>Cancel</button>
+  <button *ngIf="lookupResult" 
+          mat-button
+          [mat-dialog-close]="lookupResult">
+    Place Relic
+  </button>
 </div>

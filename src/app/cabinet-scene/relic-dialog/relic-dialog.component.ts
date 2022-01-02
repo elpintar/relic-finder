@@ -65,8 +65,11 @@ export class RelicDialogComponent {
   autocompleteOptionSelectedForSaint(selectedSaint: Saint,
                                      saintIndex: number): void {
     // Copy the selectedSaint information to populate the form data for the
-    // saint at the saintIndex.
-    this.saints[saintIndex] = Object.assign({}, selectedSaint);
+    // saint at the saintIndex. 
+    // Will keep existing values in the form, if any, where no values are in
+    // new selectedSaint info.
+    this.saints[saintIndex] = Object.assign(
+      this.saints[saintIndex], selectedSaint);
   }
 
   initOtherCommonName(saint: Saint): void {

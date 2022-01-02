@@ -2,6 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FileDataService } from '../file-data.service';
 import { SpreadsheetRow } from '../types';
+import { locsToString } from '../helperFuncs';
 
 @Component({
   selector: 'app-autofill-relics-dialog',
@@ -16,14 +17,14 @@ export class AutofillRelicsDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<AutofillRelicsDialogComponent>,
     private fileDataService: FileDataService,
-    @Inject(MAT_DIALOG_DATA) public data: string,
+    @Inject(MAT_DIALOG_DATA) public data: SpreadsheetRow,
   ) { }
 
   lookupRelicLocation(chapelLoc: string) {
     const spreadsheet = this.fileDataService.relicSpreadsheetData;
     const searchString = chapelLoc.toUpperCase().trim();
     const results = spreadsheet.filter((row: SpreadsheetRow) => {
-      let ssLoc = this.locsToString(row);
+      let ssLoc = locsToString(row);
       return ssLoc === searchString;
     });
     if (results.length === 1) {
@@ -40,7 +41,7 @@ export class AutofillRelicsDialogComponent {
     } else {
       this.lookupResultStr = 'No relic found with location: ' + chapelLoc;
       const partialMatches = spreadsheet.filter((row: SpreadsheetRow) => {
-        let ssLoc = this.locsToString(row);
+        let ssLoc = locsToString(row);
         // Index of allows for partial matches, such as "A 1" matching "A 1 A"
         // and "A 1 B".
         return ssLoc.indexOf(searchString) === 0;
@@ -48,30 +49,13 @@ export class AutofillRelicsDialogComponent {
       if (partialMatches.length > 0) {
         this.lookupResultStr += '\n' + partialMatches.length.toString() +
           ' partial matches found.\nDid you mean one of these?\n\n';
-        this.lookupResultStr += partialMatches.map((r) => this.locsToString(r))
+        this.lookupResultStr += partialMatches.map((r) => locsToString(r))
           .join('\n');
       }
     }
   }
 
-  locsToString(row: SpreadsheetRow) {
-    let result = '' + row.loc1;
-    if (row.loc2) {
-      result += ' ' + row.loc2;
-      if (row.loc3) {
-        result += ' ' + row.loc3;
-        if (row.loc4) {
-          result += ' ' + row.loc4;
-          if (row.loc5) {
-            result += ' ' + row.loc5;
-          }
-        }
-      }
-    }
-    return result;
-  }
-
-  prettyPrintSpreadsheetRow(row: SpreadsheetRow): string {
+  private prettyPrintSpreadsheetRow(row: SpreadsheetRow): string {
     let result = '';
     result += row.name + '\n';
     if (row.vocations) {
@@ -92,7 +76,7 @@ export class AutofillRelicsDialogComponent {
     if (row.line) {
       result += 'line in book: ' + row.line + '\n';
     }
-    result += 'chapel location: ' + this.locsToString(row);
+    result += 'chapel location: ' + locsToString(row);
     return result;
   }
 
