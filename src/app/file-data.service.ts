@@ -2,27 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, retry, tap } from 'rxjs/operators';
-
-interface SpreadsheetRow {
-  loc1: string;
-  loc2: string;
-  loc3: string;
-  loc4: string;
-  loc5: string;
-  name: string;
-  vocations: string;
-  otherInfo: string;
-  relicMaterials: string;
-  feastDayAndMonth: string;
-  page: string;
-  line: string;
-}
+import { SpreadsheetRow } from './types';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FileDataService {
-  relicSpreadsheetData: {}[] = [];
+  relicSpreadsheetData: SpreadsheetRow[] = [];
 
   constructor(private http: HttpClient) { }
 
@@ -30,7 +16,7 @@ export class FileDataService {
     return this.http.get(filename, {responseType: 'text'})
       .pipe(
         tap( // Log the result or error
-          data => console.log(filename, data),
+          _data => console.log("GOT", filename),
           error => console.error(filename, error)
         )
       );
@@ -59,14 +45,9 @@ export class FileDataService {
 
     return lines.map(line => match(line).reduce((acc, cur, i) => ({
       ...acc,
-      [heads[i] || `extra_${i}`]: (cur.length > 0) ? (Number(cur) || cur) : null
+      [heads[i] || `extra_${i}`]: (cur.length > 0) ? (Number(cur) || cur) : undefined
     }), {}));
   }
-
-  // ab2str(buf: ArrayBuffer): string {
-  //   var enc = new TextDecoder("utf-8");
-  //   return enc.decode(buf);
-  // }
 
   fetchCsvData(callback: () => void): void {
     this.getTextFile('/assets/infoFromSaintsAndBlesseds.txt').subscribe(
@@ -74,19 +55,10 @@ export class FileDataService {
         const headers = ['loc1', 'loc2', 'loc3', 'loc4', 'loc5','name',
         'vocations', 'otherInfo', 'relicMaterials', 'feastDayAndMonth',
         'page', 'line'];
-        this.relicSpreadsheetData = this.csvToJson(csvText, headers);
+        this.relicSpreadsheetData = 
+          this.csvToJson(csvText, headers) as SpreadsheetRow[];
         callback();
       });
-
-    
-    // var oReq = new XMLHttpRequest();
-    // oReq.onload = function(e) {
-    //   csvText = ab2str(oReq.response as ArrayBuffer);
-    //   return csvJsonObjs;
-    // }
-    // oReq.open("GET", '/assets/infoFromSaintsAndBlesseds.txt');
-    // oReq.responseType = "arraybuffer";
-    // oReq.send();
   }
 
 }

@@ -51,6 +51,16 @@
     <mat-icon *ngIf="movingRelicOrZA">cancel</mat-icon>
     <mat-icon *ngIf="!movingRelicOrZA || movingRelicOrZA === ''">edit_location</mat-icon>
   </button>
+  <br>
+  <button mat-fab
+          *ngIf="editMode && firebaseAuthService.user && firebaseAuthService.user!.uid"
+          (click)="autofillRelicsToggle()"
+          color="primary"
+          aria-label="Autofill relic info from book"
+          [title]="(autofillingRelics) ? 'Cancel autofill' : 'Autofill relic info from book'">
+    <mat-icon *ngIf="autofillingRelics">cancel</mat-icon>
+    <mat-icon *ngIf="!autofillingRelics || autofillingRelics === ''">auto_stories</mat-icon>
+  </button>
 </div>
 
 <div class="top-right-buttons">

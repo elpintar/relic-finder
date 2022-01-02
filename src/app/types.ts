@@ -81,3 +81,18 @@ export interface User {
 }
 
 export type RelicAndSaints = [Relic, Saint[]];
+
+export interface SpreadsheetRow {
+  loc1?: string;
+  loc2?: string;
+  loc3?: string;
+  loc4?: string;
+  loc5?: string;
+  name?: string;
+  vocations?: string;
+  otherInfo?: string;
+  relicMaterials?: string;
+  feastDayAndMonth?: string;
+  page?: string;
+  line?: string;
+}

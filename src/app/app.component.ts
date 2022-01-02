@@ -12,6 +12,7 @@ import {FileDataService} from './file-data.service';
 import { ArrowDialogComponent } from './cabinet-scene/arrow-dialog/arrow-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { InfoDialogComponent } from './info-dialog/info-dialog.component';
+import { AutofillRelicsDialogComponent } from './autofill-relics-dialog/autofill-relics-dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -27,6 +28,7 @@ export class AppComponent {
   addRelicMode = true;
   hideLabels = false;
   movingRelicOrZA = '';
+  autofillingRelics = '';
   helperText = '';
 
   zoomedList: string[] = [];
@@ -61,7 +63,7 @@ export class AppComponent {
       }
       this.redrawCurrentScene();
       this.fileDataService.fetchCsvData(() => {
-        console.log("GOT DATA", this.fileDataService.relicSpreadsheetData);
+        console.log("Got csv relic data.");
       });
     });
   }
@@ -259,6 +261,26 @@ export class AppComponent {
       this.movingRelicOrZA = 'whichRelicOrZA';
       this.helperText = 'Click relic or zoom area to move';
     }
+  }
+
+  autofillRelicsToggle(): void {
+    if (this.autofillingRelics) {
+      this.autofillingRelics = '';
+    } else {
+      this.openAutofillRelicsDialog().subscribe((result: string) => {
+        if (result) {
+          this.autofillingRelics = 'whereRelicForLocation';
+          console.log(result);
+        } else {
+          this.autofillingRelics = '';
+        }
+      });
+    }
+  }
+
+  private openAutofillRelicsDialog() {
+    const dialogRef = this.dialog.open(AutofillRelicsDialogComponent);
+    return dialogRef.afterClosed();
   }
 
   showInfo() {
