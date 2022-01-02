@@ -26,6 +26,7 @@ import { RelicDotComponent } from './cabinet-scene/relic-dot/relic-dot.component
 import { RelicDialogComponent } from './cabinet-scene/relic-dialog/relic-dialog.component';
 import { ArrowDialogComponent } from './cabinet-scene/arrow-dialog/arrow-dialog.component';
 import { InfoDialogComponent } from './info-dialog/info-dialog.component';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -40,6 +41,7 @@ import { InfoDialogComponent } from './info-dialog/info-dialog.component';
   ],
   imports: [
     BrowserModule,
+    HttpClientModule,
     BrowserAnimationsModule,
     MatDialogModule,
     MatFormFieldModule,

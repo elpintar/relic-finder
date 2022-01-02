@@ -8,6 +8,7 @@ import { AngularFireAuth } from '@angular/fire/auth';
 import { auth } from 'firebase/app';
 import {FirebaseDataService} from './firebase-data.service';
 import {FirebaseAuthService} from './firebase-auth.service';
+import {FileDataService} from './file-data.service';
 import { ArrowDialogComponent } from './cabinet-scene/arrow-dialog/arrow-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { InfoDialogComponent } from './info-dialog/info-dialog.component';
@@ -45,6 +46,7 @@ export class AppComponent {
 
   constructor(private firebaseDataService: FirebaseDataService,
               public firebaseAuthService: FirebaseAuthService,
+              private fileDataService: FileDataService,
               private dialog: MatDialog,
               private angularFireAuth: AngularFireAuth) {
     this.zoomAreaRelicCounts = new Map();
@@ -58,6 +60,9 @@ export class AppComponent {
         this.currentPhotoInfo.arrows = startingArrows;
       }
       this.redrawCurrentScene();
+      this.fileDataService.fetchCsvData(() => {
+        console.log("GOT DATA", this.fileDataService.relicSpreadsheetData);
+      });
     });
   }
 
