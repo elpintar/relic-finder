@@ -82,7 +82,9 @@ export class FirebaseDataService {
     }
   }
 
-  addOrUpdateRelicAndSaints(relicAndSaints: RelicAndSaints): void {
+  /** Callback param for autofill only. */
+  addOrUpdateRelicAndSaints(relicAndSaints: RelicAndSaints, 
+                            callback?: () => void): void {
     console.log('add or update:', relicAndSaints);
     const relic = relicAndSaints[0];
     const saints = relicAndSaints[1];
@@ -91,7 +93,7 @@ export class FirebaseDataService {
       if (!relic.firebaseDocId) {
         // ADD new relic/saints
         this.updateOrAddSaints(saints);
-        this.addRelic(relic, saints);
+        this.addRelic(relic, saints, callback);
       } else {
         // UPDATE relic/saints
         this.updateOrAddSaints(saints);
@@ -155,23 +157,25 @@ export class FirebaseDataService {
     });
   }
 
-  addRelic(relic: Relic, saints: Saint[]): void {
+  /** Callback param for autofill only. */
+  addRelic(relic: Relic, saints: Saint[], callback?: () => void): void {
     this.updateSaintIdsInRelic(relic, saints);
     const newRelicId = this.makeIdForRelic(relic, saints);
     relic.firebaseDocId = newRelicId;
     console.log('NEW RELIC ID: ', newRelicId);
     this.firestore.collection<Relic>('relics').doc(newRelicId).set(relic)
       .then(() => {
-        console.log('successful write of new doc - firebase id: ' + newRelicId);
+        console.log('successful write of new relic doc - firebase id: ' + newRelicId);
+        // Update local data
+        this.allRelicsLocal.push(relic);
+        if (callback) {
+          callback();
+        }
       })
       .catch((reason: string) => {
         console.error(reason);
-        alert('Reminder: your data is not being saved.');
-      }).finally(() => {
-        console.log('successfully added relic: ', relic);
+        alert('Relic could not be written (Are you logged in?): ' + reason);
       });
-    // Update local data
-    this.allRelicsLocal.push(relic);
   }
 
   updateSaintIdsInRelic(relic: Relic, saints: Saint[]): void {

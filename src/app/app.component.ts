@@ -203,8 +203,16 @@ export class AppComponent {
 
   // WRITE new relic.
   addOrUpdateRelicDot(relicAndSaints: RelicAndSaints): void {
-    this.firebaseDataService.addOrUpdateRelicAndSaints(relicAndSaints);
-    this.clearAutofill();
+    this.firebaseDataService.addOrUpdateRelicAndSaints(relicAndSaints, () => {
+      // Successful write of new relic - prompt next autofill.
+      if (this.autofillingRelics && this.autofillRow && this.autofillRow.i) {
+        const nextI = this.autofillRow.i + 1;
+        this.autofillRow = this.fileDataService.cleanSpreadsheetData[nextI];
+        this.openAutofillRelicsDialog(this.autofillRow).subscribe(
+          this.afterAutofillDialogClosed.bind(this)
+        );
+      }
+    });
   }
 
   toggleEditMode(): void {
@@ -269,16 +277,27 @@ export class AppComponent {
     if (this.autofillingRelics) {
       this.clearAutofill();
     } else {
-      this.openAutofillRelicsDialog().subscribe((rowToPlace: SpreadsheetRow) => {
-        if (rowToPlace) {
-          this.autofillingRelics = 'whereRelicForLocation';
-          this.autofillRow = rowToPlace;
-          this.setHelperText('Click where relic should go.');
-          this.addRelicMode = true;
-        } else {
-          this.clearAutofill();
-        }
-      });
+      this.openAutofillRelicsDialog().subscribe(
+        this.afterAutofillDialogClosed.bind(this)
+      );
+    }
+  }
+
+  private openAutofillRelicsDialog(rowToAutofill?: SpreadsheetRow) {
+    const dialogRef = this.dialog.open(AutofillRelicsDialogComponent, {
+      data: rowToAutofill,
+    });
+    return dialogRef.afterClosed();
+  }
+
+  private afterAutofillDialogClosed(rowToPlace: SpreadsheetRow) {
+    if (rowToPlace) {
+      this.autofillingRelics = 'whereRelicForLocation';
+      this.autofillRow = rowToPlace;
+      this.setHelperText('Click where relic should go.');
+      this.addRelicMode = true;
+    } else {
+      this.clearAutofill();
     }
   }
 
@@ -286,11 +305,6 @@ export class AppComponent {
     this.autofillingRelics = '';
     this.autofillRow = undefined;
     this.setHelperText();
-  }
-
-  private openAutofillRelicsDialog() {
-    const dialogRef = this.dialog.open(AutofillRelicsDialogComponent);
-    return dialogRef.afterClosed();
   }
 
   showInfo() {

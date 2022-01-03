@@ -1,17 +1,35 @@
 <div mat-dialog-content>
-  <h2>Relic Autofiller</h2>
-  <p>Autofill relic information from the Saints & Blessed book!</p>
-  <p>To start, enter the chapel location below.<br>
-    The location will have up to 5 fields, separated by spaces.<br>
-    Example: From the book: &nbsp;<code> U. 006 ...B 02 .</code><br>
-    &nbsp; will be entered as: &nbsp;<code> U 6 B 2</code>
-  </p>
+  <h2 *ngIf="dialogState !== 'nextIndex'">Relic Autofiller</h2>
+  <h2 *ngIf="dialogState === 'nextIndex'">Add Next Saint?</h2>
+
+  <div *ngIf="dialogState !== 'nextIndex'">
+    <p>Autofill relic information from the Saints & Blessed book!</p>
+    <p>To start, enter the chapel location below.<br>
+      The location will have up to 5 fields, separated by spaces.<br>
+      Example: From the book: &nbsp;<code> U. 006 ...B 02 .</code><br>
+      &nbsp; will be entered as: &nbsp;<code> U 6 B 2</code>
+    </p>
+  </div>
+
+  <div *ngIf="dialogState === 'nextIndex'">
+    <p>Or use next/prev to add a different one nearby.</p>
+  </div>
+
   <mat-form-field>
     <mat-label>Chapel location</mat-label>
     <input matInput [(ngModel)]="chapelLocation">
   </mat-form-field>
+  &nbsp;
   <button mat-raised-button
           (click)="lookupRelicLocation(chapelLocation)">Look up</button>
+  <span *ngIf="lookupResult">
+    &nbsp;
+    <button mat-raised-button
+            (click)="prevRelicLocation()">Prev</button>
+    &nbsp;
+    <button mat-raised-button
+            (click)="nextRelicLocation()">Next</button>
+  </span>
 
   <pre>{{lookupResultStr}}</pre>
 

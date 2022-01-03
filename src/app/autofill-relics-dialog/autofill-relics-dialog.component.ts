@@ -14,12 +14,24 @@ export class AutofillRelicsDialogComponent {
   lookupResultStr = '';
   lookupResult?: SpreadsheetRow;
   lookupIndex = -1;
+  dialogState = '';
 
   constructor(
     public dialogRef: MatDialogRef<AutofillRelicsDialogComponent>,
     private fileDataService: FileDataService,
     @Inject(MAT_DIALOG_DATA) public data: SpreadsheetRow,
-  ) { }
+  ) {
+    const nextRow = data;
+    if (nextRow) {
+      this.dialogState = 'nextIndex';
+    } else {
+      this.dialogState = 'initial';
+    }
+    if (this.dialogState === 'nextIndex') {
+      this.chapelLocation = locsToString(nextRow);
+      this.lookupRelicLocation(this.chapelLocation);
+    }
+  }
 
   lookupRelicLocation(chapelLoc: string) {
     const spreadsheet = this.fileDataService.cleanSpreadsheetData;
@@ -92,6 +104,25 @@ export class AutofillRelicsDialogComponent {
     }
     result += 'chapel location: ' + locsToString(row);
     return result;
+  }
+
+  private moveRelicLocation(changeIndex: number) {
+    if (this.lookupResult && this.lookupResult.i) {
+      const moveToIndex = this.lookupResult.i + changeIndex;
+      const moveToRow = this.fileDataService.cleanSpreadsheetData[moveToIndex];
+      if (moveToRow) {
+        this.chapelLocation = locsToString(moveToRow);
+        this.lookupRelicLocation(this.chapelLocation);
+      }
+    }
+  }
+
+  prevRelicLocation() {
+    this.moveRelicLocation(-1);
+  }
+
+  nextRelicLocation() {
+    this.moveRelicLocation(1);
   }
 
   onCancelClick(): void {

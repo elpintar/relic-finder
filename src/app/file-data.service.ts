@@ -94,7 +94,8 @@ export class FileDataService {
   }
 
   cleanUpSpreadsheetData(rawData: SpreadsheetRow[]): SpreadsheetRow[] {
-    return rawData.map((row) => {
+    return rawData.map((row, i) => {
+      row.i = i;
       if (row.name) {
         // Get rid of extra whitespace.
         row.name = row.name.replace(/  +/g, ' ').trim();

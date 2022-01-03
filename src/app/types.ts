@@ -98,4 +98,5 @@ export interface SpreadsheetRow {
   feastDayAndMonth?: string;
   page?: string;
   line?: string;
+  i?: number; // Index in the big list of spreadsheet rows.
 }
