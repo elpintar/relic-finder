@@ -8,7 +8,7 @@ import { SpreadsheetRow } from './types';
   providedIn: 'root'
 })
 export class FileDataService {
-  relicSpreadsheetData: SpreadsheetRow[] = [];
+  cleanSpreadsheetData: SpreadsheetRow[] = [];
 
   constructor(private http: HttpClient) { }
 
@@ -55,10 +55,85 @@ export class FileDataService {
         const headers = ['loc1', 'loc2', 'loc3', 'loc4', 'loc5','name',
         'vocations', 'otherInfo', 'relicMaterials', 'feastDayAndMonth',
         'page', 'line'];
-        this.relicSpreadsheetData = 
+        const rawSpreadsheetData = 
           this.csvToJson(csvText, headers) as SpreadsheetRow[];
+        this.cleanSpreadsheetData =
+          this.cleanUpSpreadsheetData(rawSpreadsheetData);
         callback();
       });
+  }
+
+  private capitalizeFirstLetters(s: string): string {
+    const words = s.split(" ");
+    const upperWords = words.map((word) => { 
+      return word[0].toUpperCase() + word.substring(1).toLowerCase(); 
+    });
+    const lowerThese = ["Of", "The", "De"]
+    const betterWords = upperWords.map((word) => {
+      if (lowerThese.indexOf(word) >= 0) {
+        return word.toLowerCase();
+      } else {
+        return word;
+      }
+    });
+    return betterWords.join(" ");
+  }
+
+  private extractReligiousOrder(s: string, row: SpreadsheetRow): string {
+    const religiousOrders = ["SJ", "OFM", "OP", "OSB", "CP", "OSA", "CSSR", 
+      "O.C.", "OC"];
+    const words = s.split(" ");
+    let lastWord = words[words.length-1];
+    if (religiousOrders.indexOf(lastWord) >= 0) {
+      row.religiousOrder = words.pop();
+      s = words.join(" ");
+      // Delete comma at end of name, if it exists.
+      s = s.replace(/,$/g, "");
+    }
+    return s;
+  }
+
+  cleanUpSpreadsheetData(rawData: SpreadsheetRow[]): SpreadsheetRow[] {
+    return rawData.map((row) => {
+      if (row.name) {
+        // Get rid of extra whitespace.
+        row.name = row.name.replace(/  +/g, ' ').trim();
+        row.name = this.extractReligiousOrder(row.name, row);
+        row.name = this.capitalizeFirstLetters(row.name);
+      }
+      if (row.vocations) {
+        // Get rid of extra whitespace.
+        row.vocations = row.vocations.replace(/  +/g, ' ').trim();
+        row.vocations = this.extractReligiousOrder(row.vocations, row);
+        row.vocations = row.vocations.replace(/MRT/g, "Martyr");
+        row.vocations = this.capitalizeFirstLetters(row.vocations);
+        if (row.vocations.toLowerCase() === "blank") {
+          row.vocations = undefined;
+        }
+      }
+      if (row.relicMaterials) {
+        // Get rid of extra whitespace.
+        row.relicMaterials = row.relicMaterials.replace(/  +/g, ' ').trim();
+        row.relicMaterials = row.relicMaterials[0].toUpperCase() +
+                             row.relicMaterials.substring(1).toLowerCase();
+        const osss = ["Ex oss", "Ex ossibus", "Oss", "Bone"];
+        if (osss.indexOf(row.relicMaterials) >= 0) {
+          row.relicMaterials = "Ex ossibus (from the bone)";
+        }
+      }
+      if (row.feastDayAndMonth) {
+        // Get rid of extra whitespace.
+        row.feastDayAndMonth = row.feastDayAndMonth.replace(/  +/g, ' ').trim(); 
+        if (row.feastDayAndMonth === "00-00") {
+          row.feastDayAndMonth = undefined;
+        }
+      }
+      if (row.otherInfo) {
+        row.otherInfo = row.otherInfo.replace(/  +/g, ' ').trim();
+      }
+
+      return row;
+    });
   }
 
 }

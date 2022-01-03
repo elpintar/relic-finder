@@ -12,15 +12,14 @@
   </mat-form-field>
   <button mat-raised-button
           (click)="lookupRelicLocation(chapelLocation)">Look up</button>
-  
+
   <pre>{{lookupResultStr}}</pre>
 
   <div *ngIf="lookupResult">
     When you place this relic:
     <ol>
-      <li>SEARCH if {{lookupResult.name}} already exists,<br>
-        and if so, use existing saint info<br>
-        (but add info from this one to that one if this has new information)</li>
+      <li>SEARCH if {{lookupResult.name}} already exists<br>
+          (if a field conflicts, the existing saint info will be automatically used)</li>
       <li>EDIT the fields if they don't look right</li>
       <li>ADD new fields (through internet searches on the saint),<br>if you have time</li>
     </ol>

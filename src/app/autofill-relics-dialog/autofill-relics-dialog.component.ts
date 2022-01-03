@@ -13,6 +13,7 @@ export class AutofillRelicsDialogComponent {
   chapelLocation = '';
   lookupResultStr = '';
   lookupResult?: SpreadsheetRow;
+  lookupIndex = -1;
 
   constructor(
     public dialogRef: MatDialogRef<AutofillRelicsDialogComponent>,
@@ -21,7 +22,7 @@ export class AutofillRelicsDialogComponent {
   ) { }
 
   lookupRelicLocation(chapelLoc: string) {
-    const spreadsheet = this.fileDataService.relicSpreadsheetData;
+    const spreadsheet = this.fileDataService.cleanSpreadsheetData;
     const searchString = chapelLoc.toUpperCase().trim();
     const results = spreadsheet.filter((row: SpreadsheetRow) => {
       let ssLoc = locsToString(row);
@@ -53,11 +54,24 @@ export class AutofillRelicsDialogComponent {
           .join('\n');
       }
     }
+    this.getIndexAndRawRow();
+  }
+
+  private getIndexAndRawRow() {
+    if (this.lookupResult) {
+      const spreadsheet = this.fileDataService.cleanSpreadsheetData;
+      this.lookupIndex = spreadsheet.findIndex((row) => {
+        return locsToString(row) === locsToString(this.lookupResult!);
+      });
+    }
   }
 
   private prettyPrintSpreadsheetRow(row: SpreadsheetRow): string {
     let result = '';
     result += row.name + '\n';
+    if (row.religiousOrder) {
+      result += 'religious order: ' + row.religiousOrder + '\n';
+    }
     if (row.vocations) {
       result += 'vocations: ' + row.vocations + '\n';
     }

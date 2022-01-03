@@ -92,6 +92,7 @@ export interface SpreadsheetRow {
   loc5?: string;
   name?: string;
   vocations?: string;
+  religiousOrder?: string;
   otherInfo?: string;
   relicMaterials?: string;
   feastDayAndMonth?: string;

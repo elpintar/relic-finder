@@ -270,6 +270,14 @@ export class CabinetSceneComponent implements OnInit {
       }
       if (i.vocations) {
         s.vocations = [i.vocations];
+        if (i.vocations === "Virgin Martyr") {
+          s.vocations = ["Virgin", "Martyr"];
+        } else if (i.vocations === "Bishop Martyr") {
+          s.vocations = ["Bishop", "Martyr"];
+        }
+      }
+      if (i.religiousOrder) {
+        s.religiousOrder = i.religiousOrder;
       }
       if (i.feastDayAndMonth) {
         s.feastDayAndMonth = i.feastDayAndMonth;
