@@ -216,6 +216,13 @@ export class FirebaseDataService {
     return saints;
   }
 
+  getRelicsForSaint(saint: Saint): Relic[] {
+    const saintId = saint.firebaseDocId || '';
+    return this.allRelicsLocal.filter(r => {
+      return r.saintFirebaseDocIds.includes(saintId);
+    });
+  }
+
   // Filename format: 'MNOPQ.jpeg'
   getPhotoForFilename(filename: string): string {
     const filenameParts = filename.split('.');

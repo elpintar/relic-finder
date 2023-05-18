@@ -1,5 +1,31 @@
 import {Relic, RelicAndSaints, Saint, SpreadsheetRow} from './types';
 
+export function makeSaintNameString(saint: Saint): string {
+  if (saint.commonName) {
+    if (saint.commonName === 'CITY') {
+      return saint.canonizationStatus + ' ' +
+        saint.name + ' of ' + saint.city;
+    } else if (saint.commonName === 'SUBTITLE') {
+      return saint.canonizationStatus + ' ' +
+        saint.name + ' ' + saint.subtitle;
+    } else {
+      return saint.commonName;
+    }
+  }
+  let saintName = saint.name;
+  saintName = saint.canonizationStatus + ' ' + saint.name;
+  if (saint.subtitle) {
+    saintName = saintName + ' ' + saint.subtitle;
+  }
+  if (saint.city) {
+    saintName = saintName + ' of ' + saint.city;
+  }
+  if (saint.religiousOrder) {
+    saintName = saintName + ', ' + saint.religiousOrder;
+  }
+  return saintName;
+}
+
 function deepEquals(x: any, y: any) {
   if (x === y) {
     return true; // if both x and y are null or undefined and exactly the same

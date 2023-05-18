@@ -164,7 +164,7 @@ export class AppComponent {
       if (slashIndex >= 0) {
         shortPhotoName = shortPhotoName.substring(slashIndex + 3);
       }
-      this.setHelperText(shortPhotoName + "  " + photoName);
+      this.setHelperText(photoName + " [ " + shortPhotoName + " ]");
     }
   }
 

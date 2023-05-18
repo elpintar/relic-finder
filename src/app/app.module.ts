@@ -28,6 +28,7 @@ import { ArrowDialogComponent } from './cabinet-scene/arrow-dialog/arrow-dialog.
 import { InfoDialogComponent } from './info-dialog/info-dialog.component';
 import { HttpClientModule } from '@angular/common/http';
 import { AutofillRelicsDialogComponent } from './autofill-relics-dialog/autofill-relics-dialog.component';
+import { SearchBarComponent } from './search-bar/search-bar.component';
 
 @NgModule({
   declarations: [
@@ -40,6 +41,7 @@ import { AutofillRelicsDialogComponent } from './autofill-relics-dialog/autofill
     ArrowDialogComponent,
     InfoDialogComponent,
     AutofillRelicsDialogComponent,
+    SearchBarComponent,
   ],
   imports: [
     BrowserModule,

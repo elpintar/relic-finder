@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { FirebaseAuthService } from 'src/app/firebase-auth.service';
 import { FirebaseDataService } from 'src/app/firebase-data.service';
-import { msToDate } from 'src/app/helperFuncs';
+import { makeSaintNameString, msToDate } from 'src/app/helperFuncs';
 import { Relic, ZoomArea, CanonizationStatus, Saint, RelicAndSaints } from 'src/app/types';
 
 @Component({
@@ -21,6 +21,7 @@ export class RelicDialogComponent {
   autocompleteSaintsCtrl = new FormControl();
   filteredSaints: Observable<Saint[]>;
   otherCommonName = '';
+  getHumanReadableSaintName: Function;
 
   // Comes from injected data; determines which template to use.
   editMode = false;
@@ -42,6 +43,7 @@ export class RelicDialogComponent {
         startWith(''),
         map(this.filterSaintsMatchingSearch, this)
       );
+    this.getHumanReadableSaintName = makeSaintNameString;
   }
 
   msToDate(ms: number): string {
@@ -187,32 +189,6 @@ export class RelicDialogComponent {
   removeSaint(saint: Saint): void {
     const i = this.saints.findIndex((s) => s.name === saint.name);
     this.saints.splice(i, 1);
-  }
-
-  getHumanReadableSaintName(saint: Saint): string {
-    if (saint.commonName) {
-      if (saint.commonName === 'CITY') {
-        return saint.canonizationStatus + ' ' +
-          saint.name + ' of ' + saint.city;
-      } else if (saint.commonName === 'SUBTITLE') {
-        return saint.canonizationStatus + ' ' +
-          saint.name + ' ' + saint.subtitle;
-      } else {
-        return saint.commonName;
-      }
-    }
-    let saintName = saint.name;
-    saintName = saint.canonizationStatus + ' ' + saint.name;
-    if (saint.subtitle) {
-      saintName = saintName + ' ' + saint.subtitle;
-    }
-    if (saint.city) {
-      saintName = saintName + ' of ' + saint.city;
-    }
-    if (saint.religiousOrder) {
-      saintName = saintName + ', ' + saint.religiousOrder;
-    }
-    return saintName;
   }
 
   getHumanReadableSaintVocations(saint: Saint): string {
