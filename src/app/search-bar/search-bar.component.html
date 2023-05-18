@@ -1,0 +1,12 @@
+<input matInput
+       placeholder="Search a saint (no 'St.' needed)..."
+       aria-label="Search a saint (no letters S T period are needed)"
+       [matAutocomplete]="auto"
+       [formControl]="autocompleteSaintsCtrl">
+<mat-autocomplete #auto="matAutocomplete">
+  <mat-option *ngFor="let s of filteredSaints | async"
+              (onSelectionChange)="autocompleteOptionSelectedForSaint(s)"
+              [value]="getHumanReadableSaintName(s)">
+    <span>{{getHumanReadableSaintName(s)}}</span>
+  </mat-option>
+</mat-autocomplete>
