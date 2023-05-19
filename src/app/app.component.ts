@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { PhotoInfo, Relic, ZoomArea, User, RelicAndSaints, PhotoArrows, SpreadsheetRow } from './types';
+import { PhotoInfo, Relic, ZoomArea, User, RelicAndSaints, PhotoArrows, SpreadsheetRow, Saint } from './types';
 import { CabinetSceneComponent } from './cabinet-scene/cabinet-scene.component';
 import { AngularFirestore, AngularFirestoreCollection, DocumentData, DocumentReference, QuerySnapshot } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
@@ -349,5 +349,14 @@ export class AppComponent {
 
   getRelicCounts(startingPhoto: string): void {
     this.recursivelyGetRelicCounts(startingPhoto);
+  }
+
+  makeNewSearch(saint: Saint): void {
+    this.setHelperText("Search for: " + saint.firebaseDocId);
+    const relicsWithSaint = this.firebaseDataService.getRelicsForSaint(saint);
+    const relicPaths = relicsWithSaint.map(r => {
+      return this.firebaseDataService.getPathToRelic(r, this.currentPhotoInfo.photoFilename);
+    });
+    console.log(relicPaths);
   }
 }

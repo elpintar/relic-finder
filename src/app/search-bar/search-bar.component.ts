@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
-import { Saint } from '../types';
+import { Relic, Saint } from '../types';
 import { map, startWith } from 'rxjs/operators';
 import { FirebaseDataService } from '../firebase-data.service';
 import { makeSaintNameString } from '../helperFuncs';
@@ -12,6 +12,8 @@ import { makeSaintNameString } from '../helperFuncs';
   styleUrls: ['./search-bar.component.sass']
 })
 export class SearchBarComponent {
+  @Output() newSearch = new EventEmitter<Saint>();
+
   autocompleteSaintsCtrl = new FormControl();
   filteredSaints: Observable<Saint[]>;
   getHumanReadableSaintName: Function;
@@ -41,7 +43,6 @@ export class SearchBarComponent {
   }
 
   autocompleteOptionSelectedForSaint(selectedSaint: Saint): void {
-    const relicsWithSaint = this.firebaseDataService.getRelicsForSaint(selectedSaint);
-    console.log(selectedSaint.firebaseDocId, relicsWithSaint);
+    this.newSearch.emit(selectedSaint);
   }
 }

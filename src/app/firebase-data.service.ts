@@ -9,6 +9,12 @@ import { auth } from 'firebase/app';
 import { Injectable } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 
+type TraversalResult = {
+  successful: boolean;
+  path: string[];
+  visited: string[];
+};
+
 @Injectable({
   providedIn: 'root'
 })
@@ -223,6 +229,111 @@ export class FirebaseDataService {
     });
   }
 
+  private zoomInListToPhoto(photoFilename: string): string[] {
+    const pathList: string[] = [];
+    const zoomAreaOneLevelUp = this.allZoomAreasLocal.find(za => {
+      return za.zoomToPhotoFilename === photoFilename;
+    });
+    if (zoomAreaOneLevelUp) {
+      const picOneLevelUp = zoomAreaOneLevelUp.zoomFromPhotoFilename;
+      return this.zoomInListToPhoto(picOneLevelUp).concat([photoFilename]);
+    } else {
+      return [photoFilename];
+    }
+  }
+
+  private traverseEachArrow(arrows: PhotoArrows,
+                            toPhotoFilename: string,
+                            visited: string[]): TraversalResult {
+    let traversalResult: TraversalResult;
+    const curPhotoFilename = arrows.photoFilename;
+    const arrowList = this.getArrowsAsList(arrows);
+    for (let i in arrowList) {
+      let picToCheck = arrowList[i];
+      traversalResult = this.traverse(picToCheck, toPhotoFilename, visited);
+      if (traversalResult.successful) {
+        return traversalResult;
+      } else {
+        visited = visited.concat(traversalResult.visited);
+      }
+    }
+    return {
+      successful: false,
+      path: [],
+      visited: visited.concat(curPhotoFilename),
+    };
+  }
+
+  private traverse(fromPhotoFilename: string, 
+                   toPhotoFilename: string,
+                   visited: string[] = []): TraversalResult {
+    console.log("traversing", fromPhotoFilename);
+    // SUCCESS
+    if (fromPhotoFilename === toPhotoFilename) {
+      return {successful: true, path: [fromPhotoFilename], visited};
+    }
+    // Already visited, go back.
+    else if (visited.includes(fromPhotoFilename)) {
+      return {successful: false, path: [], visited};
+    }
+    // Update visited when first arriving at each node.
+    visited = visited.concat([fromPhotoFilename]);
+    const arrows = this.getLocalArrowsWithPhotoFilename(fromPhotoFilename);
+    // Not a success and no arrows here to explore, go back.
+    if (!arrows) {
+      return {successful: false, path: [], visited};
+    }
+    // Not success, so keep on traversing in each direction.
+    else {
+      const result = this.traverseEachArrow(arrows, toPhotoFilename, visited);
+      return {
+        successful: result.successful,
+        path: result.path.concat([fromPhotoFilename]),
+        visited,
+      };
+    }
+  }
+
+  private findTopLevelPath(fromPhotoFilename: string, 
+                           toPhotoFilename: string): string[] {
+    let result = this.traverse(fromPhotoFilename, toPhotoFilename);
+    if (result.successful) {
+      return result.path;
+    } else {
+      console.error('No path found from', fromPhotoFilename,
+                    'to', toPhotoFilename);
+      return [];
+    }
+  }
+
+  /**
+   * Get the path from currentPhotoFilename to the Relic, of photo filenames,
+   * going in order of clicks of arrows or zoom areas from now to the relic. 
+   * It will always be in order of:
+   *  - zooming out from where you are (if not at the top level)
+   *  - using arrows at the top-most level
+   *  - zooming into where you need to go
+  */
+  getPathToRelic(relic: Relic, currentPhotoFilename: string): string[] {
+    const zoomingInToRelic = this.zoomInListToPhoto(relic.inPhoto);
+    const zoomingInToCurrent = this.zoomInListToPhoto(currentPhotoFilename);
+    // Shift outermost elements off arrays since they will be included in top level path.
+    const zoomedOutFromRelic = zoomingInToRelic[0];
+    const zoomedOutFromCurrentPhoto = zoomingInToCurrent[0];
+    const zoomedOutPathViaArrows = this.findTopLevelPath(zoomedOutFromRelic, zoomedOutFromCurrentPhoto);
+    console.log("zoomingInToCurrent", zoomingInToCurrent,
+                "zoomedOutPathViaArrows", zoomedOutPathViaArrows,
+                "zoomingInToRelic", zoomingInToRelic);
+    // Remove duplicate path elements before combining.
+    zoomingInToCurrent.pop(); // remove starting pic
+    zoomedOutPathViaArrows.shift(); // remove first from arrow path
+    zoomingInToRelic.shift(); // remove first from zooming in path
+    const zoomingOutFromCurrent = zoomingInToCurrent.reverse();
+    return zoomingOutFromCurrent.concat(
+           zoomedOutPathViaArrows.concat(
+           zoomingInToRelic));
+  }
+
   // Filename format: 'MNOPQ.jpeg'
   getPhotoForFilename(filename: string): string {
     const filenameParts = filename.split('.');
@@ -349,6 +460,23 @@ export class FirebaseDataService {
       console.error('Invalid direction given to directionHasArrow: ', direction);
       return false;
     }
+  }
+
+  getArrowsAsList(arrows: PhotoArrows): string[] {
+    const result = [];
+    if (arrows.leftToPhoto) {
+      result.push(arrows.leftToPhoto);
+    }
+    if (arrows.rightToPhoto) {
+      result.push(arrows.rightToPhoto);
+    }
+    if (arrows.upToPhoto) {
+      result.push(arrows.upToPhoto);
+    }
+    if (arrows.downToPhoto) {
+      result.push(arrows.downToPhoto);
+    }
+    return result;
   }
 
   getLocalSaintIndexWithId(saintFirebaseId: string): number {
