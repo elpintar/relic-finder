@@ -1,16 +1,18 @@
 <div class="cabinet-scenes-container">
-    <app-cabinet-scene [photoInfo]="currentPhotoInfo"
-      [editMode]="editMode"
-      [addRelicMode]="addRelicMode"
-      [hideLabels]="hideLabels"
-      [movingRelicOrZA]="movingRelicOrZA"
-      [autofillRow]="autofillRow"
-      (sceneImgChanged)="redrawCurrentScene()"
-      (zoomIn)="zoomIn($event)"
-      (addOrUpdateRelicDot)="addOrUpdateRelicDot($event)"
-      (addZoomArea)="addZoomArea($event)"
-      (setHelperText)="setHelperTextFromCabinetScene($event)">
-    </app-cabinet-scene>
+  <app-cabinet-scene
+    [photoInfo]="currentPhotoInfo"
+    [editMode]="editMode"
+    [addRelicMode]="addRelicMode"
+    [hideLabels]="hideLabels"
+    [movingRelicOrZA]="movingRelicOrZA"
+    [autofillRow]="autofillRow"
+    (sceneImgChanged)="redrawCurrentScene()"
+    (zoomIn)="zoomIn($event)"
+    (addOrUpdateRelicDot)="addOrUpdateRelicDot($event)"
+    (addZoomArea)="addZoomArea($event)"
+    (setHelperText)="setHelperTextFromCabinetScene($event)"
+  >
+  </app-cabinet-scene>
 </div>
 
 <div class="search-bar-area">
@@ -18,145 +20,187 @@
 </div>
 
 <div class="top-left-buttons">
-  <button mat-fab
-          (click)="zoomOut()"
-          *ngIf="zoomedList.length > 0"
-          color="primary"
-          aria-label="Zoom out"
-          title="Zoom out">
+  <button
+    mat-fab
+    (click)="zoomOut()"
+    *ngIf="zoomedList.length > 0"
+    color="primary"
+    aria-label="Zoom out"
+    title="Zoom out"
+  >
     <mat-icon>zoom_out</mat-icon>
   </button>
-  <br>
-  <button *ngIf="firebaseAuthService.user && firebaseAuthService.user!.uid"
-          mat-fab
-          (click)="toggleEditMode()"
-          color="primary"
-          aria-label="Change from view mode to edit mode"
-          [title]="(editMode) ? 'Change to view mode' : 'Change to edit mode'">
+  <br />
+  <button
+    *ngIf="firebaseAuthService.user && firebaseAuthService.user!.uid"
+    mat-fab
+    (click)="toggleEditMode()"
+    color="primary"
+    aria-label="Change from view mode to edit mode"
+    [title]="editMode ? 'Change to view mode' : 'Change to edit mode'"
+  >
     <mat-icon *ngIf="editMode">visibility</mat-icon>
     <mat-icon *ngIf="!editMode">create</mat-icon>
   </button>
-  <br>
-  <button mat-fab
-          *ngIf="editMode && firebaseAuthService.user && firebaseAuthService.user!.uid"
-          (click)="toggleAddRelicMode()"
-          color="primary"
-          aria-label="Change from add relic mode to add zoom area mode"
-          [title]="(addRelicMode) ? 'Change to zoom area mode' : 'Change to add relic mode'">
+  <br />
+  <button
+    mat-fab
+    *ngIf="
+      editMode && firebaseAuthService.user && firebaseAuthService.user!.uid
+    "
+    (click)="toggleAddRelicMode()"
+    color="primary"
+    aria-label="Change from add relic mode to add zoom area mode"
+    [title]="
+      addRelicMode ? 'Change to zoom area mode' : 'Change to add relic mode'
+    "
+  >
     <mat-icon *ngIf="addRelicMode">crop_free</mat-icon>
     <mat-icon *ngIf="!addRelicMode">control_camera</mat-icon>
   </button>
-  <br>
-  <button mat-fab
-          *ngIf="editMode && firebaseAuthService.user && firebaseAuthService.user!.uid"
-          (click)="moveRelicOrZA()"
-          color="primary"
-          aria-label="Move a relic or Zoom Area"
-          [title]="(movingRelicOrZA) ? 'Cancel move' : 'Move relic or zoom area'">
+  <br />
+  <button
+    mat-fab
+    *ngIf="
+      editMode && firebaseAuthService.user && firebaseAuthService.user!.uid
+    "
+    (click)="moveRelicOrZA()"
+    color="primary"
+    aria-label="Move a relic or Zoom Area"
+    [title]="movingRelicOrZA ? 'Cancel move' : 'Move relic or zoom area'"
+  >
     <mat-icon *ngIf="movingRelicOrZA">cancel</mat-icon>
-    <mat-icon *ngIf="!movingRelicOrZA || movingRelicOrZA === ''">edit_location</mat-icon>
+    <mat-icon *ngIf="!movingRelicOrZA || movingRelicOrZA === ''"
+      >edit_location</mat-icon
+    >
   </button>
-  <br>
-  <button mat-fab
-          *ngIf="editMode && firebaseAuthService.user && firebaseAuthService.user!.uid"
-          (click)="autofillRelicsToggle()"
-          color="primary"
-          aria-label="Autofill relic info from book"
-          [title]="(autofillingRelics) ? 'Cancel autofill' : 'Autofill relic info from book'">
+  <br />
+  <button
+    mat-fab
+    *ngIf="
+      editMode && firebaseAuthService.user && firebaseAuthService.user!.uid
+    "
+    (click)="autofillRelicsToggle()"
+    color="primary"
+    aria-label="Autofill relic info from book"
+    [title]="
+      autofillingRelics ? 'Cancel autofill' : 'Autofill relic info from book'
+    "
+  >
     <mat-icon *ngIf="autofillingRelics">cancel</mat-icon>
-    <mat-icon *ngIf="!autofillingRelics || autofillingRelics === ''">auto_stories</mat-icon>
+    <mat-icon *ngIf="!autofillingRelics || autofillingRelics === ''"
+      >auto_stories</mat-icon
+    >
   </button>
 </div>
 
 <div class="top-right-buttons">
-  <div *ngIf="firebaseAuthService.angularFireAuth.user | async as user; else showLogin">
-    <button class="user-btn"
-            (click)="logout()"
-            title="Log out">
-      <img class="user-photo"
-           [src]="user!.photoURL">
+  <div
+    *ngIf="
+      firebaseAuthService.angularFireAuth.user | async as user;
+      else showLogin
+    "
+  >
+    <button class="user-btn" (click)="logout()" title="Log out">
+      <img class="user-photo" [src]="user!.photoURL" />
     </button>
   </div>
   <ng-template #showLogin>
-    <button class="user-btn"
-            (click)="login()"
-            title="Log in to edit">
-      <mat-icon class="user-photo"
-                style="padding: 13px 0px">create</mat-icon>
+    <button class="user-btn" (click)="login()" title="Log in to edit">
+      <mat-icon class="user-photo" style="padding: 13px 0px">create</mat-icon>
     </button>
   </ng-template>
 </div>
 
 <div class="left-button">
-  <button mat-fab
-          (click)="arrowClicked('left')"
-          *ngIf="editMode || currentPhotoInfo.arrows.leftToPhoto"
-          [ngClass]="{'faded-arrow-btn': editMode && !currentPhotoInfo.arrows.leftToPhoto}"
-          color="primary"
-          aria-label="Move left"
-          title="Move left">
+  <button
+    mat-fab
+    (click)="arrowClicked('left')"
+    *ngIf="editMode || currentPhotoInfo.arrows.leftToPhoto"
+    [ngClass]="{
+      'faded-arrow-btn': editMode && !currentPhotoInfo.arrows.leftToPhoto
+    }"
+    color="primary"
+    aria-label="Move left"
+    title="Move left"
+  >
     <mat-icon>arrow_back</mat-icon>
   </button>
 </div>
 
 <div class="right-button">
-  <button mat-fab
-          (click)="arrowClicked('right')"
-          *ngIf="editMode || currentPhotoInfo.arrows.rightToPhoto"
-          [ngClass]="{'faded-arrow-btn': editMode && !currentPhotoInfo.arrows.rightToPhoto}"
-          color="primary"
-          aria-label="Move right"
-          title="Move right">
+  <button
+    mat-fab
+    (click)="arrowClicked('right')"
+    *ngIf="editMode || currentPhotoInfo.arrows.rightToPhoto"
+    [ngClass]="{
+      'faded-arrow-btn': editMode && !currentPhotoInfo.arrows.rightToPhoto
+    }"
+    color="primary"
+    aria-label="Move right"
+    title="Move right"
+  >
     <mat-icon>arrow_forward</mat-icon>
   </button>
 </div>
 
 <div class="up-button">
-  <button mat-fab
-          (click)="arrowClicked('up')"
-          *ngIf="editMode || currentPhotoInfo.arrows.upToPhoto"
-          [ngClass]="{'faded-arrow-btn': editMode && !currentPhotoInfo.arrows.upToPhoto}"
-          color="primary"
-          aria-label="Move up"
-          title="Move up">
+  <button
+    mat-fab
+    (click)="arrowClicked('up')"
+    *ngIf="editMode || currentPhotoInfo.arrows.upToPhoto"
+    [ngClass]="{
+      'faded-arrow-btn': editMode && !currentPhotoInfo.arrows.upToPhoto
+    }"
+    color="primary"
+    aria-label="Move up"
+    title="Move up"
+  >
     <mat-icon>arrow_upward</mat-icon>
   </button>
 </div>
 
 <div class="down-button">
-  <button mat-fab
-          (click)="arrowClicked('down')"
-          *ngIf="editMode || currentPhotoInfo.arrows.downToPhoto"
-          [ngClass]="{'faded-arrow-btn': editMode && !currentPhotoInfo.arrows.downToPhoto}"
-          color="primary"
-          aria-label="Move down"
-          title="Move down">
+  <button
+    mat-fab
+    (click)="arrowClicked('down')"
+    *ngIf="editMode || currentPhotoInfo.arrows.downToPhoto"
+    [ngClass]="{
+      'faded-arrow-btn': editMode && !currentPhotoInfo.arrows.downToPhoto
+    }"
+    color="primary"
+    aria-label="Move down"
+    title="Move down"
+  >
     <mat-icon>arrow_downward</mat-icon>
   </button>
 </div>
 
-<div *ngIf="helperText"
-     class="bottom-text-area">
-  <span class="bottom-text">{{helperText}}</span>
+<div *ngIf="helperText" class="bottom-text-area">
+  <span class="bottom-text">{{ helperText }}</span>
 </div>
 
 <div class="bottom-left-buttons">
-  <button mat-fab
-          (click)="toggleHideLabels()"
-          color="primary"
-          aria-label="Show or hide the labels"
-          [title]="(hideLabels) ? 'Show labels' : 'Hide labels'">
+  <button
+    mat-fab
+    (click)="toggleHideLabels()"
+    color="primary"
+    aria-label="Show or hide the labels"
+    [title]="hideLabels ? 'Show labels' : 'Hide labels'"
+  >
     <mat-icon *ngIf="hideLabels">explore</mat-icon>
     <mat-icon *ngIf="!hideLabels">explore_off</mat-icon>
   </button>
 </div>
 
 <div class="bottom-right-buttons">
-  <button mat-fab
-          (click)="showInfo()"
-          color="primary"
-          aria-label="Show info screen"
-          title="Show info screen">
+  <button
+    mat-fab
+    (click)="showInfo()"
+    color="primary"
+    aria-label="Show info screen"
+    title="Show info screen"
+  >
     <mat-icon>info</mat-icon>
   </button>
 </div>

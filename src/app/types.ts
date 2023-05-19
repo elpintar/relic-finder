@@ -48,17 +48,17 @@ export interface Relic {
   creator?: string; // DEPRECATED - name of first user who created relic
   editors: string[]; // name of users who created/edited in order
   timesUpdated: number[]; // Date.getTime() values; maps 1-to-1 with editors
-                          // 0 means we don't know when updated
+  // 0 means we don't know when updated
 }
 
 export interface Saint {
   firebaseDocId?: string; // doc in Firebase
   name: string;
   commonName?: string; // "commonly known as" name, for relic dot label
-                       // 'CITY' or 'SUBTITLE' values indicate to use the
-                       // given information to compile a string
+  // 'CITY' or 'SUBTITLE' values indicate to use the
+  // given information to compile a string
   otherCommonName?: string; // used only internally for form field,
-                            // the value won't matter or need saved.
+  // the value won't matter or need saved.
   canonizationStatus: CanonizationStatus;
   city?: string;
   subtitle?: string; // like "of the Cross"
@@ -74,7 +74,7 @@ export interface Saint {
   linkUrls?: string[];
   editors: string[]; // name of users who edited
   timesUpdated: number[]; // Date.getTime() values; maps 1-to-1 with editors
-                          // 0 means we don't know when updated
+  // 0 means we don't know when updated
 }
 
 export interface User {

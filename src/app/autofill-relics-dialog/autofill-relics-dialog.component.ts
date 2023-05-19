@@ -7,7 +7,7 @@ import { locsToString } from '../helperFuncs';
 @Component({
   selector: 'app-autofill-relics-dialog',
   templateUrl: './autofill-relics-dialog.component.html',
-  styleUrls: ['./autofill-relics-dialog.component.sass']
+  styleUrls: ['./autofill-relics-dialog.component.sass'],
 })
 export class AutofillRelicsDialogComponent {
   chapelLocation = '';
@@ -19,7 +19,7 @@ export class AutofillRelicsDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<AutofillRelicsDialogComponent>,
     private fileDataService: FileDataService,
-    @Inject(MAT_DIALOG_DATA) public data: SpreadsheetRow,
+    @Inject(MAT_DIALOG_DATA) public data: SpreadsheetRow
   ) {
     const nextRow = data;
     if (nextRow) {
@@ -41,11 +41,13 @@ export class AutofillRelicsDialogComponent {
       return ssLoc === searchString;
     });
     if (results.length === 1) {
-      this.lookupResultStr = 'Relic information found:\n\n' + 
+      this.lookupResultStr =
+        'Relic information found:\n\n' +
         this.prettyPrintSpreadsheetRow(results[0]);
       this.lookupResult = results[0];
     } else if (results.length > 1) {
-      this.lookupResultStr = results.length.toString() +
+      this.lookupResultStr =
+        results.length.toString() +
         ' results found...hmmm, unusual...first one will be used: \n';
       this.lookupResultStr += results
         .map((r) => this.prettyPrintSpreadsheetRow(r))
@@ -60,9 +62,12 @@ export class AutofillRelicsDialogComponent {
         return ssLoc.indexOf(searchString) === 0;
       });
       if (partialMatches.length > 0) {
-        this.lookupResultStr += '\n' + partialMatches.length.toString() +
+        this.lookupResultStr +=
+          '\n' +
+          partialMatches.length.toString() +
           ' partial matches found.\nDid you mean one of these?\n\n';
-        this.lookupResultStr += partialMatches.map((r) => locsToString(r))
+        this.lookupResultStr += partialMatches
+          .map((r) => locsToString(r))
           .join('\n');
       }
     }
@@ -128,5 +133,4 @@ export class AutofillRelicsDialogComponent {
   onCancelClick(): void {
     this.dialogRef.close();
   }
-
 }

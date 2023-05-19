@@ -8,9 +8,8 @@ describe('ZoomAreaComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ZoomAreaComponent ]
-    })
-    .compileComponents();
+      declarations: [ZoomAreaComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

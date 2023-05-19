@@ -1,8 +1,12 @@
-<div class="zoom-area"
-     [ngStyle]="{'width.px': width,
-                 'height.px': height,
-                 'left.px': offsetX,
-                 'top.px': offsetY}"
-     (click)="sendZoomInSignal()">
-     <span class="relic-count">{{relicCount}}</span>
+<div
+  class="zoom-area"
+  [ngStyle]="{
+    'width.px': width,
+    'height.px': height,
+    'left.px': offsetX,
+    'top.px': offsetY
+  }"
+  (click)="sendZoomInSignal()"
+>
+  <span class="relic-count">{{ relicCount }}</span>
 </div>

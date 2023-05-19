@@ -8,9 +8,8 @@ describe('ZoomAreaDialogComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ZoomAreaDialogComponent ]
-    })
-    .compileComponents();
+      declarations: [ZoomAreaDialogComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

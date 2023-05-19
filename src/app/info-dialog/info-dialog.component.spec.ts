@@ -8,9 +8,8 @@ describe('InfoDialogComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ InfoDialogComponent ]
-    })
-    .compileComponents();
+      declarations: [InfoDialogComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

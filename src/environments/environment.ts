@@ -11,12 +11,12 @@ const firebaseConfig = {
   storageBucket: 'relic-finder.appspot.com',
   messagingSenderId: '149042048555',
   appId: '1:149042048555:web:3f54f2a15ca24c3ddd446e',
-  measurementId: 'G-NKFQKZ6D96'
+  measurementId: 'G-NKFQKZ6D96',
 };
 
 export const environment = {
   production: false,
-  firebase: firebaseConfig
+  firebase: firebaseConfig,
 };
 
 /*

@@ -1,18 +1,24 @@
 import { Component, Inject } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import {MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatRadioChange, _MatRadioButtonBase } from '@angular/material/radio';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { FirebaseAuthService } from 'src/app/firebase-auth.service';
 import { FirebaseDataService } from 'src/app/firebase-data.service';
 import { makeSaintNameString, msToDate } from 'src/app/helperFuncs';
-import { Relic, ZoomArea, CanonizationStatus, Saint, RelicAndSaints } from 'src/app/types';
+import {
+  Relic,
+  ZoomArea,
+  CanonizationStatus,
+  Saint,
+  RelicAndSaints,
+} from 'src/app/types';
 
 @Component({
   selector: 'app-relic-dialog',
   templateUrl: './relic-dialog.component.html',
-  styleUrls: ['./relic-dialog.component.sass']
+  styleUrls: ['./relic-dialog.component.sass'],
 })
 export class RelicDialogComponent {
   relic: Relic;
@@ -27,10 +33,11 @@ export class RelicDialogComponent {
   editMode = false;
 
   constructor(
-      public dialogRef: MatDialogRef<RelicDialogComponent>,
-      @Inject(MAT_DIALOG_DATA) public dataInput: [RelicAndSaints, boolean],
-      private firebaseDataService: FirebaseDataService,
-      private firebaseAuthService: FirebaseAuthService) {
+    public dialogRef: MatDialogRef<RelicDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public dataInput: [RelicAndSaints, boolean],
+    private firebaseDataService: FirebaseDataService,
+    private firebaseAuthService: FirebaseAuthService
+  ) {
     dialogRef.disableClose = true;
     const relicAndSaintsInput = this.dataInput;
     this.relic = relicAndSaintsInput[0][0];
@@ -38,11 +45,10 @@ export class RelicDialogComponent {
     this.editMode = this.dataInput[1];
     this.saints.map(this.initOtherCommonName);
     this.canonizationStatuses = Object.values(CanonizationStatus);
-    this.filteredSaints = this.autocompleteSaintsCtrl.valueChanges
-      .pipe(
-        startWith(''),
-        map(this.filterSaintsMatchingSearch, this)
-      );
+    this.filteredSaints = this.autocompleteSaintsCtrl.valueChanges.pipe(
+      startWith(''),
+      map(this.filterSaintsMatchingSearch, this)
+    );
     this.getHumanReadableSaintName = makeSaintNameString;
   }
 
@@ -54,7 +60,7 @@ export class RelicDialogComponent {
     const copyOfAllSaints = this.firebaseDataService.allSaintsLocal.slice();
     if (searchValue) {
       const searchLowercase = searchValue.toLowerCase();
-      return copyOfAllSaints.filter(s => {
+      return copyOfAllSaints.filter((s) => {
         let sName = this.getHumanReadableSaintName(s);
         sName = sName.toLowerCase();
         return sName.indexOf(searchLowercase) >= 0;
@@ -64,14 +70,18 @@ export class RelicDialogComponent {
     }
   }
 
-  autocompleteOptionSelectedForSaint(selectedSaint: Saint,
-                                     saintIndex: number): void {
+  autocompleteOptionSelectedForSaint(
+    selectedSaint: Saint,
+    saintIndex: number
+  ): void {
     // Copy the selectedSaint information to populate the form data for the
-    // saint at the saintIndex. 
+    // saint at the saintIndex.
     // Will keep existing values in the form, if any, where no values are in
     // new selectedSaint info.
     this.saints[saintIndex] = Object.assign(
-      this.saints[saintIndex], selectedSaint);
+      this.saints[saintIndex],
+      selectedSaint
+    );
   }
 
   initOtherCommonName(saint: Saint): void {
@@ -174,7 +184,7 @@ export class RelicDialogComponent {
     const currentUser = this.firebaseAuthService.getUserName() || 'Anonymous';
     const msSince1970 = new Date().getTime();
     const emptySaint = {
-      name: '', 
+      name: '',
       canonizationStatus: CanonizationStatus.Unknown,
       editors: [currentUser],
       timesUpdated: [msSince1970],

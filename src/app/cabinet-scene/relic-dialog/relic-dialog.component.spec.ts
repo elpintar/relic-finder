@@ -8,9 +8,8 @@ describe('RelicDialogComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ RelicDialogComponent ]
-    })
-    .compileComponents();
+      declarations: [RelicDialogComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

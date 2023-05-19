@@ -1,11 +1,14 @@
-<div class="relic-dot"
-     [ngStyle]="{'left.px': (offsetX - 12),
-                 'top.px': (offsetY - 13)}"
-     (click)="sendRelicClickedSignal()">
-     <mat-card *ngIf="relic && relic!.saintFirebaseDocIds[0]"
-               class="relic-hover-card">
-          <mat-card-title>
-               {{getHoverText()}}
-          </mat-card-title>
-     </mat-card>
+<div
+  class="relic-dot"
+  [ngStyle]="{ 'left.px': offsetX - 12, 'top.px': offsetY - 13 }"
+  (click)="sendRelicClickedSignal()"
+>
+  <mat-card
+    *ngIf="relic && relic!.saintFirebaseDocIds[0]"
+    class="relic-hover-card"
+  >
+    <mat-card-title>
+      {{ getHoverText() }}
+    </mat-card-title>
+  </mat-card>
 </div>

@@ -1,13 +1,11 @@
-import {Relic, RelicAndSaints, Saint, SpreadsheetRow} from './types';
+import { Relic, RelicAndSaints, Saint, SpreadsheetRow } from './types';
 
 export function makeSaintNameString(saint: Saint): string {
   if (saint.commonName) {
     if (saint.commonName === 'CITY') {
-      return saint.canonizationStatus + ' ' +
-        saint.name + ' of ' + saint.city;
+      return saint.canonizationStatus + ' ' + saint.name + ' of ' + saint.city;
     } else if (saint.commonName === 'SUBTITLE') {
-      return saint.canonizationStatus + ' ' +
-        saint.name + ' ' + saint.subtitle;
+      return saint.canonizationStatus + ' ' + saint.name + ' ' + saint.subtitle;
     } else {
       return saint.commonName;
     }
@@ -46,7 +44,7 @@ function deepEquals(x: any, y: any) {
       if (x[p] === y[p]) {
         continue; // if they have the same strict value or identity then they are equal
       }
-      if (typeof (x[p]) !== 'object') {
+      if (typeof x[p] !== 'object') {
         return false; // Numbers, Strings, Functions, Booleans must be strictly equal
       }
       if (!deepEquals(x[p], y[p])) {
@@ -85,7 +83,7 @@ export function relicAndSaintsEqual(rs1: RelicAndSaints, rs2: RelicAndSaints) {
 /** Turn milliseconds since 1970 to a human-readable datetime string. */
 export function msToDate(ms: number): string {
   if (ms === 0) {
-    return "sometime in 2021";
+    return 'sometime in 2021';
   }
   const d = new Date(ms);
   let datetimeString = d.toLocaleDateString();

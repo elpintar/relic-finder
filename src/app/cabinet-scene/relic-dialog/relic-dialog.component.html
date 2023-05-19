@@ -1,311 +1,338 @@
-
 <!-- VIEW MODE -->
 
-<div *ngIf="!editMode" 
-     mat-dialog-content
-     class="view-mode-relic-info">
-
+<div *ngIf="!editMode" mat-dialog-content class="view-mode-relic-info">
   <div *ngFor="let saint of saints; index as i">
-
-    <div *ngIf="i > 0">
-      <br><br>
-    </div>
+    <div *ngIf="i > 0"><br /><br /></div>
 
     <!-- RELIC MATERIAL -->
     <h3 *ngIf="relic.relicMaterials && relic.relicMaterials[i]">
-      {{relic.relicMaterials[i]}} of
+      {{ relic.relicMaterials[i] }} of
     </h3>
 
     <!-- COMMON NAME -->
     <h2>
-      {{getHumanReadableSaintName(saint)}}
+      {{ getHumanReadableSaintName(saint) }}
     </h2>
 
     <!-- VOCATIONS, RELIGIOUS ORDER -->
     <div>
       <h3>
-        <span *ngFor="let vocation of saint.vocations; index as i"><span *ngIf="i > 0">,
-        </span><span>{{vocation}}</span></span><span class="religious-order"
-        *ngIf="saint.religiousOrder">, {{saint.religiousOrder}}</span>
+        <span *ngFor="let vocation of saint.vocations; index as i"
+          ><span *ngIf="i > 0">, </span><span>{{ vocation }}</span></span
+        ><span class="religious-order" *ngIf="saint.religiousOrder"
+          >, {{ saint.religiousOrder }}</span
+        >
       </h3>
     </div>
 
     <!-- BIRTH - DEATH -->
     <div *ngIf="saint.birthDate || saint.deathDate">
-      <h3>{{saint.birthDate}} - {{saint.deathDate}}</h3>
+      <h3>{{ saint.birthDate }} - {{ saint.deathDate }}</h3>
     </div>
 
     <!-- FEAST DAY -->
     <div *ngIf="saint.feastDayAndMonth">
-      feast day: {{saint.feastDayAndMonth}}
+      feast day: {{ saint.feastDayAndMonth }}
     </div>
 
     <div *ngIf="saint.shortBio">
-      <br>
+      <br />
     </div>
 
     <mat-accordion *ngIf="saint.shortBio">
       <mat-expansion-panel>
         <mat-expansion-panel-header>
-          <mat-panel-title>
-            More info
-          </mat-panel-title>
+          <mat-panel-title> More info </mat-panel-title>
         </mat-expansion-panel-header>
 
         <!-- SHORT BIO -->
         <div *ngIf="saint.shortBio">
-          {{saint.shortBio}}
-          <br><br>
+          {{ saint.shortBio }}
+          <br /><br />
         </div>
 
         <!-- PATRONAGES -->
         <div *ngIf="saint.patronages && saint.patronages.length > 0">
-          Patron saint of: {{saint.patronages.join(', ')}}
-          <br><br>
+          Patron saint of: {{ saint.patronages.join(", ") }} <br /><br />
         </div>
 
         <!-- LINK(S) FOR MORE INFO -->
         <div *ngIf="saint.linkUrls && saint.linkUrls.length > 0">
           Links to learn more:
           <div>
-            <button *ngFor="let url of saint.linkUrls; index as i"
-                    mat-button>
+            <button *ngFor="let url of saint.linkUrls; index as i" mat-button>
               <a [href]="url" target="_blank" rel="noopener noreferrer">
-                <span *ngIf="saint.linkTexts && saint.linkTexts[i]; else defaultContent">
-                  {{saint.linkTexts[i]}}
+                <span
+                  *ngIf="
+                    saint.linkTexts && saint.linkTexts[i];
+                    else defaultContent
+                  "
+                >
+                  {{ saint.linkTexts[i] }}
                 </span>
-                <ng-template #defaultContent>{{'Link ' + i}}</ng-template>
+                <ng-template #defaultContent>{{ "Link " + i }}</ng-template>
               </a>
             </button>
           </div>
         </div>
       </mat-expansion-panel>
     </mat-accordion>
-
   </div>
-
 </div>
 <div *ngIf="!editMode" mat-dialog-actions>
-  <button mat-button [mat-dialog-close]="[relic, saints]" cdkFocusInitial>OK</button>
+  <button mat-button [mat-dialog-close]="[relic, saints]" cdkFocusInitial>
+    OK
+  </button>
 </div>
-
 
 <!-- EDIT MODE -->
 
-
 <div *ngIf="editMode" mat-dialog-content>
-
   <h2>Saint Information</h2>
-  
+
   <div *ngFor="let saint of saints; index as i">
     <div *ngIf="i > 0">
-      <br>
+      <br />
 
-      <hr>
-      
-      <br>
-      <h2>Saint {{i+1}}</h2>
-      <br>
+      <hr />
+
+      <br />
+      <h2>Saint {{ i + 1 }}</h2>
+      <br />
     </div>
 
     <mat-form-field>
-      <input matInput
-             placeholder="Look up existing saint"
-             aria-label="Look up existing saint"
-             [matAutocomplete]="auto"
-             [formControl]="autocompleteSaintsCtrl">
+      <input
+        matInput
+        placeholder="Look up existing saint"
+        aria-label="Look up existing saint"
+        [matAutocomplete]="auto"
+        [formControl]="autocompleteSaintsCtrl"
+      />
       <mat-autocomplete #auto="matAutocomplete">
-        <mat-option *ngFor="let s of filteredSaints | async"
-                    (onSelectionChange)="autocompleteOptionSelectedForSaint(s, i)"
-                    [value]="getHumanReadableSaintName(s)">
-          <span>{{getHumanReadableSaintName(s)}}</span>
+        <mat-option
+          *ngFor="let s of filteredSaints | async"
+          (onSelectionChange)="autocompleteOptionSelectedForSaint(s, i)"
+          [value]="getHumanReadableSaintName(s)"
+        >
+          <span>{{ getHumanReadableSaintName(s) }}</span>
         </mat-option>
       </mat-autocomplete>
     </mat-form-field>
 
     <mat-form-field appearance="fill">
       <mat-select [(ngModel)]="saint.canonizationStatus">
-        <mat-option *ngFor="let status of canonizationStatuses"
-                    [value]="status">{{status}}</mat-option>
+        <mat-option
+          *ngFor="let status of canonizationStatuses"
+          [value]="status"
+          >{{ status }}</mat-option
+        >
       </mat-select>
     </mat-form-field>
-    
+
     <mat-form-field>
       <mat-label>Saint Name (name only, subtitle goes below)</mat-label>
-      <input required matInput [(ngModel)]="saint.name">
+      <input required matInput [(ngModel)]="saint.name" />
     </mat-form-field>
-    
+
     of &nbsp;
 
-    <mat-form-field style="display: inline-block;">
+    <mat-form-field style="display: inline-block">
       <mat-label>City (optional)</mat-label>
-      <input matInput [(ngModel)]="saint.city">
+      <input matInput [(ngModel)]="saint.city" />
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Subtitle (like "the Baptist" / "of the Cross")</mat-label>
-      <input matInput [(ngModel)]="saint.subtitle">
+      <input matInput [(ngModel)]="saint.subtitle" />
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Religious Order (like "OFM", "OP", "SJ")</mat-label>
-      <input matInput [(ngModel)]="saint.religiousOrder">
+      <input matInput [(ngModel)]="saint.religiousOrder" />
     </mat-form-field>
 
     <mat-form-field>
       Saint commonly goes by this name:
-      <br><br>
-      <mat-radio-group [value]="saint.commonName"
-                       (change)="saintCommonNameChanged($event, saint)">
-        <mat-radio-button *ngIf="saint.city"
-                          [value]="'CITY'">
-          {{saint.canonizationStatus}} {{saint.name}} of {{saint.city}}
+      <br /><br />
+      <mat-radio-group
+        [value]="saint.commonName"
+        (change)="saintCommonNameChanged($event, saint)"
+      >
+        <mat-radio-button *ngIf="saint.city" [value]="'CITY'">
+          {{ saint.canonizationStatus }} {{ saint.name }} of {{ saint.city }}
         </mat-radio-button>
         &nbsp;
-        <mat-radio-button *ngIf="saint.subtitle"
-                          [value]="'SUBTITLE'">
-          {{saint.canonizationStatus}} {{saint.name}} {{saint.subtitle}}
+        <mat-radio-button *ngIf="saint.subtitle" [value]="'SUBTITLE'">
+          {{ saint.canonizationStatus }} {{ saint.name }} {{ saint.subtitle }}
         </mat-radio-button>
         &nbsp;
-        <mat-radio-button [value]="saint.otherCommonName"
-                          [id]="saint.name + i.toString() + 'radio-btn'">
+        <mat-radio-button
+          [value]="saint.otherCommonName"
+          [id]="saint.name + i.toString() + 'radio-btn'"
+        >
           Other:
-          <input matInput [(ngModel)]="saint.otherCommonName"
-                          (click)="clickRadioBtn(saint, i)"
-                          (focusout)="clickRadioBtn(saint, i)">
+          <input
+            matInput
+            [(ngModel)]="saint.otherCommonName"
+            (click)="clickRadioBtn(saint, i)"
+            (focusout)="clickRadioBtn(saint, i)"
+          />
         </mat-radio-button>
       </mat-radio-group>
     </mat-form-field>
 
-    <br>
-    Vocations (like "Martyr", "Grandfather of Jesus"):<br>
-    <div *ngFor="let vocation of saint.vocations; index as i; trackBy: trackByFn">
+    <br />
+    Vocations (like "Martyr", "Grandfather of Jesus"):<br />
+    <div
+      *ngFor="let vocation of saint.vocations; index as i; trackBy: trackByFn"
+    >
       <mat-form-field>
-        <input matInput [(ngModel)]="saint.vocations![i]">
+        <input matInput [(ngModel)]="saint.vocations![i]" />
       </mat-form-field>
     </div>
-    <button mat-raised-button
-            (click)="addVocation(saint)">+ vocation</button>
-    <button mat-raised-button
-            *ngIf="saint.vocations && saint.vocations!.length >= 1"
-            (click)="removeVocation(saint)">- vocation</button>
-    <br><br>
+    <button mat-raised-button (click)="addVocation(saint)">+ vocation</button>
+    <button
+      mat-raised-button
+      *ngIf="saint.vocations && saint.vocations!.length >= 1"
+      (click)="removeVocation(saint)"
+    >
+      - vocation
+    </button>
+    <br /><br />
 
     <mat-form-field>
       <mat-label>Birth date (MM-DD-YYYY, YYYY if date unknown)</mat-label>
-      <input matInput [(ngModel)]="saint.birthDate">
+      <input matInput [(ngModel)]="saint.birthDate" />
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Death date (MM-DD-YYYY, YYYY if date unknown)</mat-label>
-      <input matInput [(ngModel)]="saint.deathDate">
+      <input matInput [(ngModel)]="saint.deathDate" />
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Feast day (actual) (MM-DD, like 01-02)</mat-label>
-      <input matInput [(ngModel)]="saint.feastDayAndMonth">
+      <input matInput [(ngModel)]="saint.feastDayAndMonth" />
     </mat-form-field>
 
     <mat-form-field>
       <mat-label>Feast day (pre-1970) (MM-DD, like 01-02)</mat-label>
-      <input matInput [(ngModel)]="saint.feastDayAndMonthOld">
+      <input matInput [(ngModel)]="saint.feastDayAndMonthOld" />
     </mat-form-field>
 
-    <br>
-    Patron saint of:<br>
-    <div *ngFor="let patronage of saint.patronages; index as i; trackBy: trackByFn">
+    <br />
+    Patron saint of:<br />
+    <div
+      *ngFor="let patronage of saint.patronages; index as i; trackBy: trackByFn"
+    >
       <mat-form-field>
-        <input matInput [(ngModel)]="saint.patronages![i]">
+        <input matInput [(ngModel)]="saint.patronages![i]" />
       </mat-form-field>
     </div>
-    <button mat-raised-button
-            (click)="addPatronage(saint)">+ patronage</button>
-    <button mat-raised-button
-            *ngIf="saint.patronages && saint.patronages!.length >= 1"
-            (click)="removePatronage(saint)">- patronage</button>
-    <br><br>
+    <button mat-raised-button (click)="addPatronage(saint)">+ patronage</button>
+    <button
+      mat-raised-button
+      *ngIf="saint.patronages && saint.patronages!.length >= 1"
+      (click)="removePatronage(saint)"
+    >
+      - patronage
+    </button>
+    <br /><br />
 
     <mat-form-field>
-      <mat-label>Short Biography (1-2 sentences, no repeat of above info)</mat-label>
+      <mat-label
+        >Short Biography (1-2 sentences, no repeat of above info)</mat-label
+      >
       <textarea matInput [(ngModel)]="saint.shortBio"></textarea>
     </mat-form-field>
 
-    <br>
-    Links to learn more about this saint:<br>
+    <br />
+    Links to learn more about this saint:<br />
     <div *ngFor="let link of saint.linkUrls; index as i; trackBy: trackByFn">
       <mat-form-field>
         <mat-label>link text / description</mat-label>
-        <input matInput [(ngModel)]="saint.linkTexts![i]">
+        <input matInput [(ngModel)]="saint.linkTexts![i]" />
       </mat-form-field>
       <mat-form-field>
         <mat-label>URL (with http://)</mat-label>
-        <input matInput required [(ngModel)]="saint.linkUrls![i]">
+        <input matInput required [(ngModel)]="saint.linkUrls![i]" />
       </mat-form-field>
     </div>
-    <button mat-raised-button
-            (click)="addLink(saint)">+ link</button>
-    <button mat-raised-button
-            *ngIf="saint.linkUrls && saint.linkUrls!.length >= 1"
-            (click)="removeLink(saint)">- link</button>
-    <br><br>
+    <button mat-raised-button (click)="addLink(saint)">+ link</button>
+    <button
+      mat-raised-button
+      *ngIf="saint.linkUrls && saint.linkUrls!.length >= 1"
+      (click)="removeLink(saint)"
+    >
+      - link
+    </button>
+    <br /><br />
+
+    <div>Saint Firebase Id (blank if new):<br />{{ saint.firebaseDocId }}</div>
+    <br />
 
     <div>
-      Saint Firebase Id (blank if new):<br>{{saint.firebaseDocId}}
+      Creator of this saint's information:<br />
+      {{ saint.editors[0] }} ({{ msToDate(saint.timesUpdated[0]) }})
     </div>
-    <br>
+    <br />
 
-    <div>
-      Creator of this saint's information:<br>
-      {{saint.editors[0]}} ({{msToDate(saint.timesUpdated[0])}})
-    </div>
-    <br>
-  
     <div *ngIf="saint.editors.length > 1">
-      Other contributors:<br>
-      <span *ngFor="let e of saint.editors.slice(1); index as i; trackBy: trackByFn">
-        {{e}} ({{msToDate(saint.timesUpdated[i+1])}})
-        <br>
+      Other contributors:<br />
+      <span
+        *ngFor="let e of saint.editors.slice(1); index as i; trackBy: trackByFn"
+      >
+        {{ e }} ({{ msToDate(saint.timesUpdated[i + 1]) }})
+        <br />
       </span>
     </div>
-    <br>
+    <br />
 
-    <br>
+    <br />
 
     <div *ngIf="saints.length > 1">
-      <button mat-raised-button
-              (click)="removeSaint(saint)">- saint</button>
+      <button mat-raised-button (click)="removeSaint(saint)">- saint</button>
     </div>
-    <br>
+    <br />
   </div>
 
-  <button mat-raised-button
-            (click)="addSaint()">+ saint</button>
+  <button mat-raised-button (click)="addSaint()">+ saint</button>
 
-  <br>
-  <br>
-  <hr>
-  <br>
+  <br />
+  <br />
+  <hr />
+  <br />
 
   <h2>Relic Information</h2>
 
-  Relic Materials (what relic is made out of, <br>
-  one line for each saint above;<br>
-  comma-separate if multiple materials per line):<br>
-  <div *ngFor="let material of relic.relicMaterials; index as i; trackBy: trackByFn">
+  Relic Materials (what relic is made out of, <br />
+  one line for each saint above;<br />
+  comma-separate if multiple materials per line):<br />
+  <div
+    *ngFor="
+      let material of relic.relicMaterials;
+      index as i;
+      trackBy: trackByFn
+    "
+  >
     <mat-form-field>
-      <input matInput [(ngModel)]="relic.relicMaterials![i]">
+      <input matInput [(ngModel)]="relic.relicMaterials![i]" />
     </mat-form-field>
   </div>
-  <button mat-raised-button
-          (click)="addRelicMaterial()">+ material</button>
-  <button mat-raised-button
-          *ngIf="relic.relicMaterials && relic.relicMaterials!.length >= 1"
-          (click)="removeRelicMaterial()">- material</button>
-  <br>
+  <button mat-raised-button (click)="addRelicMaterial()">+ material</button>
+  <button
+    mat-raised-button
+    *ngIf="relic.relicMaterials && relic.relicMaterials!.length >= 1"
+    (click)="removeRelicMaterial()"
+  >
+    - material
+  </button>
+  <br />
 
   <mat-form-field>
     <mat-label>Chapel Location (like "V 31", "P 6 A 5 H")</mat-label>
-    <input matInput [(ngModel)]="relic.chapelLocation">
+    <input matInput [(ngModel)]="relic.chapelLocation" />
   </mat-form-field>
 
   <mat-form-field>
@@ -315,68 +342,70 @@
 
   <mat-form-field>
     <mat-label>Page number from Saints & Blesseds book</mat-label>
-    <input matInput [(ngModel)]="relic.bookPage">
+    <input matInput [(ngModel)]="relic.bookPage" />
   </mat-form-field>
 
   <mat-form-field>
     <mat-label>Page line from Saints & Blesseds book page</mat-label>
-    <input matInput [(ngModel)]="relic.bookLine">
+    <input matInput [(ngModel)]="relic.bookLine" />
   </mat-form-field>
 
   <mat-form-field>
     <mat-label>Doc Number (from chart book)</mat-label>
-    <input matInput [(ngModel)]="relic.docNumber">
+    <input matInput [(ngModel)]="relic.docNumber" />
   </mat-form-field>
 
   <mat-form-field>
     <mat-label>Number of Names in Doc (number only - no parentheses)</mat-label>
-    <input matInput [(ngModel)]="relic.numNamesInDoc">
+    <input matInput [(ngModel)]="relic.numNamesInDoc" />
   </mat-form-field>
 
-  <br>
-  <hr>
-  <br>
+  <br />
+  <hr />
+  <br />
 
   <h2>Auto-Generated Data</h2>
 
   <div>
-    Creator of this relic's information:<br>
-    {{relic.editors[0]}} ({{msToDate(relic.timesUpdated[0])}})
+    Creator of this relic's information:<br />
+    {{ relic.editors[0] }} ({{ msToDate(relic.timesUpdated[0]) }})
   </div>
-  <br>
+  <br />
 
   <div *ngIf="relic.editors.length > 1">
-    Other contributors:<br>
-    <span *ngFor="let e of relic.editors.slice(1); index as i; trackBy: trackByFn">
-      {{e}} ({{msToDate(relic.timesUpdated[i+1])}})
-      <br>
+    Other contributors:<br />
+    <span
+      *ngFor="let e of relic.editors.slice(1); index as i; trackBy: trackByFn"
+    >
+      {{ e }} ({{ msToDate(relic.timesUpdated[i + 1]) }})
+      <br />
     </span>
   </div>
 
   <mat-form-field>
     <mat-label>Photo URL</mat-label>
-    <input matInput [(ngModel)]="relic.inPhoto">
+    <input matInput [(ngModel)]="relic.inPhoto" />
   </mat-form-field>
 
   Natural Coordinates:
   <mat-form-field>
     <mat-label>X</mat-label>
-    <input matInput [(ngModel)]="relic.photoNaturalCoords[0]">
+    <input matInput [(ngModel)]="relic.photoNaturalCoords[0]" />
   </mat-form-field>
   <mat-form-field>
     <mat-label>Y</mat-label>
-    <input matInput [(ngModel)]="relic.photoNaturalCoords[1]">
+    <input matInput [(ngModel)]="relic.photoNaturalCoords[1]" />
   </mat-form-field>
 
-
   <div>
-    Firebase Relic Doc Id (blank if new):<br>{{relic.firebaseDocId}}
+    Firebase Relic Doc Id (blank if new):<br />{{ relic.firebaseDocId }}
   </div>
 
-  <br>
-
+  <br />
 </div>
 <div *ngIf="editMode" mat-dialog-actions>
   <button mat-button (click)="onCancelClick()">Cancel</button>
-  <button mat-button [mat-dialog-close]="[relic, saints]" cdkFocusInitial>Save</button>
+  <button mat-button [mat-dialog-close]="[relic, saints]" cdkFocusInitial>
+    Save
+  </button>
 </div>

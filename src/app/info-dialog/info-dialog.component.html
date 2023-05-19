@@ -1,50 +1,54 @@
 <h1>About Relic Finder</h1>
 
 <p>
-  Project Lead & Web App Developer: Erik Pintar<br>
-  St. Anthony Chapel Chairperson & Head Consultant: Carole Brueckner<br>
-  Photos taken by: Max Petrosky, Ben Plazek<br>
-  Initial Zoom Area Labeling: Ben Plazek, Jake Kelly, Noah Pepmeyer<br>
-  Clergy Supporters: Fr. Nick Vaskov, Fr. Jim Orr<br>
+  Project Lead & Web App Developer: Erik Pintar<br />
+  St. Anthony Chapel Chairperson & Head Consultant: Carole Brueckner<br />
+  Photos taken by: Max Petrosky, Ben Plazek<br />
+  Initial Zoom Area Labeling: Ben Plazek, Jake Kelly, Noah Pepmeyer<br />
+  Clergy Supporters: Fr. Nick Vaskov, Fr. Jim Orr<br />
   St. Anthony Chapel Business Manager: Becky Hurst
 </p>
 
 <p>
-  Founder, Designer, and Builder of St. Anthony Chapel: Fr. Suitbert G. Mollinger<br>
+  Founder, Designer, and Builder of St. Anthony Chapel: Fr. Suitbert G.
+  Mollinger<br />
   Patron Saint of Relic Finder: Blessed Carlos Acutis
 </p>
 
-<p><a
-  href="https://pghshrines.org/support-us-st-anthony"
-  target="_blank"
-  >Donate</a> to support St. Anthony Chapel & Relic Finder.</p>
+<p>
+  <a href="https://pghshrines.org/support-us-st-anthony" target="_blank"
+    >Donate</a
+  >
+  to support St. Anthony Chapel & Relic Finder.
+</p>
 
 <h2>Contributions to Relic Labeling & Saint Documenting</h2>
 
 <p class="bigger-font">
-  Total relics labeled: {{relicsLabeled}} (of over 4,000)<br>
-  Total saints added: {{saintsAdded}}<br>
+  Total relics labeled: {{ relicsLabeled }} (of over 4,000)<br />
+  Total saints added: {{ saintsAdded }}<br />
 </p>
 
-<p>We could always use more help with data entry!
-  Interested in contributing?<br>
-  Email epintar -at- diopitt -dot- org.</p>
+<p>
+  We could always use more help with data entry! Interested in contributing?<br />
+  Email epintar -at- diopitt -dot- org.
+</p>
 
 <table>
   <thead>
     <th>Name</th>
-    <th>Relics<br>Created</th>
-    <th>Relics<br>Edited</th>
-    <th>Saints<br>Created</th>
-    <th>Saints<br>Edited</th>
+    <th>Relics<br />Created</th>
+    <th>Relics<br />Edited</th>
+    <th>Saints<br />Created</th>
+    <th>Saints<br />Edited</th>
   </thead>
   <ng-container *ngFor="let row of displayList">
     <tr>
-      <td class="text-left">{{row[0]}}</td>
-      <td>{{row[1].relicsCreated}}</td>
-      <td>{{row[1].relicsUpdated}}</td>
-      <td>{{row[1].saintsCreated}}</td>
-      <td>{{row[1].saintsUpdated}}</td>
+      <td class="text-left">{{ row[0] }}</td>
+      <td>{{ row[1].relicsCreated }}</td>
+      <td>{{ row[1].relicsUpdated }}</td>
+      <td>{{ row[1].saintsCreated }}</td>
+      <td>{{ row[1].saintsUpdated }}</td>
     </tr>
   </ng-container>
 </table>

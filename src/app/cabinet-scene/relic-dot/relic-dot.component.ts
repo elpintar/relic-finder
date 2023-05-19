@@ -4,7 +4,7 @@ import { PhotoInfo, Relic, RelicAndSaints, Saint } from 'src/app/types';
 @Component({
   selector: 'app-relic-dot',
   templateUrl: './relic-dot.component.html',
-  styleUrls: ['./relic-dot.component.sass']
+  styleUrls: ['./relic-dot.component.sass'],
 })
 export class RelicDotComponent {
   @Output() relicClickedSignal = new EventEmitter<RelicAndSaints>();
@@ -32,8 +32,14 @@ export class RelicDotComponent {
     const coords = this.relic.photoNaturalCoords;
     const naturalWidth = photoInfo.naturalImgWidth;
     const naturalHeight = photoInfo.naturalImgHeight;
-    this.offsetX = (document.body.clientWidth / 2 - img.clientWidth / 2) + coords[0] * (img.clientWidth / naturalWidth);
-    this.offsetY = (document.body.clientHeight / 2 - img.clientHeight / 2) + coords[1] * (img.clientHeight / naturalHeight);
+    this.offsetX =
+      document.body.clientWidth / 2 -
+      img.clientWidth / 2 +
+      coords[0] * (img.clientWidth / naturalWidth);
+    this.offsetY =
+      document.body.clientHeight / 2 -
+      img.clientHeight / 2 +
+      coords[1] * (img.clientHeight / naturalHeight);
   }
 
   getHoverText(): string {
@@ -52,11 +58,13 @@ export class RelicDotComponent {
   getCommonName(saint: Saint): string {
     if (saint.commonName) {
       if (saint.commonName === 'CITY') {
-        return saint.canonizationStatus + ' ' + saint.name + ' of ' +
-          saint.city;
+        return (
+          saint.canonizationStatus + ' ' + saint.name + ' of ' + saint.city
+        );
       } else if (saint.commonName === 'SUBTITLE') {
-        return saint.canonizationStatus + ' ' + saint.name + ' ' +
-          saint.subtitle;
+        return (
+          saint.canonizationStatus + ' ' + saint.name + ' ' + saint.subtitle
+        );
       } else {
         return saint.commonName;
       }

@@ -8,9 +8,8 @@ describe('AutofillRelicsDialogComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ AutofillRelicsDialogComponent ]
-    })
-    .compileComponents();
+      declarations: [AutofillRelicsDialogComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

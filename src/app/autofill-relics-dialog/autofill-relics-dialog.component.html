@@ -4,9 +4,10 @@
 
   <div *ngIf="dialogState !== 'nextIndex'">
     <p>Autofill relic information from the Saints & Blessed book!</p>
-    <p>To start, enter the chapel location below.<br>
-      The location will have up to 5 fields, separated by spaces.<br>
-      Example: From the book: &nbsp;<code> U. 006 ...B 02 .</code><br>
+    <p>
+      To start, enter the chapel location below.<br />
+      The location will have up to 5 fields, separated by spaces.<br />
+      Example: From the book: &nbsp;<code> U. 006 ...B 02 .</code><br />
       &nbsp; will be entered as: &nbsp;<code> U 6 B 2</code>
     </p>
   </div>
@@ -17,37 +18,40 @@
 
   <mat-form-field>
     <mat-label>Chapel location</mat-label>
-    <input matInput [(ngModel)]="chapelLocation">
+    <input matInput [(ngModel)]="chapelLocation" />
   </mat-form-field>
   &nbsp;
-  <button mat-raised-button
-          (click)="lookupRelicLocation(chapelLocation)">Look up</button>
+  <button mat-raised-button (click)="lookupRelicLocation(chapelLocation)">
+    Look up
+  </button>
   <span *ngIf="lookupResult">
     &nbsp;
-    <button mat-raised-button
-            (click)="prevRelicLocation()">Prev</button>
+    <button mat-raised-button (click)="prevRelicLocation()">Prev</button>
     &nbsp;
-    <button mat-raised-button
-            (click)="nextRelicLocation()">Next</button>
+    <button mat-raised-button (click)="nextRelicLocation()">Next</button>
   </span>
 
-  <pre>{{lookupResultStr}}</pre>
+  <pre>{{ lookupResultStr }}</pre>
 
   <div *ngIf="lookupResult">
     When you place this relic:
     <ol>
-      <li>SEARCH if {{lookupResult.name}} already exists<br>
-          (if a field conflicts, the existing saint info will be automatically used)</li>
+      <li>
+        SEARCH if {{ lookupResult.name }} already exists<br />
+        (if a field conflicts, the existing saint info will be automatically
+        used)
+      </li>
       <li>EDIT the fields if they don't look right</li>
-      <li>ADD new fields (through internet searches on the saint),<br>if you have time</li>
+      <li>
+        ADD new fields (through internet searches on the saint),<br />if you
+        have time
+      </li>
     </ol>
   </div>
 </div>
 <div mat-dialog-actions>
   <button mat-button (click)="onCancelClick()" cdkFocusInitial>Cancel</button>
-  <button *ngIf="lookupResult" 
-          mat-button
-          [mat-dialog-close]="lookupResult">
+  <button *ngIf="lookupResult" mat-button [mat-dialog-close]="lookupResult">
     Place Relic
   </button>
 </div>

@@ -8,9 +8,8 @@ describe('RelicDotComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ RelicDotComponent ]
-    })
-    .compileComponents();
+      declarations: [RelicDotComponent],
+    }).compileComponents();
   }));
 
   beforeEach(() => {

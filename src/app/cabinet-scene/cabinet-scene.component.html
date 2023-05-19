@@ -1,16 +1,18 @@
 <div class="cabinet-scene-container">
-    <img #cabinetImage
-        [src]="photoInfo.photoImgPath"
-        (load)="onImgChange()"
-        (change)="onImgChange()"
-        (click)="clickInCabinet($event)"
-        class="cabinet-scene-image"
-        draggable="false">
+  <img
+    #cabinetImage
+    [src]="photoInfo.photoImgPath"
+    (load)="onImgChange()"
+    (change)="onImgChange()"
+    (click)="clickInCabinet($event)"
+    class="cabinet-scene-image"
+    draggable="false"
+  />
 
-    <div [ngClass]="{'hide-labels': hideLabels}">
-        <ng-container #zoomAreasContainer></ng-container>
-    </div>
-    <div [ngClass]="{'hide-labels': hideLabels}">
-        <ng-container #relicDotsContainer></ng-container>
-    </div>
+  <div [ngClass]="{ 'hide-labels': hideLabels }">
+    <ng-container #zoomAreasContainer></ng-container>
+  </div>
+  <div [ngClass]="{ 'hide-labels': hideLabels }">
+    <ng-container #relicDotsContainer></ng-container>
+  </div>
 </div>

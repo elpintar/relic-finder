@@ -1,7 +1,22 @@
 import { Component, ViewChild } from '@angular/core';
-import { PhotoInfo, Relic, ZoomArea, User, Saint, RelicAndSaints, CanonizationStatus, PhotoArrows } from './types';
+import {
+  PhotoInfo,
+  Relic,
+  ZoomArea,
+  User,
+  Saint,
+  RelicAndSaints,
+  CanonizationStatus,
+  PhotoArrows,
+} from './types';
 import { CabinetSceneComponent } from './cabinet-scene/cabinet-scene.component';
-import { AngularFirestore, AngularFirestoreCollection, DocumentData, DocumentReference, QuerySnapshot } from '@angular/fire/firestore';
+import {
+  AngularFirestore,
+  AngularFirestoreCollection,
+  DocumentData,
+  DocumentReference,
+  QuerySnapshot,
+} from '@angular/fire/firestore';
 import { bindCallback, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { AngularFireAuth } from '@angular/fire/auth';
@@ -16,45 +31,58 @@ type TraversalResult = {
 };
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class FirebaseDataService {
-
   allRelicsLocal: Relic[] = [];
   allZoomAreasLocal: ZoomArea[] = [];
   allSaintsLocal: Saint[] = [];
   allArrowsLocal: PhotoArrows[] = [];
 
-  constructor(private firestore: AngularFirestore) { }
+  constructor(private firestore: AngularFirestore) {}
 
   getInitialServerData(callback: () => void): void {
-    this.firestore.collection('relics')
-        .valueChanges({idField: 'firebaseDocId'}).pipe(take(1)).subscribe((relicsList) => {
-      console.log('relics', relicsList);
-      this.firestore.collection('zoomAreas')
-          .valueChanges({idField: 'firebaseDocId'}).pipe(take(1)).subscribe((zoomAreasList) => {
-        console.log('zoomAreas', zoomAreasList);
-        this.firestore.collection('saints')
-            .valueChanges({idField: 'firebaseDocId'}).pipe(take(1)).subscribe((saintsList) => {
-          console.log('saints', saintsList);
-          this.firestore.collection('arrows')
-              .valueChanges({idField: 'firebaseDocId'}).pipe(take(1)).subscribe((arrowsList) => {
-            this.allRelicsLocal = relicsList as Relic[];
-            this.allZoomAreasLocal = zoomAreasList as ZoomArea[];
-            this.allSaintsLocal = saintsList as Saint[];
-            this.allArrowsLocal = arrowsList as PhotoArrows[];
-            callback();
+    this.firestore
+      .collection('relics')
+      .valueChanges({ idField: 'firebaseDocId' })
+      .pipe(take(1))
+      .subscribe((relicsList) => {
+        console.log('relics', relicsList);
+        this.firestore
+          .collection('zoomAreas')
+          .valueChanges({ idField: 'firebaseDocId' })
+          .pipe(take(1))
+          .subscribe((zoomAreasList) => {
+            console.log('zoomAreas', zoomAreasList);
+            this.firestore
+              .collection('saints')
+              .valueChanges({ idField: 'firebaseDocId' })
+              .pipe(take(1))
+              .subscribe((saintsList) => {
+                console.log('saints', saintsList);
+                this.firestore
+                  .collection('arrows')
+                  .valueChanges({ idField: 'firebaseDocId' })
+                  .pipe(take(1))
+                  .subscribe((arrowsList) => {
+                    this.allRelicsLocal = relicsList as Relic[];
+                    this.allZoomAreasLocal = zoomAreasList as ZoomArea[];
+                    this.allSaintsLocal = saintsList as Saint[];
+                    this.allArrowsLocal = arrowsList as PhotoArrows[];
+                    callback();
+                  });
+              });
           });
-        });
       });
-    });
   }
 
   createZoomArea(zoomArea: ZoomArea): void {
     console.log('new zoom area info', zoomArea);
     const newZAId = this.makeIdForZoomArea(zoomArea);
     zoomArea.firebaseDocId = newZAId;
-    this.firestore.collection<ZoomArea>('zoomAreas').doc(newZAId)
+    this.firestore
+      .collection<ZoomArea>('zoomAreas')
+      .doc(newZAId)
       .set(zoomArea)
       .then(() => {
         console.log('za created: ', zoomArea);
@@ -70,13 +98,14 @@ export class FirebaseDataService {
     if (!zoomArea.firebaseDocId) {
       return;
     }
-    this.firestore.collection<ZoomArea>('zoomAreas')
+    this.firestore
+      .collection<ZoomArea>('zoomAreas')
       .doc(zoomArea.firebaseDocId)
       .update(zoomArea)
       .then(() => {
         console.log('Zoom area updated', zoomArea);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('Error updating zoom area:', error);
       });
     // Update local data.
@@ -89,8 +118,10 @@ export class FirebaseDataService {
   }
 
   /** Callback param for autofill only. */
-  addOrUpdateRelicAndSaints(relicAndSaints: RelicAndSaints, 
-                            callback?: () => void): void {
+  addOrUpdateRelicAndSaints(
+    relicAndSaints: RelicAndSaints,
+    callback?: () => void
+  ): void {
     console.log('add or update:', relicAndSaints);
     const relic = relicAndSaints[0];
     const saints = relicAndSaints[1];
@@ -116,7 +147,9 @@ export class FirebaseDataService {
       return;
     }
     this.updateSaintIdsInRelic(relic, saints);
-    this.firestore.collection<Relic>('relics').doc(relic.firebaseDocId)
+    this.firestore
+      .collection<Relic>('relics')
+      .doc(relic.firebaseDocId)
       .update(relic)
       .then(() => {
         console.log('Relic updated:', relic.firebaseDocId, relic);
@@ -141,23 +174,25 @@ export class FirebaseDataService {
         saint.firebaseDocId = newSaintId;
         console.log('NEW SAINT ID: ', newSaintId);
         // Add to Firebase
-        this.firestore.collection<Saint>('saints')
-          .doc(newSaintId)
-          .set(saint);
+        this.firestore.collection<Saint>('saints').doc(newSaintId).set(saint);
         // Add locally
         this.allSaintsLocal.push(saint);
       } else {
         const indexMatch = this.getLocalSaintIndexWithId(saint.firebaseDocId);
         if (indexMatch >= 0) {
           // UPDATE Firebase
-          this.firestore.collection<Saint>('saints')
+          this.firestore
+            .collection<Saint>('saints')
             .doc(saint.firebaseDocId)
             .set(saint);
           // Update locally
           this.allSaintsLocal[indexMatch] = saint;
         } else {
-          alert('Data will not be saved for this saint - ' +
-          'no firebase doc id match: ' + saint.firebaseDocId);
+          alert(
+            'Data will not be saved for this saint - ' +
+              'no firebase doc id match: ' +
+              saint.firebaseDocId
+          );
         }
       }
     });
@@ -169,9 +204,14 @@ export class FirebaseDataService {
     const newRelicId = this.makeIdForRelic(relic, saints);
     relic.firebaseDocId = newRelicId;
     console.log('NEW RELIC ID: ', newRelicId);
-    this.firestore.collection<Relic>('relics').doc(newRelicId).set(relic)
+    this.firestore
+      .collection<Relic>('relics')
+      .doc(newRelicId)
+      .set(relic)
       .then(() => {
-        console.log('successful write of new relic doc - firebase id: ' + newRelicId);
+        console.log(
+          'successful write of new relic doc - firebase id: ' + newRelicId
+        );
         // Update local data
         this.allRelicsLocal.push(relic);
         if (callback) {
@@ -185,9 +225,11 @@ export class FirebaseDataService {
   }
 
   updateSaintIdsInRelic(relic: Relic, saints: Saint[]): void {
-    relic.saintFirebaseDocIds = saints.map(s => {
+    relic.saintFirebaseDocIds = saints.map((s) => {
       if (!s.firebaseDocId) {
-        alert('Aborting; missing firebase doc id for saint ' + JSON.stringify(s));
+        alert(
+          'Aborting; missing firebase doc id for saint ' + JSON.stringify(s)
+        );
         throw new Error('No saint id ' + JSON.stringify(s));
       }
       return s.firebaseDocId;
@@ -199,10 +241,12 @@ export class FirebaseDataService {
     const saints = relicAndSaints[1];
     const updatedSaints: Saint[] = [];
     if (updatedRelic.firebaseDocId) {
-      const relicIndex = this.getLocalRelicIndexWithId(updatedRelic.firebaseDocId);
+      const relicIndex = this.getLocalRelicIndexWithId(
+        updatedRelic.firebaseDocId
+      );
       updatedRelic = this.allRelicsLocal[relicIndex];
     }
-    saints.forEach(s => {
+    saints.forEach((s) => {
       let saintToAdd = s;
       if (s.firebaseDocId) {
         const sIndex = this.getLocalSaintIndexWithId(s.firebaseDocId);
@@ -215,7 +259,7 @@ export class FirebaseDataService {
 
   getSaintsForRelic(relic: Relic): Saint[] {
     const saints: Saint[] = [];
-    relic.saintFirebaseDocIds.forEach(saintFirebaseId => {
+    relic.saintFirebaseDocIds.forEach((saintFirebaseId) => {
       const saintIndex = this.getLocalSaintIndexWithId(saintFirebaseId);
       saints.push(this.allSaintsLocal[saintIndex]);
     });
@@ -224,14 +268,14 @@ export class FirebaseDataService {
 
   getRelicsForSaint(saint: Saint): Relic[] {
     const saintId = saint.firebaseDocId || '';
-    return this.allRelicsLocal.filter(r => {
+    return this.allRelicsLocal.filter((r) => {
       return r.saintFirebaseDocIds.includes(saintId);
     });
   }
 
   private zoomInListToPhoto(photoFilename: string): string[] {
     const pathList: string[] = [];
-    const zoomAreaOneLevelUp = this.allZoomAreasLocal.find(za => {
+    const zoomAreaOneLevelUp = this.allZoomAreasLocal.find((za) => {
       return za.zoomToPhotoFilename === photoFilename;
     });
     if (zoomAreaOneLevelUp) {
@@ -242,9 +286,11 @@ export class FirebaseDataService {
     }
   }
 
-  private traverseEachArrow(arrows: PhotoArrows,
-                            toPhotoFilename: string,
-                            visited: string[]): TraversalResult {
+  private traverseEachArrow(
+    arrows: PhotoArrows,
+    toPhotoFilename: string,
+    visited: string[]
+  ): TraversalResult {
     let traversalResult: TraversalResult;
     const curPhotoFilename = arrows.photoFilename;
     const arrowList = this.getArrowsAsList(arrows);
@@ -264,24 +310,26 @@ export class FirebaseDataService {
     };
   }
 
-  private traverse(fromPhotoFilename: string, 
-                   toPhotoFilename: string,
-                   visited: string[] = []): TraversalResult {
-    console.log("traversing", fromPhotoFilename);
+  private traverse(
+    fromPhotoFilename: string,
+    toPhotoFilename: string,
+    visited: string[] = []
+  ): TraversalResult {
+    console.log('traversing', fromPhotoFilename);
     // SUCCESS
     if (fromPhotoFilename === toPhotoFilename) {
-      return {successful: true, path: [fromPhotoFilename], visited};
+      return { successful: true, path: [fromPhotoFilename], visited };
     }
     // Already visited, go back.
     else if (visited.includes(fromPhotoFilename)) {
-      return {successful: false, path: [], visited};
+      return { successful: false, path: [], visited };
     }
     // Update visited when first arriving at each node.
     visited = visited.concat([fromPhotoFilename]);
     const arrows = this.getLocalArrowsWithPhotoFilename(fromPhotoFilename);
     // Not a success and no arrows here to explore, go back.
     if (!arrows) {
-      return {successful: false, path: [], visited};
+      return { successful: false, path: [], visited };
     }
     // Not success, so keep on traversing in each direction.
     else {
@@ -294,44 +342,58 @@ export class FirebaseDataService {
     }
   }
 
-  private findTopLevelPath(fromPhotoFilename: string, 
-                           toPhotoFilename: string): string[] {
+  private findTopLevelPath(
+    fromPhotoFilename: string,
+    toPhotoFilename: string
+  ): string[] {
     let result = this.traverse(fromPhotoFilename, toPhotoFilename);
     if (result.successful) {
       return result.path;
     } else {
-      console.error('No path found from', fromPhotoFilename,
-                    'to', toPhotoFilename);
+      console.error(
+        'No path found from',
+        fromPhotoFilename,
+        'to',
+        toPhotoFilename
+      );
       return [];
     }
   }
 
   /**
    * Get the path from currentPhotoFilename to the Relic, of photo filenames,
-   * going in order of clicks of arrows or zoom areas from now to the relic. 
+   * going in order of clicks of arrows or zoom areas from now to the relic.
    * It will always be in order of:
    *  - zooming out from where you are (if not at the top level)
    *  - using arrows at the top-most level
    *  - zooming into where you need to go
-  */
+   */
   getPathToRelic(relic: Relic, currentPhotoFilename: string): string[] {
     const zoomingInToRelic = this.zoomInListToPhoto(relic.inPhoto);
     const zoomingInToCurrent = this.zoomInListToPhoto(currentPhotoFilename);
     // Shift outermost elements off arrays since they will be included in top level path.
     const zoomedOutFromRelic = zoomingInToRelic[0];
     const zoomedOutFromCurrentPhoto = zoomingInToCurrent[0];
-    const zoomedOutPathViaArrows = this.findTopLevelPath(zoomedOutFromRelic, zoomedOutFromCurrentPhoto);
-    console.log("zoomingInToCurrent", zoomingInToCurrent,
-                "zoomedOutPathViaArrows", zoomedOutPathViaArrows,
-                "zoomingInToRelic", zoomingInToRelic);
+    const zoomedOutPathViaArrows = this.findTopLevelPath(
+      zoomedOutFromRelic,
+      zoomedOutFromCurrentPhoto
+    );
+    console.log(
+      'zoomingInToCurrent',
+      zoomingInToCurrent,
+      'zoomedOutPathViaArrows',
+      zoomedOutPathViaArrows,
+      'zoomingInToRelic',
+      zoomingInToRelic
+    );
     // Remove duplicate path elements before combining.
     zoomingInToCurrent.pop(); // remove starting pic
     zoomedOutPathViaArrows.shift(); // remove first from arrow path
     zoomingInToRelic.shift(); // remove first from zooming in path
     const zoomingOutFromCurrent = zoomingInToCurrent.reverse();
     return zoomingOutFromCurrent.concat(
-           zoomedOutPathViaArrows.concat(
-           zoomingInToRelic));
+      zoomedOutPathViaArrows.concat(zoomingInToRelic)
+    );
   }
 
   // Filename format: 'MNOPQ.jpeg'
@@ -343,20 +405,25 @@ export class FirebaseDataService {
     }
     const name = filenameParts[0];
     const filetype = filenameParts[1];
-    const fullPath = 'https://firebasestorage.googleapis.com/v0/b/' +
-    'relic-finder.appspot.com/o/zas%2F' +
-    `${name}_1600x1600.${filetype}?alt=media`;
+    const fullPath =
+      'https://firebasestorage.googleapis.com/v0/b/' +
+      'relic-finder.appspot.com/o/zas%2F' +
+      `${name}_1600x1600.${filetype}?alt=media`;
     return fullPath;
   }
 
-  getPhotoArrows(photoFilename: string): PhotoArrows|undefined {
+  getPhotoArrows(photoFilename: string): PhotoArrows | undefined {
     return this.allArrowsLocal.find((arrows) => {
       return arrows.photoFilename === photoFilename;
     });
   }
 
   // If updated reverse arrow, send back the reverse arrow data.
-  updatePhotoArrowsBothDirections(newArrows: PhotoArrows, direction: string, newPhoto: string): PhotoArrows|void {
+  updatePhotoArrowsBothDirections(
+    newArrows: PhotoArrows,
+    direction: string,
+    newPhoto: string
+  ): PhotoArrows | void {
     // Assumes the newArrows has already been updated for one direction.
     this.addOrUpdatePhotoArrows(newArrows);
     // Add arrow in reverse direction.
@@ -364,10 +431,13 @@ export class FirebaseDataService {
     let linkedPhotoArrows = this.getLocalArrowsWithPhotoFilename(newPhoto);
     if (!linkedPhotoArrows) {
       linkedPhotoArrows = {
-        photoFilename: newPhoto
+        photoFilename: newPhoto,
       } as PhotoArrows;
     }
-    const reverseDirectionHasArrow = this.directionHasArrow(linkedPhotoArrows, reverseDirection);
+    const reverseDirectionHasArrow = this.directionHasArrow(
+      linkedPhotoArrows,
+      reverseDirection
+    );
     let updateReverseArrow = true;
     if (reverseDirectionHasArrow) {
       updateReverseArrow = confirm('Overwrite arrow in reverse direction?');
@@ -394,30 +464,37 @@ export class FirebaseDataService {
     if (!arrowsId) {
       // new arrows
       newArrows.firebaseDocId = newArrows.photoFilename + '-arrows';
-      this.firestore.collection<PhotoArrows>('arrows')
+      this.firestore
+        .collection<PhotoArrows>('arrows')
         .doc(newArrows.firebaseDocId)
         .set(newArrows)
-      .then(() => {
-        console.log('successful write of new arrows doc - firebase id: ' + newArrows.firebaseDocId);
-      })
-      .catch((reason: string) => {
-        console.error(reason);
-        alert('Error adding new arrow: ' + reason);
-      }).finally(() => {
-        console.log('successfully added arrows: ', newArrows);
-      });
+        .then(() => {
+          console.log(
+            'successful write of new arrows doc - firebase id: ' +
+              newArrows.firebaseDocId
+          );
+        })
+        .catch((reason: string) => {
+          console.error(reason);
+          alert('Error adding new arrow: ' + reason);
+        })
+        .finally(() => {
+          console.log('successfully added arrows: ', newArrows);
+        });
       // Update local data
       this.allArrowsLocal.push(newArrows);
     } else {
       // update existing arrow
-      this.firestore.collection<PhotoArrows>('arrows').doc(arrowsId)
-      .update(newArrows)
-      .then(() => {
-        console.log('Arrows updated:', arrowsId, newArrows);
-      })
-      .catch((error) => {
-        console.error('Error updating arrows document: ', error);
-      });
+      this.firestore
+        .collection<PhotoArrows>('arrows')
+        .doc(arrowsId)
+        .update(newArrows)
+        .then(() => {
+          console.log('Arrows updated:', arrowsId, newArrows);
+        })
+        .catch((error) => {
+          console.error('Error updating arrows document: ', error);
+        });
       // Update local data.
       const indexMatch = this.getLocalArrowsIndexWithId(arrowsId);
       if (indexMatch >= 0) {
@@ -441,7 +518,10 @@ export class FirebaseDataService {
     }
     if (reverseDirection === '') {
       alert('Input direction invalid for reverseDirection: ' + direction);
-      console.error('Input direction invalid for reverseDirection: ', direction);
+      console.error(
+        'Input direction invalid for reverseDirection: ',
+        direction
+      );
     }
     return reverseDirection;
   }
@@ -457,7 +537,10 @@ export class FirebaseDataService {
       return !!arrows.downToPhoto;
     } else {
       alert('Invalid direction given to directionHasArrow: ' + direction);
-      console.error('Invalid direction given to directionHasArrow: ', direction);
+      console.error(
+        'Invalid direction given to directionHasArrow: ',
+        direction
+      );
       return false;
     }
   }
@@ -492,19 +575,19 @@ export class FirebaseDataService {
   }
 
   getLocalZoomAreaIndexWithId(relicFirebaseId: string): number {
-    return this.allZoomAreasLocal.findIndex(za => {
+    return this.allZoomAreasLocal.findIndex((za) => {
       return za.firebaseDocId === relicFirebaseId;
     });
   }
 
   getLocalArrowsIndexWithId(arrowsId: string): number {
-    return this.allArrowsLocal.findIndex(arrow => {
+    return this.allArrowsLocal.findIndex((arrow) => {
       return arrow.firebaseDocId === arrowsId;
     });
   }
 
-  getLocalArrowsWithPhotoFilename(filename: string): PhotoArrows|undefined {
-    return this.allArrowsLocal.find(arrow => {
+  getLocalArrowsWithPhotoFilename(filename: string): PhotoArrows | undefined {
+    return this.allArrowsLocal.find((arrow) => {
       return arrow.photoFilename === filename;
     });
   }
@@ -512,10 +595,8 @@ export class FirebaseDataService {
   makeIdForZoomArea(za: ZoomArea): string {
     let newZAId = za.zoomFromPhotoFilename.split('.')[0];
     newZAId = newZAId + '_to_' + za.zoomToPhotoFilename.split('.')[0];
-    newZAId = newZAId + '_' +
-      Math.floor(za.topLeftNaturalCoords[0]).toString();
-    newZAId = newZAId + '_' +
-      Math.floor(za.topLeftNaturalCoords[1]).toString();
+    newZAId = newZAId + '_' + Math.floor(za.topLeftNaturalCoords[0]).toString();
+    newZAId = newZAId + '_' + Math.floor(za.topLeftNaturalCoords[1]).toString();
     return newZAId;
   }
 
@@ -569,17 +650,21 @@ export class FirebaseDataService {
     });
     let materials = '';
     if (relic.relicMaterials && relic.relicMaterials.length > 0) {
-      const underscoreStrings = relic.relicMaterials.map(
-        m => m.replace(/ /g, '_'));
+      const underscoreStrings = relic.relicMaterials.map((m) =>
+        m.replace(/ /g, '_')
+      );
       materials = '_' + underscoreStrings.join('_&_') + '_';
     } else {
       materials = '_';
     }
-    newRelicId = relic.inPhoto.split('.')[0] + '_' +
-                 newRelicId +
-                 materials +
-                 Math.floor(relic.photoNaturalCoords[0]).toString() + '_' +
-                 Math.floor(relic.photoNaturalCoords[1]).toString();
+    newRelicId =
+      relic.inPhoto.split('.')[0] +
+      '_' +
+      newRelicId +
+      materials +
+      Math.floor(relic.photoNaturalCoords[0]).toString() +
+      '_' +
+      Math.floor(relic.photoNaturalCoords[1]).toString();
     if (this.getLocalRelicIndexWithId(newRelicId) >= 0) {
       alert('Relic with matching id - overwriting data for existing relic!');
     }
