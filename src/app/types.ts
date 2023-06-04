@@ -24,6 +24,11 @@ export interface ZoomArea {
   bottomRightNaturalCoords: number[];
 }
 
+export interface DisplayZoomArea extends ZoomArea {
+  color: string;
+  searchRelicCount: number;
+}
+
 export interface PhotoArrows {
   firebaseDocId?: string; // doc in Firebase = photoFilename + '-arrows'
   photoFilename: string; // must match filenames in zoom area data

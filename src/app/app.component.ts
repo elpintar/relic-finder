@@ -8,6 +8,7 @@ import {
   PhotoArrows,
   SpreadsheetRow,
   Saint,
+  DisplayZoomArea,
 } from './types';
 import { CabinetSceneComponent } from './cabinet-scene/cabinet-scene.component';
 import {
@@ -28,6 +29,7 @@ import { ArrowDialogComponent } from './cabinet-scene/arrow-dialog/arrow-dialog.
 import { MatDialog } from '@angular/material/dialog';
 import { InfoDialogComponent } from './info-dialog/info-dialog.component';
 import { AutofillRelicsDialogComponent } from './autofill-relics-dialog/autofill-relics-dialog.component';
+import { makeSaintNameString } from './helperFuncs';
 
 @Component({
   selector: 'app-root',
@@ -49,6 +51,11 @@ export class AppComponent {
 
   zoomedList: string[] = [];
   zoomAreaRelicCounts: Map<string, number>;
+  // For relic search.
+  zoomAreasToColor: Map<string, string>;
+  zoomAreaSearchRelicCounts: Map<string, number>;
+  arrowCounts: Map<string, number>;
+  zoomOutCount: number;
 
   currentPhotoInfo: PhotoInfo = {
     photoFilename: 'MNOPQ.jpeg',
@@ -71,6 +78,10 @@ export class AppComponent {
     private angularFireAuth: AngularFireAuth
   ) {
     this.zoomAreaRelicCounts = new Map();
+    this.zoomAreasToColor = new Map();
+    this.zoomAreaSearchRelicCounts = new Map();
+    this.arrowCounts = new Map();
+    this.zoomOutCount = 0;
     // Initialize Cloud Firestore through Firebase
     firebaseAuthService.getInitialUserData();
     firebaseDataService.getInitialServerData(() => {
@@ -153,9 +164,14 @@ export class AppComponent {
   }
 
   changeCabinetScene(photoToChangeTo: string): void {
+    // Reset display data.
+    this.zoomAreasToColor = new Map();
+    this.arrowCounts = new Map();
+    this.zoomOutCount = 0;
     if (this.photos.has(photoToChangeTo)) {
       this.currentPhotoInfo = this.photos.get(photoToChangeTo);
     } else {
+      // Reset currentPhotoInfo.
       const emptyArrows = {
         photoFilename: photoToChangeTo,
       };
@@ -210,12 +226,20 @@ export class AppComponent {
     const zasInPhoto = this.firebaseDataService.allZoomAreasLocal.filter(
       (za) => za.zoomFromPhotoFilename === photoToChangeTo
     );
+    const displayZAsInPhoto: DisplayZoomArea[] = zasInPhoto.map((za) => {
+      const zaKey = za.firebaseDocId || '';
+      return {
+          ...za,
+          color: this.zoomAreasToColor.get(zaKey) || 'yellow',
+          searchRelicCount: this.zoomAreaSearchRelicCounts.get(zaKey) || 0,
+        };
+    });
     if (this.editMode) {
       this.getRelicCounts(photoToChangeTo);
     }
     this.cabinetSceneComponent.redrawScene(
       relicsInPhoto,
-      zasInPhoto,
+      displayZAsInPhoto,
       this.zoomAreaRelicCounts
     );
   }
@@ -394,8 +418,72 @@ export class AppComponent {
     this.recursivelyGetRelicCounts(startingPhoto);
   }
 
+  addOneToArrowCount(arrowString: string) {
+    const count = this.arrowCounts.get(arrowString);
+    if (count) {
+      this.arrowCounts.set(arrowString, count + 1);
+    } else {
+      this.arrowCounts.set(arrowString, 1);
+    }
+  }
+
+  addArrowCountIfNextStepFound(nextStep: string): boolean {
+    const arrows = this.currentPhotoInfo.arrows;
+    let foundNextStep = true; // Assume true unless nothing found below.
+    if (arrows.leftToPhoto === nextStep) {
+      this.addOneToArrowCount('left');
+    } else if (arrows.rightToPhoto === nextStep) {
+      this.addOneToArrowCount('right');
+    } else if (arrows.upToPhoto === nextStep) {
+      this.addOneToArrowCount('up');
+    } else if (arrows.downToPhoto === nextStep) {
+      this.addOneToArrowCount('down');
+    } else {
+      foundNextStep = false;
+    }
+    return foundNextStep;
+  }
+
+  addOneToSearchRelicCount(zaId: string): void {
+    const count = this.zoomAreaSearchRelicCounts.get(zaId);
+    if (count) {
+      this.zoomAreaSearchRelicCounts.set(zaId, count+1);
+    } else {
+      this.zoomAreaSearchRelicCounts.set(zaId, 1);
+    }
+  }
+
+  highlightNextStep(nextStep: string): void {
+    const zaToNextStep = this.firebaseDataService.allZoomAreasLocal.find(
+      (za) =>
+        za.zoomFromPhotoFilename === this.currentPhotoInfo.photoFilename &&
+        za.zoomToPhotoFilename === nextStep
+    );
+    const addedToArrowCount = this.addArrowCountIfNextStepFound(nextStep);
+    if (zaToNextStep && zaToNextStep.firebaseDocId) {
+      const zaId = zaToNextStep.firebaseDocId;
+      this.zoomAreasToColor.set(zaId, 'blue');
+      this.addOneToSearchRelicCount(zaId);
+    } else if (!addedToArrowCount) {
+      // Need to zoom out to get to relic, since you can't get there thru a
+      // ZoomArea or arrow.
+      this.zoomOutCount++;
+    }
+  }
+
+  highlightRelicPaths(relicPaths: string[][]): void {
+    relicPaths.forEach((path) => {
+      if (path.length === 0) {
+        console.log('a relic is in current view');
+      // TODO - higlight relic itself!
+      return;
+      }
+      const nextStep = path[0];
+      this.highlightNextStep(nextStep);
+    });
+  }
+
   makeNewSearch(saint: Saint): void {
-    this.setHelperText('Search for: ' + saint.firebaseDocId);
     const relicsWithSaint = this.firebaseDataService.getRelicsForSaint(saint);
     const relicPaths = relicsWithSaint.map((r) => {
       return this.firebaseDataService.getPathToRelic(
@@ -404,5 +492,11 @@ export class AppComponent {
       );
     });
     console.log(relicPaths);
+    const numRelics = relicsWithSaint.length;
+    const saintName = makeSaintNameString(saint);
+    this.setHelperText(numRelics + ' result(s) for ' + saintName);
+    this.highlightRelicPaths(relicPaths);
+    console.log(this.arrowCounts, this.zoomOutCount);
+    this.redrawCurrentScene();
   }
 }

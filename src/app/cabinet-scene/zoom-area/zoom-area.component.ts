@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject, Output, EventEmitter } from '@angular/core';
-import { PhotoInfo, ZoomArea } from 'src/app/types';
+import { DisplayZoomArea, PhotoInfo, ZoomArea } from 'src/app/types';
 import { assertNotNull } from '@angular/compiler/src/output/output_ast';
 import { Observable } from 'rxjs';
 
@@ -11,11 +11,12 @@ import { Observable } from 'rxjs';
 export class ZoomAreaComponent implements OnInit {
   @Output() zoomAreaClicked = new EventEmitter<string>();
 
-  zoomAreaInfo?: ZoomArea;
+  zoomAreaInfo?: DisplayZoomArea;
   width = 0;
   height = 0;
   offsetX = 0;
   offsetY = 0;
+  borderColor = 'yellow';
   relicCount: number | undefined;
 
   constructor() {}
@@ -52,5 +53,10 @@ export class ZoomAreaComponent implements OnInit {
       topLeft[1] * (img.clientHeight / naturalHeight);
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    console.log("ZOOMAREAINFO", this.zoomAreaInfo);
+    if (this.zoomAreaInfo) {
+      this.borderColor = this.zoomAreaInfo.color || 'yellow';
+    }
+  }
 }

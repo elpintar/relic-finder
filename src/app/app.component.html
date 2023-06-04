@@ -125,6 +125,9 @@
     title="Move left"
   >
     <mat-icon>arrow_back</mat-icon>
+    <span *ngIf="arrowCounts.get('left')! > 0">{{
+      arrowCounts.get("left")
+    }}</span>
   </button>
 </div>
 
@@ -141,6 +144,9 @@
     title="Move right"
   >
     <mat-icon>arrow_forward</mat-icon>
+    <span *ngIf="arrowCounts.get('right')! > 0">{{
+      arrowCounts.get("right")
+    }}</span>
   </button>
 </div>
 
@@ -157,6 +163,9 @@
     title="Move up"
   >
     <mat-icon>arrow_upward</mat-icon>
+    <span *ngIf="arrowCounts.get('up')! > 0">{{
+      arrowCounts.get("up")
+    }}</span>
   </button>
 </div>
 
@@ -173,6 +182,9 @@
     title="Move down"
   >
     <mat-icon>arrow_downward</mat-icon>
+    <span *ngIf="arrowCounts.get('down')! > 0">{{
+      arrowCounts.get("down")
+    }}</span>
   </button>
 </div>
 

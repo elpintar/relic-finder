@@ -19,6 +19,7 @@ import {
   Saint,
   RelicAndSaints,
   SpreadsheetRow,
+  DisplayZoomArea,
 } from '../types';
 import { ZoomAreaComponent } from './zoom-area/zoom-area.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -120,7 +121,7 @@ export class CabinetSceneComponent implements OnInit {
 
   redrawScene(
     relicsInScene: Relic[],
-    zoomAreasInScene: ZoomArea[],
+    zoomAreasInScene: DisplayZoomArea[],
     zoomAreaRelicCounts: Map<string, number>
   ): void {
     // Signal to destroy subscribers.
@@ -141,6 +142,9 @@ export class CabinetSceneComponent implements OnInit {
       let relicCount = 0; // hidden if 0
       if (this.editMode) {
         relicCount = zoomAreaRelicCounts.get(zoomArea.zoomToPhotoFilename) || 0;
+      } else if (zoomArea.searchRelicCount > 0) {
+        // There is a search happening, override edit mode count.
+        relicCount = zoomArea.searchRelicCount;
       }
       this.putZoomAreaInScene(zoomArea, relicCount);
     });
@@ -363,11 +367,13 @@ export class CabinetSceneComponent implements OnInit {
       (bottomRight[0] / this.imgClientWidth) * this.photoInfo.naturalImgWidth,
       (bottomRight[1] / this.imgClientHeight) * this.photoInfo.naturalImgHeight,
     ];
-    const zoomAreaInfo: ZoomArea = {
+    const zoomAreaInfo: DisplayZoomArea = {
       zoomToPhotoFilename: 'replace me',
       zoomFromPhotoFilename: this.photoInfo.photoFilename,
       topLeftNaturalCoords,
       bottomRightNaturalCoords,
+      color: 'yellow',
+      searchRelicCount: 0,
     };
     this.openDialogForZoomToPhoto(Object.assign({}, zoomAreaInfo)).subscribe(
       (result) => {
@@ -482,7 +488,7 @@ export class CabinetSceneComponent implements OnInit {
   }
 
   putZoomAreaInScene(
-    zoomAreaInfo: ZoomArea,
+    zoomAreaInfo: DisplayZoomArea,
     relicCount = 0,
     isNewZoomArea = false
   ): void {
