@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { RelicDialogComponent } from './relic-dialog.component';
 
@@ -6,7 +6,7 @@ describe('RelicDialogComponent', () => {
   let component: RelicDialogComponent;
   let fixture: ComponentFixture<RelicDialogComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [RelicDialogComponent],
     }).compileComponents();

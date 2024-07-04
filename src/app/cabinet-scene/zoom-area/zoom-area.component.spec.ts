@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 
 import { ZoomAreaComponent } from './zoom-area.component';
 
@@ -6,7 +6,7 @@ describe('ZoomAreaComponent', () => {
   let component: ZoomAreaComponent;
   let fixture: ComponentFixture<ZoomAreaComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ZoomAreaComponent],
     }).compileComponents();
