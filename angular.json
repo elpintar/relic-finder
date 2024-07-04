@@ -126,7 +126,6 @@
       }
     }
   },
-  "defaultProject": "relic-finder",
   "cli": {
     "analytics": "94aa3952-629c-4874-9c84-188f3353dda6"
   }
