@@ -1,7 +1,5 @@
 import { Component, OnInit, Inject, Output, EventEmitter } from '@angular/core';
 import { DisplayZoomArea, PhotoInfo, ZoomArea } from 'src/app/types';
-import { assertNotNull } from '@angular/compiler/src/output/output_ast';
-import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-zoom-area',

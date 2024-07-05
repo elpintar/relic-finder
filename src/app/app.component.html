@@ -97,12 +97,12 @@
 <div class="top-right-buttons">
   <div
     *ngIf="
-      firebaseAuthService.angularFireAuth.user | async as user;
+      firebaseAuthService.user;
       else showLogin
     "
   >
     <button class="user-btn" (click)="logout()" title="Log out">
-      <img class="user-photo" [src]="user!.photoURL" />
+      <img class="user-photo" [src]="firebaseAuthService.user!.photoURL" />
     </button>
   </div>
   <ng-template #showLogin>

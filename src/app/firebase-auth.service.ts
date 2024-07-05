@@ -1,55 +1,62 @@
 import { Component, ViewChild } from '@angular/core';
 import { PhotoInfo, Relic, ZoomArea, User } from './types';
 import { CabinetSceneComponent } from './cabinet-scene/cabinet-scene.component';
-import {
-  AngularFirestore,
-  AngularFirestoreCollection,
-  DocumentData,
-  DocumentReference,
-  QuerySnapshot,
-} from '@angular/fire/firestore';
+import { Firestore, collection, getDocs } from '@angular/fire/firestore';
+import { auth, firestore, User as FirebaseUser } from 'firebase/app';
 import { bindCallback, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { AngularFireAuth } from '@angular/fire/auth';
-import { auth } from 'firebase/app';
+import { Auth as AngularFireAuth, getAuth, signInWithPopup, onAuthStateChanged, User as FireUser, GoogleAuthProvider } from '@angular/fire/auth';
 import { Injectable } from '@angular/core';
 
 @Injectable({
   providedIn: 'root',
 })
 export class FirebaseAuthService {
-  user: firebase.User | null = null;
+  user: FireUser | null = null;
   users: User[] | null = null;
   userIsEditor = false;
 
   constructor(
-    private firestore: AngularFirestore,
+    private firestore: Firestore,
     public angularFireAuth: AngularFireAuth
   ) {}
 
   getInitialUserData(): void {
     // Get user data if user is logged in.
-    this.angularFireAuth.user.pipe(take(1)).subscribe((userResult) => {
-      console.log('user:', userResult);
-      // Get set of authentic user ids who can write.
-      this.firestore
-        .collection<User>('users')
-        .valueChanges()
-        .pipe(take(1))
-        .subscribe((users) => {
-          console.log('users:', users);
-          this.user = userResult;
-          this.users = users;
-          this.userIsEditor = this.checkIfUserIsEditor();
-          console.log('User is editor:', this.userIsEditor);
-        });
-    });
+    const auth: AngularFireAuth = getAuth();
+
     // Get updates to user data and keep it updated.
-    this.angularFireAuth.authState.subscribe((user: firebase.User | null) => {
-      // Update user data whenever the auth state changes.
-      this.user = user;
-      this.userIsEditor = this.checkIfUserIsEditor();
-      console.log('After user change, user is editor:', this.userIsEditor);
+    onAuthStateChanged(auth, (user: FireUser|null) => {
+      if (user) {
+        // User is signed in, see docs for a list of available properties
+        // https://firebase.google.com/docs/reference/js/auth.user
+        this.user = user;
+        console.log("this.user is ", user);
+        if (!this.users || this.users.length < 1) {
+          // On first time, get set of authentic user ids who can write.
+          firestore()
+          .collection('users')
+          .get()
+          .then((querySnapshot) => {
+            const users = querySnapshot.docs.map(doc => doc.data() as User);
+
+            console.log('users:', users);
+            this.users = users;
+            this.userIsEditor = this.checkIfUserIsEditor();
+            console.log('User is editor:', this.userIsEditor);
+          })
+          .catch((error) => {
+            console.error('Error fetching users:', error); // Add error handling
+          }); 
+        } else {
+          // Update user data whenever the auth state changes.
+          this.userIsEditor = this.checkIfUserIsEditor();
+          console.log('After user change, user is editor:', this.userIsEditor);
+        }
+      } else {
+        // User is signed out
+        console.log("User signed out!");
+      }
     });
   }
 
@@ -75,14 +82,15 @@ export class FirebaseAuthService {
   }
 
   login(): void {
-    this.angularFireAuth
-      .signInWithPopup(new auth.GoogleAuthProvider())
-      .then((result) => {
-        console.log('Logged in with user data:', JSON.stringify(result));
-      })
-      .catch((error: Error) => {
-        alert('Login error: ' + error.message);
-      });
+    const provider = new GoogleAuthProvider();
+
+    signInWithPopup(this.angularFireAuth, provider) // Access the auth instance directly
+    .then((result) => {
+      console.log('Logged in with user data:', JSON.stringify(result));
+    })
+    .catch((error: Error) => {
+      alert('Login error: ' + error.message);
+    });
   }
 
   logout(): void {

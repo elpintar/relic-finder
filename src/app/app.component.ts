@@ -11,17 +11,8 @@ import {
   DisplayZoomArea,
 } from './types';
 import { CabinetSceneComponent } from './cabinet-scene/cabinet-scene.component';
-import {
-  AngularFirestore,
-  AngularFirestoreCollection,
-  DocumentData,
-  DocumentReference,
-  QuerySnapshot,
-} from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { AngularFireAuth } from '@angular/fire/auth';
-import { auth } from 'firebase/app';
 import { FirebaseDataService } from './firebase-data.service';
 import { FirebaseAuthService } from './firebase-auth.service';
 import { FileDataService } from './file-data.service';
@@ -75,7 +66,6 @@ export class AppComponent {
     public firebaseAuthService: FirebaseAuthService,
     private fileDataService: FileDataService,
     private dialog: MatDialog,
-    private angularFireAuth: AngularFireAuth
   ) {
     this.zoomAreaRelicCounts = new Map();
     this.zoomAreasToColor = new Map();

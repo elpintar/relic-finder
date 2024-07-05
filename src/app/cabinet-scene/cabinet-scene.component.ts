@@ -26,12 +26,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { ZoomAreaDialogComponent } from './zoom-area-dialog/zoom-area-dialog.component';
 import { Subscription, Observable, Subject } from 'rxjs';
 import { RelicDotComponent } from './relic-dot/relic-dot.component';
-import { assertNotNull } from '@angular/compiler/src/output/output_ast';
 import { RelicDialogComponent } from './relic-dialog/relic-dialog.component';
 import { takeUntil } from 'rxjs/operators';
 import { FirebaseDataService } from '../firebase-data.service';
 import { FirebaseAuthService } from '../firebase-auth.service';
-import { AngularFireAuth } from '@angular/fire/auth';
 import {
   relicAndSaintsEqual,
   relicsEqual,
