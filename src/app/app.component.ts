@@ -21,6 +21,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { InfoDialogComponent } from './info-dialog/info-dialog.component';
 import { AutofillRelicsDialogComponent } from './autofill-relics-dialog/autofill-relics-dialog.component';
 import { makeSaintNameString } from './helperFuncs';
+import { Auth as AngularFireAuth } from '@angular/fire/auth';
 
 @Component({
   selector: 'app-root',
@@ -66,6 +67,7 @@ export class AppComponent {
     public firebaseAuthService: FirebaseAuthService,
     private fileDataService: FileDataService,
     private dialog: MatDialog,
+    private angularFireAuth: AngularFireAuth,
   ) {
     this.zoomAreaRelicCounts = new Map();
     this.zoomAreasToColor = new Map();

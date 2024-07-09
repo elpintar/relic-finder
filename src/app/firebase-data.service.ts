@@ -1,22 +1,13 @@
-import { Component, ViewChild } from '@angular/core';
 import {
-  PhotoInfo,
   Relic,
   ZoomArea,
-  User,
   Saint,
   RelicAndSaints,
   CanonizationStatus,
   PhotoArrows,
 } from './types';
-import { CabinetSceneComponent } from './cabinet-scene/cabinet-scene.component';
-import { Firestore } from '@angular/fire/firestore';
-import { bindCallback, Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
-import { Title } from '@angular/platform-browser';
-import { initializeApp } from "firebase/app";
-import { firestore } from 'firebase/app';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
 
 type TraversalResult = {
   successful: boolean;
@@ -33,33 +24,33 @@ export class FirebaseDataService {
   allSaintsLocal: Saint[] = [];
   allArrowsLocal: PhotoArrows[] = [];
 
-  constructor(private firestore: Firestore) {}
+  constructor(private firestore: AngularFirestore) {}
 
   getInitialServerData(callback: () => void): void {
-    firestore().collection('relics')
+    this.firestore.collection<Relic>('relics')
       .get()
-      .then((relicsSnapshot) => {
+      .subscribe((relicsSnapshot) => {
         const relicsList = relicsSnapshot.docs.map(doc => ({ ...doc.data(), firebaseDocId: doc.id }));
         console.log('relics', relicsList);
     
-        firestore()
-          .collection('zoomAreas')
+        this.firestore
+          .collection<ZoomArea>('zoomAreas')
           .get()
-          .then((zoomAreasSnapshot) => {
+          .subscribe((zoomAreasSnapshot) => {
             const zoomAreasList = zoomAreasSnapshot.docs.map(doc => ({ ...doc.data(), firebaseDocId: doc.id }));
             console.log('zoomAreas', zoomAreasList);
     
-            firestore()
-              .collection('saints')
+            this.firestore
+              .collection<Saint>('saints')
               .get()
-              .then((saintsSnapshot) => {
+              .subscribe((saintsSnapshot) => {
                 const saintsList = saintsSnapshot.docs.map(doc => ({ ...doc.data(), firebaseDocId: doc.id }));
                 console.log('saints', saintsList);
     
-                firestore()
-                  .collection('arrows')
+                this.firestore
+                  .collection<PhotoArrows>('arrows')
                   .get()
-                  .then((arrowsSnapshot) => {
+                  .subscribe((arrowsSnapshot) => {
                     const arrowsList = arrowsSnapshot.docs.map(doc => ({ ...doc.data(), firebaseDocId: doc.id }));
     
                     this.allRelicsLocal = relicsList as Relic[];
@@ -78,8 +69,8 @@ export class FirebaseDataService {
     console.log('new zoom area info', zoomArea);
     const newZAId = this.makeIdForZoomArea(zoomArea);
     zoomArea.firebaseDocId = newZAId;
-    firestore()
-      .collection('zoomAreas')
+    this.firestore
+      .collection<ZoomArea>('zoomAreas')
       .doc(newZAId)
       .set(zoomArea)
       .then(() => {
@@ -95,8 +86,8 @@ export class FirebaseDataService {
     if (!zoomArea.firebaseDocId) {
       return;
     }
-    firestore()
-      .collection('zoomAreas')
+    this.firestore
+      .collection<ZoomArea>('zoomAreas')
       .doc(zoomArea.firebaseDocId)
       .update(zoomArea)
       .then(() => {
@@ -144,8 +135,8 @@ export class FirebaseDataService {
       return;
     }
     this.updateSaintIdsInRelic(relic, saints);
-    firestore()
-      .collection('relics')
+    this.firestore
+      .collection<Relic>('relics')
       .doc(relic.firebaseDocId)
       .update(relic)
       .then(() => {
@@ -171,15 +162,15 @@ export class FirebaseDataService {
         saint.firebaseDocId = newSaintId;
         console.log('NEW SAINT ID: ', newSaintId);
         // Add to Firebase
-        firestore().collection('saints').doc(newSaintId).set(saint);
+        this.firestore.collection<Saint>('saints').doc(newSaintId).set(saint);
         // Add locally
         this.allSaintsLocal.push(saint);
       } else {
         const indexMatch = this.getLocalSaintIndexWithId(saint.firebaseDocId);
         if (indexMatch >= 0) {
           // UPDATE Firebase
-          firestore()
-            .collection('saints')
+          this.firestore
+            .collection<Saint>('saints')
             .doc(saint.firebaseDocId)
             .set(saint);
           // Update locally
@@ -201,8 +192,8 @@ export class FirebaseDataService {
     const newRelicId = this.makeIdForRelic(relic, saints);
     relic.firebaseDocId = newRelicId;
     console.log('NEW RELIC ID: ', newRelicId);
-    firestore()
-      .collection('relics')
+    this.firestore
+      .collection<Relic>('relics')
       .doc(newRelicId)
       .set(relic)
       .then(() => {
@@ -461,8 +452,8 @@ export class FirebaseDataService {
     if (!arrowsId) {
       // new arrows
       newArrows.firebaseDocId = newArrows.photoFilename + '-arrows';
-      firestore()
-        .collection('arrows')
+      this.firestore
+        .collection<PhotoArrows>('arrows')
         .doc(newArrows.firebaseDocId)
         .set(newArrows)
         .then(() => {
@@ -482,8 +473,8 @@ export class FirebaseDataService {
       this.allArrowsLocal.push(newArrows);
     } else {
       // update existing arrow
-      firestore()
-        .collection('arrows')
+      this.firestore
+        .collection<PhotoArrows>('arrows')
         .doc(arrowsId)
         .update(newArrows)
         .then(() => {

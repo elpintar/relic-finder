@@ -1,12 +1,7 @@
-import { Component, ViewChild } from '@angular/core';
-import { PhotoInfo, Relic, ZoomArea, User } from './types';
-import { CabinetSceneComponent } from './cabinet-scene/cabinet-scene.component';
-import { Firestore, collection, getDocs } from '@angular/fire/firestore';
-import { auth, firestore, User as FirebaseUser } from 'firebase/app';
-import { bindCallback, Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { User } from './types';
 import { Auth as AngularFireAuth, getAuth, signInWithPopup, onAuthStateChanged, User as FireUser, GoogleAuthProvider } from '@angular/fire/auth';
 import { Injectable } from '@angular/core';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -17,7 +12,7 @@ export class FirebaseAuthService {
   userIsEditor = false;
 
   constructor(
-    private firestore: Firestore,
+    private firestore: AngularFirestore,
     public angularFireAuth: AngularFireAuth
   ) {}
 
@@ -34,20 +29,17 @@ export class FirebaseAuthService {
         console.log("this.user is ", user);
         if (!this.users || this.users.length < 1) {
           // On first time, get set of authentic user ids who can write.
-          firestore()
+          this.firestore
           .collection('users')
           .get()
-          .then((querySnapshot) => {
+          .subscribe((querySnapshot) => {
             const users = querySnapshot.docs.map(doc => doc.data() as User);
 
             console.log('users:', users);
             this.users = users;
             this.userIsEditor = this.checkIfUserIsEditor();
             console.log('User is editor:', this.userIsEditor);
-          })
-          .catch((error) => {
-            console.error('Error fetching users:', error); // Add error handling
-          }); 
+          });
         } else {
           // Update user data whenever the auth state changes.
           this.userIsEditor = this.checkIfUserIsEditor();
