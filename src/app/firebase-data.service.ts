@@ -27,20 +27,26 @@ export class FirebaseDataService {
   allArrowsLocal: PhotoArrows[] = [];
 
   relics$: Observable<Relic[]>; 
-
-  zoomAreas$: Observable<ZoomArea[]> = collectionData(
-    query(collection(this.firestore, 'zoomAreas'))) as Observable<ZoomArea[]>;
-
-  saints$: Observable<Saint[]> = collectionData(
-    query(collection(this.firestore, 'saints'))) as Observable<Saint[]>;
-
-  arrows$: Observable<PhotoArrows[]> = collectionData(
-    collection(this.firestore, 'arrows')) as Observable<PhotoArrows[]>;
+  zoomAreas$: Observable<ZoomArea[]>;
+  saints$: Observable<Saint[]>;
+  arrows$: Observable<PhotoArrows[]>;
 
   constructor(private firestore: Firestore) {
     const relicCollection = collection(this.firestore, 'relics');
     const relicQuery = query(relicCollection) as Query<Relic>;
     this.relics$ = collectionData<Relic>(relicQuery);
+
+    const zoomAreaCollection = collection(this.firestore, 'zoomAreas');
+    const zoomAreaQuery = query(zoomAreaCollection) as Query<ZoomArea>;
+    this.zoomAreas$ = collectionData<ZoomArea>(zoomAreaQuery);
+
+    const saintCollection = collection(this.firestore, 'saints');
+    const saintQuery = query(saintCollection) as Query<Saint>;
+    this.saints$ = collectionData<Saint>(saintQuery);
+
+    const arrowCollection = collection(this.firestore, 'arrows');
+    const arrowQuery = query(arrowCollection) as Query<PhotoArrows>;
+    this.arrows$ = collectionData<PhotoArrows>(arrowQuery);
   }
 
   getInitialServerData(callback: () => void) {
