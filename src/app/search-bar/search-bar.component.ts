@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Output } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { Relic, Saint } from '../types';
 import { map, startWith } from 'rxjs/operators';
@@ -14,7 +14,7 @@ import { makeSaintNameString } from '../helperFuncs';
 export class SearchBarComponent {
   @Output() newSearch = new EventEmitter<Saint>();
 
-  autocompleteSaintsCtrl = new FormControl();
+  autocompleteSaintsCtrl = new UntypedFormControl();
   filteredSaints: Observable<Saint[]>;
   getHumanReadableSaintName: Function;
 
