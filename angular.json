@@ -51,13 +51,34 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "2mb",
-                  "maximumError": "4mb"
+                  "maximumWarning": "8mb",
+                  "maximumError": "10mb"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumWarning": "5kb",
+                  "maximumError": "10kb"
+                }
+              ]
+            },
+            "development": {
+              "optimization": false,
+              "outputHashing": "all",
+              "sourceMap": true,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": false,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "8mb",
+                  "maximumError": "10mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "5kb",
+                  "maximumError": "10kb"
                 }
               ]
             }
@@ -71,6 +92,9 @@
           "configurations": {
             "production": {
               "browserTarget": "relic-finder:build:production"
+            },
+            "development": {
+              "browserTarget": "relic-finder:build:development"
             }
           }
         },
@@ -115,6 +139,9 @@
           "configurations": {
             "production": {
               "devServerTarget": "relic-finder:serve:production"
+            },
+            "development": {
+              "devServerTarget": "relic-finder:serve:development"
             }
           }
         },

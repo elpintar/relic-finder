@@ -7,9 +7,9 @@ import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { AngularFireModule } from '@angular/fire/compat';
-import { FirestoreModule } from '@angular/fire/firestore';
-import { MatCardModule } from '@angular/material/card';
+import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { getAuth, provideAuth } from '@angular/fire/auth';
+import { getFirestore, provideFirestore } from '@angular/fire/firestore';import { MatCardModule } from '@angular/material/card';
 import { MatSelectModule } from '@angular/material/select';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -29,6 +29,8 @@ import { InfoDialogComponent } from './info-dialog/info-dialog.component';
 import { HttpClientModule } from '@angular/common/http';
 import { AutofillRelicsDialogComponent } from './autofill-relics-dialog/autofill-relics-dialog.component';
 import { SearchBarComponent } from './search-bar/search-bar.component';
+import { FirebaseAuthService } from './firebase-auth.service';
+import { FirebaseDataService } from './firebase-data.service';
 
 @NgModule({
   declarations: [
@@ -59,10 +61,11 @@ import { SearchBarComponent } from './search-bar/search-bar.component';
     MatAutocompleteModule,
     MatExpansionModule,
     ReactiveFormsModule,
-    AngularFireModule.initializeApp(environment.firebase),
-    FirestoreModule,
+    provideFirebaseApp(() => initializeApp(environment.firebase)),
+    provideAuth(() => getAuth()),
+    provideFirestore(() => getFirestore())
   ],
-  providers: [],
+  providers: [FirebaseAuthService, FirebaseDataService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

@@ -80,7 +80,7 @@ export class CabinetSceneComponent implements OnInit {
   imgClientWidth = 0;
   imgClientHeight = 0;
 
-  private sceneRedrawn = new Subject();
+  private sceneRedrawn = new Subject<void>();
 
   constructor(
     private resolver: ComponentFactoryResolver,
@@ -123,7 +123,7 @@ export class CabinetSceneComponent implements OnInit {
     zoomAreaRelicCounts: Map<string, number>
   ): void {
     // Signal to destroy subscribers.
-    this.sceneRedrawn.next();
+    this.sceneRedrawn.next(undefined);
     // Destroy dead components / html elements.
     this.zoomAreaComponentsToDestroy.forEach((zoomAreaComponent) => {
       zoomAreaComponent.destroy();

@@ -1,7 +1,7 @@
 import { User } from './types';
-import { Auth as AngularFireAuth, getAuth, signInWithPopup, onAuthStateChanged, User as FireUser, GoogleAuthProvider } from '@angular/fire/auth';
-import { Injectable } from '@angular/core';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { getAuth, signInWithPopup, onAuthStateChanged, User as FireUser, GoogleAuthProvider } from 'firebase/auth';
+import { Injectable, inject } from '@angular/core';
+import { Firestore, collection, collectionData, DocumentData } from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -11,44 +11,37 @@ export class FirebaseAuthService {
   users: User[] | null = null;
   userIsEditor = false;
 
-  constructor(
-    private firestore: AngularFirestore,
-    public angularFireAuth: AngularFireAuth
-  ) {}
+  private firestore = inject(Firestore);
+
+  constructor() {}
 
   getInitialUserData(): void {
-    // Get user data if user is logged in.
-    const auth: AngularFireAuth = getAuth();
-
-    // Get updates to user data and keep it updated.
-    onAuthStateChanged(auth, (user: FireUser|null) => {
+    onAuthStateChanged(getAuth(), (user: FireUser | null) => {
       if (user) {
-        // User is signed in, see docs for a list of available properties
-        // https://firebase.google.com/docs/reference/js/auth.user
         this.user = user;
-        console.log("this.user is ", user);
-        if (!this.users || this.users.length < 1) {
-          // On first time, get set of authentic user ids who can write.
-          this.firestore
-          .collection('users')
-          .get()
-          .subscribe((querySnapshot) => {
-            const users = querySnapshot.docs.map(doc => doc.data() as User);
+        console.log("this.user is", user);
 
-            console.log('users:', users);
-            this.users = users;
+        const usersCollection = collection(this.firestore, 'users');
+        collectionData(usersCollection).subscribe(
+          (users: DocumentData[]) => {
+            // Get set of authentic user ids who can write.
+            this.users = users as User[];
             this.userIsEditor = this.checkIfUserIsEditor();
-            console.log('User is editor:', this.userIsEditor);
-          });
-        } else {
-          // Update user data whenever the auth state changes.
-          this.userIsEditor = this.checkIfUserIsEditor();
-          console.log('After user change, user is editor:', this.userIsEditor);
-        }
+          },
+          (error) => {
+            console.error('Error fetching users data:', error);
+          }
+        );
       } else {
         // User is signed out
+        this.user = null;
+        this.users = null;
+        this.userIsEditor = false;
         console.log("User signed out!");
       }
+    }, (error) => {
+      // Handle errors from onAuthStateChanged
+      console.error('Error in onAuthStateChanged:', error);
     });
   }
 
@@ -73,21 +66,25 @@ export class FirebaseAuthService {
     }
   }
 
-  login(): void {
+  login(callback: ()=>void): void {
     const provider = new GoogleAuthProvider();
 
-    signInWithPopup(this.angularFireAuth, provider) // Access the auth instance directly
+    signInWithPopup(getAuth(), provider) // Access the auth instance directly
     .then((result) => {
       console.log('Logged in with user data:', JSON.stringify(result));
     })
     .catch((error: Error) => {
       alert('Login error: ' + error.message);
+    }).finally(() => {
+      callback();
     });
   }
 
-  logout(): void {
+  logout(callback: ()=>void): void {
     if (confirm('Are you sure you want to logout?')) {
-      this.angularFireAuth.signOut();
+      getAuth().signOut().finally(() => {
+        callback();
+      });
     }
   }
 }

@@ -32,7 +32,7 @@
   </button>
   <br />
   <button
-    *ngIf="firebaseAuthService.user && firebaseAuthService.user!.uid"
+    *ngIf="loggedInUser && loggedInUser!.uid"
     mat-fab
     (click)="toggleEditMode()"
     color="primary"
@@ -46,7 +46,7 @@
   <button
     mat-fab
     *ngIf="
-      editMode && firebaseAuthService.user && firebaseAuthService.user!.uid
+      editMode && loggedInUser && loggedInUser!.uid
     "
     (click)="toggleAddRelicMode()"
     color="primary"
@@ -62,7 +62,7 @@
   <button
     mat-fab
     *ngIf="
-      editMode && firebaseAuthService.user && firebaseAuthService.user!.uid
+      editMode && loggedInUser && loggedInUser!.uid
     "
     (click)="moveRelicOrZA()"
     color="primary"
@@ -78,7 +78,7 @@
   <button
     mat-fab
     *ngIf="
-      editMode && firebaseAuthService.user && firebaseAuthService.user!.uid
+      editMode && loggedInUser && loggedInUser!.uid
     "
     (click)="autofillRelicsToggle()"
     color="primary"
@@ -97,12 +97,12 @@
 <div class="top-right-buttons">
   <div
     *ngIf="
-      firebaseAuthService.user;
+      loggedInUser;
       else showLogin
     "
   >
     <button class="user-btn" (click)="logout()" title="Log out">
-      <img class="user-photo" [src]="firebaseAuthService.user!.photoURL" />
+      <img class="user-photo" [src]="loggedInUser!.photoURL" />
     </button>
   </div>
   <ng-template #showLogin>

@@ -52,7 +52,6 @@ export class ZoomAreaComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log("ZOOMAREAINFO", this.zoomAreaInfo);
     if (this.zoomAreaInfo) {
       this.borderColor = this.zoomAreaInfo.color || 'yellow';
     }

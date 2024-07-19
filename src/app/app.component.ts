@@ -21,7 +21,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { InfoDialogComponent } from './info-dialog/info-dialog.component';
 import { AutofillRelicsDialogComponent } from './autofill-relics-dialog/autofill-relics-dialog.component';
 import { makeSaintNameString } from './helperFuncs';
-import { Auth as AngularFireAuth } from '@angular/fire/auth';
+import { User as FireUser } from '@angular/fire/auth';
 
 @Component({
   selector: 'app-root',
@@ -49,6 +49,8 @@ export class AppComponent {
   arrowCounts: Map<string, number>;
   zoomOutCount: number;
 
+  loggedInUser: FireUser|null = null;
+
   currentPhotoInfo: PhotoInfo = {
     photoFilename: 'MNOPQ.jpeg',
     photoImgPath:
@@ -64,10 +66,9 @@ export class AppComponent {
 
   constructor(
     private firebaseDataService: FirebaseDataService,
-    public firebaseAuthService: FirebaseAuthService,
+    private firebaseAuthService: FirebaseAuthService,
     private fileDataService: FileDataService,
     private dialog: MatDialog,
-    private angularFireAuth: AngularFireAuth,
   ) {
     this.zoomAreaRelicCounts = new Map();
     this.zoomAreasToColor = new Map();
@@ -77,11 +78,12 @@ export class AppComponent {
     // Initialize Cloud Firestore through Firebase
     firebaseAuthService.getInitialUserData();
     firebaseDataService.getInitialServerData(() => {
+      console.log("got initial server data");
       const startingArrows = this.firebaseDataService.getPhotoArrows(
         this.currentPhotoInfo.photoFilename
       );
       if (!startingArrows) {
-        alert('Arrow data not properly loaded!');
+        console.error('Arrow data not properly loaded!');
       } else {
         this.currentPhotoInfo.arrows = startingArrows;
       }
@@ -93,11 +95,15 @@ export class AppComponent {
   }
 
   login(): void {
-    this.firebaseAuthService.login();
+    this.firebaseAuthService.login(() => {
+      this.loggedInUser = this.firebaseAuthService.user;
+    });
   }
 
   logout(): void {
-    this.firebaseAuthService.logout();
+    this.firebaseAuthService.logout(() => {
+      this.loggedInUser = this.firebaseAuthService.user;
+    });
   }
 
   arrowClicked(direction: string): void {

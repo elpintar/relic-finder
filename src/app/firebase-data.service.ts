@@ -7,7 +7,9 @@ import {
   PhotoArrows,
 } from './types';
 import { Injectable } from '@angular/core';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { Firestore, collection, collectionData, query, orderBy, doc, addDoc, updateDoc, setDoc, Query } from '@angular/fire/firestore';
+import { from, Observable, combineLatest, of, throwError, forkJoin } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
 
 type TraversalResult = {
   successful: boolean;
@@ -24,85 +26,78 @@ export class FirebaseDataService {
   allSaintsLocal: Saint[] = [];
   allArrowsLocal: PhotoArrows[] = [];
 
-  constructor(private firestore: AngularFirestore) {}
+  relics$: Observable<Relic[]>; 
 
-  getInitialServerData(callback: () => void): void {
-    this.firestore.collection<Relic>('relics')
-      .get()
-      .subscribe((relicsSnapshot) => {
-        const relicsList = relicsSnapshot.docs.map(doc => ({ ...doc.data(), firebaseDocId: doc.id }));
-        console.log('relics', relicsList);
-    
-        this.firestore
-          .collection<ZoomArea>('zoomAreas')
-          .get()
-          .subscribe((zoomAreasSnapshot) => {
-            const zoomAreasList = zoomAreasSnapshot.docs.map(doc => ({ ...doc.data(), firebaseDocId: doc.id }));
-            console.log('zoomAreas', zoomAreasList);
-    
-            this.firestore
-              .collection<Saint>('saints')
-              .get()
-              .subscribe((saintsSnapshot) => {
-                const saintsList = saintsSnapshot.docs.map(doc => ({ ...doc.data(), firebaseDocId: doc.id }));
-                console.log('saints', saintsList);
-    
-                this.firestore
-                  .collection<PhotoArrows>('arrows')
-                  .get()
-                  .subscribe((arrowsSnapshot) => {
-                    const arrowsList = arrowsSnapshot.docs.map(doc => ({ ...doc.data(), firebaseDocId: doc.id }));
-    
-                    this.allRelicsLocal = relicsList as Relic[];
-                    this.allZoomAreasLocal = zoomAreasList as ZoomArea[];
-                    this.allSaintsLocal = saintsList as Saint[];
-                    this.allArrowsLocal = arrowsList as PhotoArrows[];
-    
-                    callback();
-                  });
-              });
-          });
-      });
+  zoomAreas$: Observable<ZoomArea[]> = collectionData(
+    query(collection(this.firestore, 'zoomAreas'))) as Observable<ZoomArea[]>;
+
+  saints$: Observable<Saint[]> = collectionData(
+    query(collection(this.firestore, 'saints'))) as Observable<Saint[]>;
+
+  arrows$: Observable<PhotoArrows[]> = collectionData(
+    collection(this.firestore, 'arrows')) as Observable<PhotoArrows[]>;
+
+  constructor(private firestore: Firestore) {
+    const relicCollection = collection(this.firestore, 'relics');
+    const relicQuery = query(relicCollection) as Query<Relic>;
+    this.relics$ = collectionData<Relic>(relicQuery);
   }
 
-  createZoomArea(zoomArea: ZoomArea): void {
-    console.log('new zoom area info', zoomArea);
-    const newZAId = this.makeIdForZoomArea(zoomArea);
+  getInitialServerData(callback: () => void) {
+    console.log("getInitialServerData");
+    combineLatest([
+      this.relics$,
+      this.zoomAreas$,
+      this.saints$,
+      this.arrows$
+    ]).pipe(
+      tap({
+        next: ([relics, zoomAreas, saints, arrows]) => {
+          this.allRelicsLocal = relics;
+          this.allZoomAreasLocal = zoomAreas;
+          this.allSaintsLocal = saints;
+          this.allArrowsLocal = arrows;
+          callback();
+        },
+        error: (error) => {
+          console.error(error);
+        }
+      })
+    ).subscribe();
+  }
+
+  createZoomArea(zoomArea: ZoomArea): Observable<ZoomArea> {
+    const newZAId = this.makeIdForZoomArea(zoomArea); 
     zoomArea.firebaseDocId = newZAId;
-    this.firestore
-      .collection<ZoomArea>('zoomAreas')
-      .doc(newZAId)
-      .set(zoomArea)
-      .then(() => {
-        console.log('za created:', zoomArea);
-        this.allZoomAreasLocal.push(zoomArea);
+
+    const zoomAreasCollection = collection(this.firestore, 'zoomAreas');
+    return from(addDoc(zoomAreasCollection, zoomArea)).pipe(
+      tap((docRef) => {
+        console.log('Zoom area created with ID:', docRef.id);
+      }),
+      map(() => zoomArea),
+      catchError((error) => {
+        console.error('Error creating zoom area:', error);
+        throw error;
       })
-      .catch((error) => {
-        console.error('Error creating zoom area:', error, zoomArea);
-      });
+    );
   }
 
-  updateZoomArea(zoomArea: ZoomArea): void {
+  updateZoomArea(zoomArea: ZoomArea): Observable<void> {
     if (!zoomArea.firebaseDocId) {
-      return;
+      return of(undefined);
     }
-    this.firestore
-      .collection<ZoomArea>('zoomAreas')
-      .doc(zoomArea.firebaseDocId)
-      .update(zoomArea)
-      .then(() => {
-        console.log('Zoom area updated', zoomArea);
-      })
-      .catch((error) => {
+
+    const zoomAreaRef = doc(this.firestore, 'zoomAreas', zoomArea.firebaseDocId);
+    return from(updateDoc(zoomAreaRef, zoomArea as {})).pipe(
+      tap(() => {
+        console.log('Zoom area updated:', zoomArea);
+      }),
+      catchError((error) => {
         console.error('Error updating zoom area:', error);
-      });
-    // Update local data.
-    const indexMatch = this.getLocalZoomAreaIndexWithId(zoomArea.firebaseDocId);
-    if (indexMatch >= 0) {
-      this.allZoomAreasLocal[indexMatch] = zoomArea;
-    } else {
-      alert('No matching zoom area found to update locally!');
-    }
+        throw error;
+      })
+    );
   }
 
   /** Callback param for autofill only. */
@@ -129,87 +124,58 @@ export class FirebaseDataService {
     }
   }
 
-  updateRelic(relic: Relic, saints: Saint[]): void {
+  updateRelic(relic: Relic, saints: Saint[]): Observable<void> {
     if (!relic.firebaseDocId) {
-      alert('No relic firebaseDocId for ' + JSON.stringify(relic));
-      return;
+      return throwError(() => new Error('No relic firebaseDocId'));
     }
+
     this.updateSaintIdsInRelic(relic, saints);
-    this.firestore
-      .collection<Relic>('relics')
-      .doc(relic.firebaseDocId)
-      .update(relic)
-      .then(() => {
-        console.log('Relic updated:', relic.firebaseDocId, relic);
+
+    const relicRef = doc(this.firestore, 'relics', relic.firebaseDocId);
+    return from(updateDoc(relicRef, relic as {})).pipe(
+      tap(() => console.log('Relic updated:', relic.firebaseDocId, relic)),
+      catchError((error) => {
+        console.error('Error updating relic:', error);
+        throw error; 
       })
-      .catch((error) => {
-        console.error('Error updating document: ', error);
-      });
-    // Update local data.
-    const indexMatch = this.getLocalRelicIndexWithId(relic.firebaseDocId);
-    if (indexMatch >= 0) {
-      this.allRelicsLocal[indexMatch] = relic;
-    } else {
-      alert('No matching relic found to update locally!');
-    }
+    );
   }
 
-  updateOrAddSaints(saints: Saint[]): void {
-    saints.forEach((saint) => {
+  updateOrAddSaints(saints: Saint[]): Observable<void[]> {
+    const updates = saints.map((saint) => {
       if (!saint.firebaseDocId) {
-        // NEW TO ADD
         const newSaintId = this.makeIdForSaint(saint);
         saint.firebaseDocId = newSaintId;
-        console.log('NEW SAINT ID: ', newSaintId);
-        // Add to Firebase
-        this.firestore.collection<Saint>('saints').doc(newSaintId).set(saint);
-        // Add locally
-        this.allSaintsLocal.push(saint);
+        const saintRef = doc(this.firestore, 'saints', newSaintId);
+        return from(setDoc(saintRef, saint));
       } else {
-        const indexMatch = this.getLocalSaintIndexWithId(saint.firebaseDocId);
-        if (indexMatch >= 0) {
-          // UPDATE Firebase
-          this.firestore
-            .collection<Saint>('saints')
-            .doc(saint.firebaseDocId)
-            .set(saint);
-          // Update locally
-          this.allSaintsLocal[indexMatch] = saint;
-        } else {
-          alert(
-            'Data will not be saved for this saint - ' +
-              'no firebase doc id match: ' +
-              saint.firebaseDocId
-          );
-        }
+        const saintRef = doc(this.firestore, 'saints', saint.firebaseDocId);
+        return from(updateDoc(saintRef, saint as {}));
       }
     });
+    return forkJoin(updates); // Execute all updates concurrently
   }
+    
 
-  /** Callback param for autofill only. */
-  addRelic(relic: Relic, saints: Saint[], callback?: () => void): void {
+  addRelic(relic: Relic, saints: Saint[], callback?: () => void): Observable<string> {
     this.updateSaintIdsInRelic(relic, saints);
     const newRelicId = this.makeIdForRelic(relic, saints);
     relic.firebaseDocId = newRelicId;
-    console.log('NEW RELIC ID: ', newRelicId);
-    this.firestore
-      .collection<Relic>('relics')
-      .doc(newRelicId)
-      .set(relic)
-      .then(() => {
-        console.log(
-          'successful write of new relic doc - firebase id: ' + newRelicId
-        );
-        // Update local data
-        this.allRelicsLocal.push(relic);
+
+    const relicsCollection = collection(this.firestore, 'relics');
+    return from(addDoc(relicsCollection, relic)).pipe(
+      tap((docRef) => {
+        console.log('Relic added with ID:', docRef.id);
         if (callback) {
           callback();
         }
+      }),
+      map((docRef) => docRef.id), // Return the newly created relic's ID
+      catchError((error) => {
+        console.error('Error adding relic:', error);
+        throw error;
       })
-      .catch((error) => {
-        console.error(error);
-        alert('Relic could not be written (Are you logged in?): ' + error);
-      });
+    );
   }
 
   updateSaintIdsInRelic(relic: Relic, saints: Saint[]): void {
@@ -447,49 +413,45 @@ export class FirebaseDataService {
     }
   }
 
-  addOrUpdatePhotoArrows(newArrows: PhotoArrows): void {
+  addOrUpdatePhotoArrows(newArrows: PhotoArrows): Observable<PhotoArrows> {
     const arrowsId = newArrows.firebaseDocId;
+
     if (!arrowsId) {
-      // new arrows
+      // New arrows
       newArrows.firebaseDocId = newArrows.photoFilename + '-arrows';
-      this.firestore
-        .collection<PhotoArrows>('arrows')
-        .doc(newArrows.firebaseDocId)
-        .set(newArrows)
-        .then(() => {
-          console.log(
-            'successful write of new arrows doc - firebase id: ' +
-              newArrows.firebaseDocId
-          );
+      const arrowsCollection = collection(this.firestore, 'arrows');
+      return from(addDoc(arrowsCollection, newArrows)).pipe(
+        tap((docRef) => {
+          console.log('Arrows added with ID:', docRef.id);
+          // Update local data
+          this.allArrowsLocal.push(newArrows);
+        }),
+        map(() => newArrows),
+        catchError((error) => {
+          console.error('Error adding arrows:', error);
+          throw error; // Rethrow the error
         })
-        .catch((error) => {
-          console.error(error);
-          alert('Error adding new arrow: ' + error);
-        })
-        .finally(() => {
-          console.log('successfully added arrows: ', newArrows);
-        });
-      // Update local data
-      this.allArrowsLocal.push(newArrows);
+      );
     } else {
-      // update existing arrow
-      this.firestore
-        .collection<PhotoArrows>('arrows')
-        .doc(arrowsId)
-        .update(newArrows)
-        .then(() => {
+      // Update existing arrows
+      const arrowsRef = doc(this.firestore, 'arrows', arrowsId);
+      return from(updateDoc(arrowsRef, newArrows as {})).pipe(
+        tap(() => {
           console.log('Arrows updated:', arrowsId, newArrows);
+          // Update local data
+          const indexMatch = this.getLocalArrowsIndexWithId(arrowsId);
+          if (indexMatch >= 0) {
+            this.allArrowsLocal[indexMatch] = newArrows;
+          } else {
+            alert('No matching arrows found to update locally!');
+          }
+        }),
+        map(() => newArrows),
+        catchError((error) => {
+          console.error('Error updating arrows:', error);
+          throw error;
         })
-        .catch((error) => {
-          console.error('Error updating arrows document: ', error);
-        });
-      // Update local data.
-      const indexMatch = this.getLocalArrowsIndexWithId(arrowsId);
-      if (indexMatch >= 0) {
-        this.allArrowsLocal[indexMatch] = newArrows;
-      } else {
-        alert('No matching arrows found to update locally!');
-      }
+      );
     }
   }
 
