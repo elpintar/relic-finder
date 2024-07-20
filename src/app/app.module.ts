@@ -26,46 +26,39 @@ import { RelicDotComponent } from './cabinet-scene/relic-dot/relic-dot.component
 import { RelicDialogComponent } from './cabinet-scene/relic-dialog/relic-dialog.component';
 import { ArrowDialogComponent } from './cabinet-scene/arrow-dialog/arrow-dialog.component';
 import { InfoDialogComponent } from './info-dialog/info-dialog.component';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { AutofillRelicsDialogComponent } from './autofill-relics-dialog/autofill-relics-dialog.component';
 import { SearchBarComponent } from './search-bar/search-bar.component';
 import { FirebaseAuthService } from './firebase-auth.service';
 import { FirebaseDataService } from './firebase-data.service';
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    CabinetSceneComponent,
-    ZoomAreaComponent,
-    ZoomAreaDialogComponent,
-    RelicDotComponent,
-    RelicDialogComponent,
-    ArrowDialogComponent,
-    InfoDialogComponent,
-    AutofillRelicsDialogComponent,
-    SearchBarComponent,
-  ],
-  imports: [
-    BrowserModule,
-    HttpClientModule,
-    BrowserAnimationsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    FormsModule,
-    MatButtonModule,
-    MatIconModule,
-    MatCardModule,
-    MatSelectModule,
-    MatRadioModule,
-    MatAutocompleteModule,
-    MatExpansionModule,
-    ReactiveFormsModule,
-    provideFirebaseApp(() => initializeApp(environment.firebase)),
-    provideAuth(() => getAuth()),
-    provideFirestore(() => getFirestore())
-  ],
-  providers: [FirebaseAuthService, FirebaseDataService],
-  bootstrap: [AppComponent],
-})
+@NgModule({ declarations: [
+        AppComponent,
+        CabinetSceneComponent,
+        ZoomAreaComponent,
+        ZoomAreaDialogComponent,
+        RelicDotComponent,
+        RelicDialogComponent,
+        ArrowDialogComponent,
+        InfoDialogComponent,
+        AutofillRelicsDialogComponent,
+        SearchBarComponent,
+    ],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        BrowserAnimationsModule,
+        MatDialogModule,
+        MatFormFieldModule,
+        MatInputModule,
+        FormsModule,
+        MatButtonModule,
+        MatIconModule,
+        MatCardModule,
+        MatSelectModule,
+        MatRadioModule,
+        MatAutocompleteModule,
+        MatExpansionModule,
+        ReactiveFormsModule,
+        provideFirebaseApp(() => initializeApp(environment.firebase)),
+        provideAuth(() => getAuth()),
+        provideFirestore(() => getFirestore())], providers: [FirebaseAuthService, FirebaseDataService, provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule {}
