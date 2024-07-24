@@ -6,21 +6,23 @@ import {
   CanonizationStatus,
   PhotoArrows,
 } from './types';
-import { Injectable } from '@angular/core';
-import { Firestore, collection, collectionData, query, orderBy, doc, addDoc, updateDoc, setDoc, Query } from '@angular/fire/firestore';
+import { inject, Injectable } from '@angular/core';
+import { Firestore, collection, collectionData, query, doc, addDoc, updateDoc, setDoc, Query } from '@angular/fire/firestore';
 import { from, Observable, combineLatest, of, throwError, forkJoin } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 
-type TraversalResult = {
+interface TraversalResult {
   successful: boolean;
   path: string[];
   visited: string[];
-};
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class FirebaseDataService {
+  private firestore: Firestore = inject(Firestore);
+
   allRelicsLocal: Relic[] = [];
   allZoomAreasLocal: ZoomArea[] = [];
   allSaintsLocal: Saint[] = [];
@@ -31,7 +33,7 @@ export class FirebaseDataService {
   saints$: Observable<Saint[]>;
   arrows$: Observable<PhotoArrows[]>;
 
-  constructor(private firestore: Firestore) {
+  constructor() {
     const relicCollection = collection(this.firestore, 'relics');
     const relicQuery = query(relicCollection) as Query<Relic>;
     this.relics$ = collectionData<Relic>(relicQuery);
@@ -254,8 +256,8 @@ export class FirebaseDataService {
     let traversalResult: TraversalResult;
     const curPhotoFilename = arrows.photoFilename;
     const arrowList = this.getArrowsAsList(arrows);
-    for (let i in arrowList) {
-      let picToCheck = arrowList[i];
+    for (const i in arrowList) {
+      const picToCheck = arrowList[i];
       traversalResult = this.traverse(picToCheck, toPhotoFilename, visited);
       if (traversalResult.successful) {
         return traversalResult;
@@ -306,7 +308,7 @@ export class FirebaseDataService {
     fromPhotoFilename: string,
     toPhotoFilename: string
   ): string[] {
-    let result = this.traverse(fromPhotoFilename, toPhotoFilename);
+    const result = this.traverse(fromPhotoFilename, toPhotoFilename);
     if (result.successful) {
       return result.path;
     } else {

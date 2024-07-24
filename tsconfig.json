@@ -3,6 +3,10 @@
   "compileOnSave": false,
   "compilerOptions": {
     "baseUrl": "./",
+    "paths": {
+      "@app/*": ["src/app/*"],
+      "@environments/*": ["src/environments/*"],
+    },
     "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
@@ -15,12 +19,12 @@
     "moduleResolution": "node",
     "importHelpers": true,
     "target": "ES2022",
-    "module": "es2020",
+    "module": "es2022",
     "lib": [
-      "es2020",
+      "ESNext",
       "dom"
     ],
-    "useDefineForClassFields": false
+    //"useDefineForClassFields": false // It's common to encounter issues related to useDefineForClassFields when integrating Angular with libraries like AngularFire
   },
   "angularCompilerOptions": {
     "strictInjectionParameters": true,

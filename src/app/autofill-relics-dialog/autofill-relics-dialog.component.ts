@@ -37,7 +37,7 @@ export class AutofillRelicsDialogComponent {
     const spreadsheet = this.fileDataService.cleanSpreadsheetData;
     const searchString = chapelLoc.toUpperCase().trim();
     const results = spreadsheet.filter((row: SpreadsheetRow) => {
-      let ssLoc = locsToString(row);
+      const ssLoc = locsToString(row);
       return ssLoc === searchString;
     });
     if (results.length === 1) {
@@ -56,7 +56,7 @@ export class AutofillRelicsDialogComponent {
     } else {
       this.lookupResultStr = 'No relic found with location: ' + chapelLoc;
       const partialMatches = spreadsheet.filter((row: SpreadsheetRow) => {
-        let ssLoc = locsToString(row);
+        const ssLoc = locsToString(row);
         // Index of allows for partial matches, such as "A 1" matching "A 1 A"
         // and "A 1 B".
         return ssLoc.indexOf(searchString) === 0;
