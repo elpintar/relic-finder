@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError, retry, tap } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 import { SpreadsheetRow } from './types';
 
 @Injectable({
@@ -121,7 +120,7 @@ export class FileDataService {
       'OC',
     ];
     const words = s.split(' ');
-    let lastWord = words[words.length - 1];
+    const lastWord = words[words.length - 1];
     if (religiousOrders.indexOf(lastWord) >= 0) {
       row.religiousOrder = words.pop();
       s = words.join(' ');

@@ -38,7 +38,7 @@ export class InfoDialogComponent {
   calculateScoreboard() {
     const relics = this.firebaseDataService.allRelicsLocal;
     const saints = this.firebaseDataService.allSaintsLocal;
-    const users: Map<string, UserScoreboardInfo> = new Map();
+    const users = new Map<string, UserScoreboardInfo>();
 
     relics.forEach((r: Relic) => {
       this.getRelicOrSaintInfo(r, users, ['relicsCreated', 'relicsUpdated']);

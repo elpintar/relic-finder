@@ -8,8 +8,8 @@ describe('ArrowDialogComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ArrowDialogComponent],
-    }).compileComponents();
+    declarations: [ArrowDialogComponent],
+}).compileComponents();
   }));
 
   beforeEach(() => {
