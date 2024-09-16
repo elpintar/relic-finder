@@ -12,7 +12,7 @@ import {
 } from './types';
 import { CabinetSceneComponent } from './cabinet-scene/cabinet-scene.component';
 import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { reduce, take } from 'rxjs/operators';
 import { FirebaseDataService } from './firebase-data.service';
 import { FirebaseAuthService } from './firebase-auth.service';
 import { FileDataService } from './file-data.service';
@@ -35,6 +35,7 @@ export class AppComponent {
   title = 'relic-finder';
   editMode = false;
   addRelicMode = true;
+  activeSearchSaint: Saint|null = null;
   hideLabels = false;
   movingRelicOrZA = '';
   autofillingRelics = '';
@@ -199,6 +200,9 @@ export class AppComponent {
   }
 
   redrawCurrentScene(): void {
+    if (this.activeSearchSaint) {
+      this.makeNewSearch(this.activeSearchSaint);
+    }
     this.sendRedrawInfo(this.currentPhotoInfo.photoFilename);
 
     if (this.editMode) {
@@ -451,16 +455,23 @@ export class AppComponent {
     }
   }
 
-  highlightNextStep(nextStep: string): void {
+  highlightNextStep(stepOne: string, stepTwo: string): void {
+    const curPhotoName = this.currentPhotoInfo.photoFilename;
+    console.log("NOW:", curPhotoName, stepOne, stepTwo);
+    if (stepOne === "O%2FO-2ND SHELF.jpg") {
+      console.log("FOUND:", stepOne, stepTwo);
+    }
     const zaToNextStep = this.firebaseDataService.allZoomAreasLocal.find(
-      (za) =>
-        za.zoomFromPhotoFilename === this.currentPhotoInfo.photoFilename &&
-        za.zoomToPhotoFilename === nextStep
+      (za) => 
+      za.zoomFromPhotoFilename === curPhotoName &&
+      za.zoomFromPhotoFilename === stepOne &&
+      za.zoomToPhotoFilename === stepTwo
     );
-    const addedToArrowCount = this.addArrowCountIfNextStepFound(nextStep);
+    const addedToArrowCount = this.addArrowCountIfNextStepFound(stepOne);
     if (zaToNextStep && zaToNextStep.firebaseDocId) {
       const zaId = zaToNextStep.firebaseDocId;
       this.zoomAreasToColor.set(zaId, 'blue');
+      console.log("colored ZA:", zaId);
       this.addOneToSearchRelicCount(zaId);
     } else if (!addedToArrowCount) {
       // Need to zoom out to get to relic, since you can't get there thru a
@@ -476,25 +487,42 @@ export class AppComponent {
       // TODO - higlight relic itself!
       return;
       }
-      const nextStep = path[0];
-      this.highlightNextStep(nextStep);
+      let reducedPath = path.slice();
+      while (reducedPath.length >= 2) {
+        const stepOne = reducedPath.shift() || "";
+        const stepTwo = reducedPath[0];
+        this.highlightNextStep(stepOne, stepTwo);
+      }
     });
+  }
+
+  makeNewSearchFromSearchbar(saint: Saint): void {
+    this.activeSearchSaint = saint;
+    this.redrawCurrentScene();
   }
 
   makeNewSearch(saint: Saint): void {
     const relicsWithSaint = this.firebaseDataService.getRelicsForSaint(saint);
-    const relicPaths = relicsWithSaint.map((r) => {
+    let relicPaths = relicsWithSaint.map((r) => {
       return this.firebaseDataService.getPathToRelic(
         r,
         this.currentPhotoInfo.photoFilename
       );
     });
-    console.log(relicPaths);
+    const topLevelPics = ["MNOPQ.jpeg", "this.currentPhotoInfo.photoFilename",
+      "ZG_ZC_ZH.jpg", "ABCDEF.jpeg", "RSTUV.jpeg", "WXYZZaZb.jpeg",
+      "ZE_ZF.jpg", "GHJKL.jpeg"
+    ];
+    if (topLevelPics.includes(this.currentPhotoInfo.photoFilename)) {
+      relicPaths = relicPaths.map((path) => {
+        return [this.currentPhotoInfo.photoFilename].concat(path)
+      });
+    }
+    console.log("relicPaths:", relicPaths);
     const numRelics = relicsWithSaint.length;
     const saintName = makeSaintNameString(saint);
     this.setHelperText(numRelics + ' result(s) for ' + saintName);
     this.highlightRelicPaths(relicPaths);
     console.log(this.arrowCounts, this.zoomOutCount);
-    this.redrawCurrentScene();
   }
 }
