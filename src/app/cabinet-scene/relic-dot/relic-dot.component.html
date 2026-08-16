@@ -3,6 +3,7 @@
   [ngStyle]="{ 'left.px': offsetX - 12, 'top.px': offsetY - 13 }"
   (click)="sendRelicClickedSignal()"
 >
+  <div *ngIf="foundSearch" class="relic-dot-search"></div>
   <mat-card
     *ngIf="relic && relic!.saintFirebaseDocIds[0]"
     class="relic-hover-card"
@@ -11,4 +12,5 @@
       {{ getHoverText() }}
     </mat-card-title>
   </mat-card>
+  
 </div>
