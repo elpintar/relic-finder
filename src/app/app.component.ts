@@ -1,4 +1,5 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, inject, OnInit } from '@angular/core'; //CW!
+import { ActivatedRoute } from '@angular/router'; //CW!
 import {
   PhotoInfo,
   Relic,
@@ -28,7 +29,7 @@ import { User as FireUser } from '@angular/fire/auth';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.sass'],
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   @ViewChild(CabinetSceneComponent)
   private cabinetSceneComponent?: CabinetSceneComponent;
 
@@ -41,6 +42,7 @@ export class AppComponent {
   autofillingRelics = '';
   autofillRow?: SpreadsheetRow;
   helperText = '';
+  jumptoPage: string| null = null;
 
   zoomedList: string[] = [];
   zoomAreaRelicCounts: Map<string, number>;
@@ -54,9 +56,9 @@ export class AppComponent {
 
   currentPhotoInfo: PhotoInfo = {
     photoFilename: 'MNOPQ.jpeg',
-    photoImgPath:
-      'https://firebasestorage.googleapis.com/v0/b/relic-finder.' +
-      'appspot.com/o/zas%2FMNOPQ_1600x1600.jpeg?alt=media',
+    photoImgPath: 
+      'https://firebasestorage.googleapis.com/v0/b/relic-finder.' +  
+      'appspot.com/o/zas%2FMNOPQ_1600x1600.jpeg?alt=media',     
     relicsInPhoto: [],
     naturalImgWidth: 0, // will be replaced by load call of image
     naturalImgHeight: 0, // will be replaced by load call of image
@@ -64,6 +66,21 @@ export class AppComponent {
   };
 
   photos = new Map();
+
+  //CW!---------------------- Allow to jump to another page
+  private route = inject(ActivatedRoute);
+
+  ngOnInit() {
+    this.route.queryParamMap.subscribe(params => {
+    this.jumptoPage = params.get('jump');
+    console.log("Start app on this page: " + this.jumptoPage);
+    if (this.jumptoPage != null ) {
+       this.currentPhotoInfo.photoFilename = this.jumptoPage ?? 'MNOPQ.jpeg';
+       this.changeCabinetScene(this.currentPhotoInfo.photoFilename);
+       } 
+    })
+    }
+//CW!-----------------------
 
   constructor(
     private firebaseDataService: FirebaseDataService,
@@ -239,10 +256,13 @@ export class AppComponent {
     if (this.editMode) {
       this.getRelicCounts(photoToChangeTo);
     }
+    const searchSaint = this.activeSearchSaint?.firebaseDocId as string;  //CW!
+    //console.log("CW Search Saint: " + searchSaint);  //CW!
     this.cabinetSceneComponent.redrawScene(
       relicsInPhoto,
       displayZAsInPhoto,
-      this.zoomAreaRelicCounts
+      this.zoomAreaRelicCounts,
+      searchSaint //CW!
     );
   }
 
@@ -457,10 +477,10 @@ export class AppComponent {
 
   highlightNextStep(stepOne: string, stepTwo: string): void {
     const curPhotoName = this.currentPhotoInfo.photoFilename;
-    console.log("NOW:", curPhotoName, stepOne, stepTwo);
-    if (stepOne === "O%2FO-2ND SHELF.jpg") {
-      console.log("FOUND:", stepOne, stepTwo);
-    }
+    //console.log("NOW:", curPhotoName, stepOne, stepTwo); //CW!
+    //if (stepOne === "O%2FO-2ND SHELF.jpg") {  //CW!
+    //  console.log("FOUND:", stepOne, stepTwo);  //CW!
+    // }  //CW!
     const zaToNextStep = this.firebaseDataService.allZoomAreasLocal.find(
       (za) => 
       za.zoomFromPhotoFilename === curPhotoName &&

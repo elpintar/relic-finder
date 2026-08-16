@@ -32,6 +32,8 @@ import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { provideAuth } from '@angular/fire/auth';
 import { getAuth } from 'firebase/auth';
 import { provideHttpClient } from '@angular/common/http';
+import { provideRouter, withComponentInputBinding } from '@angular/router'; //CW!
+import { routes } from './app.routes'; //CW!
 
 @NgModule({
   declarations: [
@@ -68,6 +70,7 @@ import { provideHttpClient } from '@angular/common/http';
     provideFirestore(() => getFirestore()),
     provideAuth(() => getAuth()),
     provideHttpClient(),
+    provideRouter(routes, withComponentInputBinding()) //CW!
   ]
 })
 export class AppModule {}

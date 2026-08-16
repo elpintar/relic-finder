@@ -170,15 +170,18 @@ export class FirebaseDataService {
     const newRelicId = this.makeIdForRelic(relic, saints);
     relic.firebaseDocId = newRelicId;
 
-    const relicsCollection = collection(this.firestore, 'relics');
-    return from(addDoc(relicsCollection, relic)).pipe(
+    //const relicsCollection = collection(this.firestore, 'relics');
+    //CW - 7-16 - Change the collection to a Ref that has the correct new relic ID. Use setDoc to prevent 
+    // autogeneartion of doc.id.
+    const relicRef = doc(this.firestore, 'relics', newRelicId);
+    return from(setDoc(relicRef, relic)).pipe(
       tap((docRef) => {
-        console.log('Relic added with ID:', docRef.id);
+        console.log('Relic added with ID:', newRelicId);
         if (callback) {
           callback();
         }
       }),
-      map((docRef) => docRef.id), // Return the newly created relic's ID
+      map((docRef) => newRelicId), // Return the newly created relic's ID
       catchError((error) => {
         console.error('Error adding relic:', error);
         throw error;
@@ -427,10 +430,13 @@ export class FirebaseDataService {
     if (!arrowsId) {
       // New arrows
       newArrows.firebaseDocId = newArrows.photoFilename + '-arrows';
-      const arrowsCollection = collection(this.firestore, 'arrows');
-      return from(addDoc(arrowsCollection, newArrows)).pipe(
+      //const arrowsCollection = collection(this.firestore, 'arrows'); //CW!
+      const arrowRef = doc(this.firestore, 'arrows', newArrows.firebaseDocId); //CW!
+ 
+      //return from(addDoc(arrowsCollection, newArrows)).pipe(  //CW!
+      return from(setDoc(arrowRef, newArrows)).pipe(   //CW!
         tap((docRef) => {
-          console.log('Arrows added with ID:', docRef.id);
+          console.log('Arrows added with ID:', arrowRef.id);
           // Update local data
           this.allArrowsLocal.push(newArrows);
         }),

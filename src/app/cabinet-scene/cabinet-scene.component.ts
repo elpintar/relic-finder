@@ -120,7 +120,8 @@ export class CabinetSceneComponent implements OnInit {
   redrawScene(
     relicsInScene: Relic[],
     zoomAreasInScene: DisplayZoomArea[],
-    zoomAreaRelicCounts: Map<string, number>
+    zoomAreaRelicCounts: Map<string, number>,
+    currentSearchSaint: string //CW!
   ): void {
     // Signal to destroy subscribers.
     this.sceneRedrawn.next(undefined);
@@ -131,10 +132,12 @@ export class CabinetSceneComponent implements OnInit {
     this.relicDotComponentsToDestroy.forEach((relicDotComponent) => {
       relicDotComponent.destroy();
     });
+    let vbolSaintInSearch: boolean = false;
     // Redraw relics and zoom areas for this scene.
     relicsInScene.forEach((relic) => {
       const saints = this.firebaseDataService.getSaintsForRelic(relic);
-      this.putRelicInScene([relic, saints]);
+      vbolSaintInSearch = currentSearchSaint == relic.saintFirebaseDocIds[0]; //CW!
+      this.putRelicInScene([relic, saints], false, vbolSaintInSearch);  //CW!
     });
     zoomAreasInScene.forEach((zoomArea) => {
       let relicCount = 0; // hidden if 0
@@ -307,7 +310,7 @@ export class CabinetSceneComponent implements OnInit {
         console.log('result', returnedRelicAndSaints);
         if (returnedRelicAndSaints) {
           // User pressed OK.
-          this.putRelicInScene(returnedRelicAndSaints, true);
+          this.putRelicInScene(returnedRelicAndSaints, true, false); //CW!
         }
       }
     );
@@ -385,7 +388,7 @@ export class CabinetSceneComponent implements OnInit {
     );
   }
 
-  putRelicInScene(relicAndSaints: RelicAndSaints, isNewRelic = false): void {
+  putRelicInScene(relicAndSaints: RelicAndSaints, isNewRelic = false, vbolSearchSaint = false): void {
     if (!this.relicDotsContainer) {
       throw new Error('No #relicDotsContainer found in view');
     }
@@ -394,6 +397,7 @@ export class CabinetSceneComponent implements OnInit {
     this.relicDotComponentsToDestroy.push(componentRef);
     componentRef.instance.relic = relicAndSaints[0];
     componentRef.instance.saints = relicAndSaints[1];
+    componentRef.instance.foundSearch = vbolSearchSaint;  //CW!
     if (!this.img) {
       throw new Error('No image data loaded in makeNewZoomArea subscription');
     }

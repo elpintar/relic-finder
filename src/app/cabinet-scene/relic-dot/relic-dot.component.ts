@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, input, OnInit, Output } from '@angular/core';
 import { PhotoInfo, Relic, RelicAndSaints, Saint } from 'src/app/types';
 
 @Component({
@@ -13,6 +13,7 @@ export class RelicDotComponent {
   saints?: Saint[];
   offsetX = -1;
   offsetY = -1;
+  foundSearch = false; //CW!
 
   sendRelicClickedSignal(): void {
     if (!this.relic) {
@@ -21,9 +22,10 @@ export class RelicDotComponent {
     this.relicClickedSignal.emit([this.relic, this.saints || []]);
   }
 
-  showRelicInfo(): void {
-    console.log(this.relic);
-  }
+//  showRelicInfo(): void {
+//    console.log("SETTING A DOT COMPONENT?");
+//    this.foundSearch = true; //CW!
+//  }
 
   updateLocation(img: HTMLImageElement, photoInfo: PhotoInfo): void {
     if (!this.relic) {
